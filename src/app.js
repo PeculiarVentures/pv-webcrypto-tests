@@ -181,6 +181,9 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
             if (items.length && state.complited !== items.length) {
                 items[state.complited].run();
             }
+            else {
+                this.emit("end", this);
+            }
         };
         return TestCaseCollection;
     }(store_1.BaseStore));
@@ -196,6 +199,9 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
             this.sign = new TestCaseCollection([]);
             this.encrypt = new TestCaseCollection([]);
             this.digest = new TestCaseCollection([]);
+            this.deriveKey = new TestCaseCollection([]);
+            this.deriveBits = new TestCaseCollection([]);
+            this.wrap = new TestCaseCollection([]);
             this.onCaseChange = this.onCaseChange.bind(this);
             // connect to generate key
             if (this.generateKey) {
@@ -235,17 +241,39 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                 }
             }
         };
+        AlgorithmTest.prototype.getAllTests = function () {
+            var tests = [];
+            tests.push(this.generateKey);
+            tests.push(this.exportKey);
+            tests.push(this.sign);
+            tests.push(this.encrypt);
+            tests.push(this.digest);
+            tests.push(this.deriveKey);
+            tests.push(this.deriveBits);
+            tests.push(this.wrap);
+            return tests;
+        };
+        AlgorithmTest.prototype.countDuaration = function (tests) {
+            var res = 0;
+            var durations = tests.state.items.map(function (item) { return item.state.duration; });
+            if (durations.length)
+                res = durations.reduce(function (prev, cur) { return prev += cur; });
+            return res;
+        };
+        AlgorithmTest.prototype.countStatus = function (tests, status) {
+            var res = tests.state.items.filter(function (item) { return item.state.status === status; }).length;
+            return res;
+        };
+        AlgorithmTest.prototype.report = function () {
+            var _this = this;
+            // total duration
+            var duration = this.getAllTests().map(function (test) { return _this.countDuaration(test); }).reduce(function (p, c) { return p + c; });
+            var success = this.getAllTests().map(function (test) { return _this.countStatus(test, CaseStatus.success); }).reduce(function (p, c) { return p + c; });
+            var error = this.getAllTests().map(function (test) { return _this.countStatus(test, CaseStatus.error); }).reduce(function (p, c) { return p + c; });
+            return { duration: duration, success: success, error: error };
+        };
         AlgorithmTest.prototype.run = function () {
-            if (this.generateKey)
-                this.generateKey.run();
-            if (this.exportKey)
-                this.exportKey.run();
-            if (this.sign)
-                this.sign.run();
-            if (this.encrypt)
-                this.encrypt.run();
-            if (this.digest)
-                this.digest.run();
+            this.getAllTests().forEach(function (test) { return test.run(); });
         };
         return AlgorithmTest;
     }(store_1.BaseStore));
@@ -395,6 +423,111 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
         return DigestCase;
     }(store_1.BaseStore));
     exports.DigestCase = DigestCase;
+    var DeriveKeyCase = (function (_super) {
+        __extends(DeriveKeyCase, _super);
+        function DeriveKeyCase(state) {
+            state.duration = 0;
+            _super.call(this, state);
+        }
+        DeriveKeyCase.prototype.run = function () {
+            var _this = this;
+            var params = this.state.params;
+            var startAt = new Date().getTime();
+            var promise = new Promise(function (resolve, reject) {
+                _this.setState({ status: CaseStatus.working });
+                crypto.subtle.deriveKey(params.algorithm, params.key, params.derivedKeyAlg, true, params.keyUsage)
+                    .then(function (data) {
+                    var endAt = new Date().getTime();
+                    _this.setState({
+                        status: CaseStatus.success,
+                        duration: endAt - startAt
+                    });
+                })
+                    .catch(function (e) {
+                    var endAt = new Date().getTime();
+                    _this.setState({
+                        status: CaseStatus.error,
+                        message: e.message,
+                        stack: e.stack,
+                        duration: endAt - startAt
+                    });
+                });
+            });
+        };
+        return DeriveKeyCase;
+    }(store_1.BaseStore));
+    exports.DeriveKeyCase = DeriveKeyCase;
+    var DeriveBitsCase = (function (_super) {
+        __extends(DeriveBitsCase, _super);
+        function DeriveBitsCase(state) {
+            state.duration = 0;
+            _super.call(this, state);
+        }
+        DeriveBitsCase.prototype.run = function () {
+            var _this = this;
+            var params = this.state.params;
+            var startAt = new Date().getTime();
+            var promise = new Promise(function (resolve, reject) {
+                _this.setState({ status: CaseStatus.working });
+                crypto.subtle.deriveBits(params.algorithm, params.key, params.bitsLength)
+                    .then(function (data) {
+                    var endAt = new Date().getTime();
+                    _this.setState({
+                        status: CaseStatus.success,
+                        duration: endAt - startAt
+                    });
+                })
+                    .catch(function (e) {
+                    var endAt = new Date().getTime();
+                    _this.setState({
+                        status: CaseStatus.error,
+                        message: e.message,
+                        stack: e.stack,
+                        duration: endAt - startAt
+                    });
+                });
+            });
+        };
+        return DeriveBitsCase;
+    }(store_1.BaseStore));
+    exports.DeriveBitsCase = DeriveBitsCase;
+    var WrapCase = (function (_super) {
+        __extends(WrapCase, _super);
+        function WrapCase(state) {
+            state.duration = 0;
+            _super.call(this, state);
+        }
+        WrapCase.prototype.run = function () {
+            var _this = this;
+            var params = this.state.params;
+            var startAt = new Date().getTime();
+            var promise = new Promise(function (resolve, reject) {
+                _this.setState({ status: CaseStatus.working });
+                crypto.subtle.wrapKey(params.format, params.key, params.wrappingKey, params.algorithm)
+                    .then(function (data) {
+                    return crypto.subtle.unwrapKey(params.format, new Uint8Array(data), params.unwrappingKey, params.algorithm, params.unwrappedAlgorithm, true, params.keyUsage);
+                })
+                    .then(function (key) {
+                    var endAt = new Date().getTime();
+                    _this.setState({
+                        status: CaseStatus.success,
+                        duration: endAt - startAt
+                    });
+                })
+                    .catch(function (e) {
+                    var endAt = new Date().getTime();
+                    _this.setState({
+                        status: CaseStatus.error,
+                        message: e.message,
+                        stack: e.stack,
+                        duration: endAt - startAt
+                    });
+                });
+            });
+        };
+        return WrapCase;
+    }(store_1.BaseStore));
+    exports.WrapCase = WrapCase;
 });
 define("tests/aes", ["require", "exports", "store/test"], function (require, exports, test_1) {
     "use strict";
@@ -450,6 +583,8 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
             this.on("generate", function (keys) {
                 _this.exportKey.push(ExportKey(keys));
                 _this.encrypt.push(AesCBCTest.Encrypt(ALG_AES_CBC, keys));
+                _this.wrap.push(AesCBCTest.Wrap(ALG_AES_CBC, keys));
+                _this.run();
             });
         }
         AesCBCTest.Encrypt = function (alg, keys) {
@@ -467,6 +602,31 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
                 });
             });
         };
+        AesCBCTest.Wrap = function (alg, keys) {
+            var cases = [];
+            keys.forEach(function (key) {
+                var _alg = key.algorithm;
+                // format
+                ["jwk", "raw"].forEach(function (format) {
+                    cases.push(new test_1.WrapCase({
+                        name: "wrap " + alg + " len:" + _alg.length,
+                        params: {
+                            format: format,
+                            key: key,
+                            wrappingKey: key,
+                            unwrappingKey: key,
+                            algorithm: {
+                                name: alg,
+                                iv: new Uint8Array(16)
+                            },
+                            unwrappedAlgorithm: key.algorithm,
+                            keyUsage: key.usages
+                        }
+                    }));
+                });
+            });
+            return cases;
+        };
         return AesCBCTest;
     }(test_1.AlgorithmTest));
     exports.AesCBCTest = AesCBCTest;
@@ -479,6 +639,8 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
             this.on("generate", function (keys) {
                 _this.exportKey.push(ExportKey(keys));
                 _this.encrypt.push(AesGCMTest.Encrypt(keys));
+                _this.wrap.push(AesGCMTest.Wrap(ALG_AES_GCM, keys));
+                _this.run();
             });
         }
         AesGCMTest.Encrypt = function (keys) {
@@ -504,6 +666,35 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
             });
             return cases;
         };
+        AesGCMTest.Wrap = function (alg, keys) {
+            var cases = [];
+            keys.forEach(function (key) {
+                var _alg = key.algorithm;
+                // format
+                ["jwk", "raw"].forEach(function (format) {
+                    // tagLength
+                    [32, 64, 96, 104, 112, 120, 128].forEach(function (tagLength) {
+                        cases.push(new test_1.WrapCase({
+                            name: "wrap " + alg + " len:" + _alg.length + " tagLen:" + tagLength,
+                            params: {
+                                format: format,
+                                key: key,
+                                wrappingKey: key,
+                                unwrappingKey: key,
+                                algorithm: {
+                                    name: alg,
+                                    tagLength: tagLength,
+                                    iv: new Uint8Array(16)
+                                },
+                                unwrappedAlgorithm: key.algorithm,
+                                keyUsage: key.usages
+                            }
+                        }));
+                    });
+                });
+            });
+            return cases;
+        };
         return AesGCMTest;
     }(test_1.AlgorithmTest));
     exports.AesGCMTest = AesGCMTest;
@@ -516,6 +707,8 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
             this.on("generate", function (keys) {
                 _this.exportKey.push(ExportKey(keys));
                 _this.encrypt.push(AesCTRTest.Encrypt(ALG_AES_CTR, keys));
+                _this.wrap.push(AesCTRTest.Wrap(ALG_AES_CTR, keys));
+                _this.run();
             });
         }
         AesCTRTest.Encrypt = function (alg, keys) {
@@ -531,6 +724,32 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
                     }
                 }
             }); });
+        };
+        AesCTRTest.Wrap = function (alg, keys) {
+            var cases = [];
+            keys.forEach(function (key) {
+                var _alg = key.algorithm;
+                // format
+                ["jwk", "raw"].forEach(function (format) {
+                    cases.push(new test_1.WrapCase({
+                        name: "wrap " + alg + " len:" + _alg.length,
+                        params: {
+                            format: format,
+                            key: key,
+                            wrappingKey: key,
+                            unwrappingKey: key,
+                            algorithm: {
+                                name: alg,
+                                counter: new Uint8Array(16),
+                                length: 128
+                            },
+                            unwrappedAlgorithm: key.algorithm,
+                            keyUsage: key.usages
+                        }
+                    }));
+                });
+            });
+            return cases;
         };
         return AesCTRTest;
     }(test_1.AlgorithmTest));
@@ -558,6 +777,7 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
             this.on("generate", function (keys) {
                 _this.exportKey.push(ExportKey(keys));
                 _this.sign.push(AesCMACTest.Sign(ALG_AES_CMAC, keys));
+                _this.run();
             });
         }
         AesCMACTest.Sign = function (alg, keys) {
@@ -630,6 +850,7 @@ define("tests/ec", ["require", "exports", "store/test"], function (require, expo
             this.on("generate", function (keys) {
                 _this.exportKey.push(ExportKey(keys));
                 _this.sign.push(EcDSATest.Sign(ALG_EC_DSA, keys));
+                _this.run();
             });
         }
         EcDSATest.Sign = function (alg, keys) {
@@ -666,8 +887,62 @@ define("tests/ec", ["require", "exports", "store/test"], function (require, expo
             this.generateKey.push(GenerateKey(ALG_EC_DH, ["deriveKey", "deriveBits"]));
             this.on("generate", function (keys) {
                 _this.exportKey.push(ExportKey(keys));
+                _this.deriveKey.push(EcDHTest.DeriveKey(ALG_EC_DH, keys));
+                _this.deriveBits.push(EcDHTest.DeriveBits(ALG_EC_DH, keys));
+                _this.run();
             });
         }
+        EcDHTest.DeriveKey = function (alg, keys) {
+            var cases = [];
+            keys.forEach(function (keyPair) {
+                // AES algs
+                ["AES-CBC", "AES-CTR", "AES-GCM", "AES-CFB-8"].forEach(function (alg) {
+                    // AES alg length
+                    [128, 196, 256].forEach(function (algLen) {
+                        var keyAlg = keyPair.privateKey.algorithm;
+                        cases.push(new test_2.DeriveKeyCase({
+                            name: "deriveKey " + keyAlg.name + "-" + keyAlg.namedCurve + " " + alg + "-" + algLen,
+                            params: {
+                                algorithm: {
+                                    name: keyPair.privateKey.algorithm.name,
+                                    namedCurve: keyAlg.namedCurve,
+                                    public: keyPair.publicKey
+                                },
+                                derivedKeyAlg: {
+                                    name: alg,
+                                    length: algLen
+                                },
+                                key: keyPair.privateKey,
+                                keyUsage: ["encrypt", "decrypt"]
+                            }
+                        }));
+                    });
+                });
+            });
+            return cases;
+        };
+        EcDHTest.DeriveBits = function (alg, keys) {
+            var cases = [];
+            keys.forEach(function (keyPair) {
+                // bitsLength
+                [128, 196, 256].forEach(function (bitsLength) {
+                    var keyAlg = keyPair.privateKey.algorithm;
+                    cases.push(new test_2.DeriveBitsCase({
+                        name: "deriveKey " + keyAlg.name + "-" + keyAlg.namedCurve + " ",
+                        params: {
+                            algorithm: {
+                                name: keyPair.privateKey.algorithm.name,
+                                namedCurve: keyAlg.namedCurve,
+                                public: keyPair.publicKey
+                            },
+                            key: keyPair.privateKey,
+                            bitsLength: bitsLength
+                        }
+                    }));
+                });
+            });
+            return cases;
+        };
         return EcDHTest;
     }(test_2.AlgorithmTest));
     exports.EcDHTest = EcDHTest;
@@ -739,6 +1014,7 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
             this.on("generate", function (keys) {
                 _this.exportKey.push(ExportKey(keys));
                 _this.sign.push(RsaSSATest.Sign(ALG_RSA_SSA, keys));
+                _this.run();
             });
         }
         RsaSSATest.Sign = function (alg, keys) {
@@ -765,6 +1041,7 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
             this.on("generate", function (keys) {
                 _this.exportKey.push(ExportKey(keys));
                 _this.sign.push(RsaPSSTest.Sign(ALG_RSA_PSS, keys));
+                _this.run();
             });
         }
         RsaPSSTest.Sign = function (alg, keys) {
@@ -793,6 +1070,8 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
             this.on("generate", function (keys) {
                 _this.exportKey.push(ExportKey(keys));
                 _this.encrypt.push(RsaOAEPTest.Encrypt(ALG_RSA_OAEP, keys));
+                _this.wrap.push(RsaOAEPTest.Wrap(ALG_RSA_OAEP, keys));
+                _this.run();
             });
         }
         RsaOAEPTest.Encrypt = function (alg, keys) {
@@ -813,6 +1092,35 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
                             }
                         }
                     }));
+                });
+            });
+            return cases;
+        };
+        RsaOAEPTest.Wrap = function (alg, keys) {
+            var cases = [];
+            // format
+            ["jwk", "spki"].forEach(function (format) {
+                // label
+                [null, new Uint8Array(5)].forEach(function (label) {
+                    keys.forEach(function (keyPair) {
+                        cases.push(new test_3.WrapCase({
+                            name: "wrap " + alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 0 : 1) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + " lable:" + label,
+                            params: {
+                                format: format,
+                                key: keyPair.publicKey,
+                                wrappingKey: keyPair.publicKey,
+                                unwrappingKey: keyPair.privateKey,
+                                algorithm: label ? {
+                                    name: alg,
+                                    label: label
+                                } : {
+                                    name: alg
+                                },
+                                unwrappedAlgorithm: keyPair.publicKey.algorithm,
+                                keyUsage: keyPair.publicKey.usages
+                            }
+                        }));
+                    });
                 });
             });
             return cases;
@@ -851,7 +1159,7 @@ define("components/pie-chart", ["require", "exports", "react"], function (requir
             this.state = {};
         }
         PieChart.prototype.render = function () {
-            return (React.createElement("figure", {className: "pie-chart"}, React.createElement("svg", null, this.props.children)));
+            return (React.createElement("figure", {className: "pie-chart"}, React.createElement("svg", null, this.props.children.map(function (item) { return item.props.value ? item : null; }))));
         };
         return PieChart;
     }(React.Component));
@@ -863,7 +1171,8 @@ define("components/pie-chart", ["require", "exports", "react"], function (requir
             this.state = {};
         }
         Pie.prototype.render = function () {
-            var _a = this.props, className = _a.className, value = _a.value, rotate = _a.rotate, size = _a.size;
+            var _a = this.props, className = _a.className, value = _a.value, size = _a.size;
+            var rotate = this.props.rotate || 0;
             return (React.createElement("circle", {className: "pie " + className, r: size || 0, cy: size || 0, cx: size || 0, style: { strokeDasharray: value + ", 158", transform: "rotate(" + rotate + "deg)" }}));
         };
         return Pie;
@@ -880,7 +1189,7 @@ define("components/alg", ["require", "exports", "react", "store/store", "store/t
         }
         TestTable.prototype.render = function () {
             var _this = this;
-            return (React.createElement("table", null, React.createElement("thead", null, React.createElement("tr", null, React.createElement("td", null, "Allgorithm"), React.createElement("td", null, "generateKey"), React.createElement("td", null, "digest"), React.createElement("td", null, "export /import "), React.createElement("td", null, "sign/verify"), React.createElement("td", null, "encrypt/decrypt"))), React.createElement("tbody", null, this.props.model.map(function (item) { return React.createElement(TestTableItem, {model: item, onCellClick: _this.props.onCellClick}); }))));
+            return (React.createElement("table", {className: "test-table"}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("td", null, "Allgorithm"), React.createElement("td", null, "generateKey"), React.createElement("td", null, "digest"), React.createElement("td", null, "export/import "), React.createElement("td", null, "sign/verify"), React.createElement("td", null, "encrypt/decrypt"), React.createElement("td", null, "derive key"), React.createElement("td", null, "derive bits"), React.createElement("td", null, "wrap/unwrap"))), React.createElement("tbody", null, this.props.model.map(function (item) { return React.createElement(TestTableItem, {model: item, onCellClick: _this.props.onCellClick}); }))));
         };
         return TestTable;
     }(React.Component));
@@ -893,7 +1202,7 @@ define("components/alg", ["require", "exports", "react", "store/store", "store/t
         }
         TestTableItem.prototype.render = function () {
             var model = this.props.model;
-            return (React.createElement("tr", null, React.createElement("td", null, model.state.name), React.createElement(TestTableItemCell, {model: model.generateKey, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.digest, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.exportKey, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.sign, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.encrypt, onCellClick: this.props.onCellClick})));
+            return (React.createElement("tr", null, React.createElement("td", null, model.state.name), React.createElement(TestTableItemCell, {model: model.generateKey, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.digest, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.exportKey, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.sign, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.encrypt, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.deriveKey, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.deriveBits, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.wrap, onCellClick: this.props.onCellClick})));
         };
         TestTableItem = __decorate([
             store_2.Store()
@@ -924,7 +1233,7 @@ define("components/alg", ["require", "exports", "react", "store/store", "store/t
                 }
             });
             var length = items.length;
-            return (React.createElement("td", null, React.createElement("div", {onClick: function (e) { return _this.props.onCellClick(model); }}, React.createElement(TestChar, {success: success, error: error, length: length}))));
+            return (React.createElement("td", {className: "test-cell"}, React.createElement("div", {onClick: function (e) { return _this.props.onCellClick(model); }}, React.createElement(TestChar, {success: success, error: error, length: length}))));
         };
         TestTableItemCell = __decorate([
             store_2.Store()
@@ -943,7 +1252,7 @@ define("components/alg", ["require", "exports", "react", "store/store", "store/t
         };
         TestChar.prototype.render = function () {
             var _a = this.props, success = _a.success, error = _a.error, length = _a.length;
-            return (React.createElement("div", {className: "test-chart shadow-1"}, React.createElement("div", {className: "value"}, Math.floor(this.count(length, success + error) * 100)), React.createElement(pie_chart_1.PieChart, null, React.createElement(pie_chart_1.Pie, {className: "success", value: 79 * this.count(length, success), size: 12.5, rotate: 0}), React.createElement(pie_chart_1.Pie, {className: "error", value: 79 * this.count(length, error), size: 12.5, rotate: 360 * this.count(length, success)}))));
+            return (React.createElement("div", {className: "test-chart shadow-1"}, React.createElement("div", {className: "value"}, Math.floor(this.count(length, success + error) * 100)), React.createElement(pie_chart_1.PieChart, null, React.createElement(pie_chart_1.Pie, {className: "error", value: 79 * this.count(length, error + success), size: 12.5}), React.createElement(pie_chart_1.Pie, {className: "success", value: 79 * this.count(length, success), size: 12.5}))));
         };
         return TestChar;
     }(React.Component));
@@ -988,7 +1297,23 @@ define("components/property", ["require", "exports", "react"], function (require
     }(React.Component));
     exports.PropertyViewGroup = PropertyViewGroup;
 });
-define("components/detail", ["require", "exports", "react", "store/store", "store/test", "components/property"], function (require, exports, React, store_3, test_6, property_1) {
+define("components/collapse-button", ["require", "exports", "react"], function (require, exports, React) {
+    "use strict";
+    var CollapseButton = (function (_super) {
+        __extends(CollapseButton, _super);
+        function CollapseButton(props) {
+            _super.call(this, props);
+            this.state = {};
+        }
+        CollapseButton.prototype.render = function () {
+            var _a = this.props, collapsed = _a.collapsed, onClick = _a.onClick;
+            return (React.createElement("div", {className: "btn-collapse ", onClick: onClick}, collapsed ? "+" : "-"));
+        };
+        return CollapseButton;
+    }(React.Component));
+    exports.CollapseButton = CollapseButton;
+});
+define("components/detail", ["require", "exports", "react", "store/store", "store/test", "components/property", "components/collapse-button"], function (require, exports, React, store_3, test_6, property_1, collapse_button_1) {
     "use strict";
     var TestDetail = (function (_super) {
         __extends(TestDetail, _super);
@@ -997,7 +1322,7 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
             this.state = {};
         }
         TestDetail.prototype.render = function () {
-            return (React.createElement("table", {className: "detail"}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("td", null, "+"), React.createElement("td", null, "name"), React.createElement("td", null, "time"), React.createElement("td", null, "status"), React.createElement("td", null, "message"))), this.props.model.state.items.map(function (item) { return (React.createElement(TestDetailItem, {test: item.state})); }), React.createElement("tbody", null)));
+            return (React.createElement("table", {className: "detail"}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("td", null), React.createElement("td", null, "name"), React.createElement("td", null, "time"), React.createElement("td", null, "status"), React.createElement("td", null, "message"))), this.props.model.state.items.map(function (item) { return (React.createElement(TestDetailItem, {test: item.state})); }), React.createElement("tbody", null)));
         };
         TestDetail = __decorate([
             store_3.Store()
@@ -1010,13 +1335,13 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
         function TestDetailItem(props) {
             _super.call(this, props);
             this.state = {
-                colapsed: true
+                collapsed: true
             };
         }
         TestDetailItem.prototype.render = function () {
             var _this = this;
             var test = this.props.test;
-            return (React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", {onClick: function (e) { return _this.setState({ colapsed: !_this.state.colapsed }); }}, this.state.colapsed ? "+" : "-"), React.createElement("td", null, test.name), React.createElement("td", null, test.duration / 1000 + "s"), React.createElement("td", {className: "status " + test_6.CaseStatus[test.status]}, test_6.CaseStatus[test.status] || "not started"), React.createElement("td", null, test.message)), React.createElement("tr", {hidden: this.state.colapsed}, React.createElement("td", null), React.createElement("td", {colSpan: 3}, React.createElement(DetailParamsView, {params: test.params})))));
+            return (React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement(collapse_button_1.CollapseButton, {collapsed: this.state.collapsed, onClick: function (e) { return _this.setState({ collapsed: !_this.state.collapsed }); }})), React.createElement("td", null, test.name), React.createElement("td", null, test.duration / 1000 + "s"), React.createElement("td", {className: "status " + test_6.CaseStatus[test.status]}, test_6.CaseStatus[test.status] || "not started"), React.createElement("td", null, test.message)), React.createElement("tr", {hidden: this.state.collapsed}, React.createElement("td", null), React.createElement("td", {colSpan: 3}, React.createElement(DetailParamsView, {params: test.params})))));
         };
         return TestDetailItem;
     }(React.Component));
@@ -1031,7 +1356,7 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
             var items = [];
             for (var key in params) {
                 var value = params[key];
-                if (key === "algorithm") {
+                if (key === "algorithm" || key === "derivedKeyAlg") {
                     items = items.concat(this.renderAlgrithm(params[key], key));
                     continue;
                 }
@@ -1069,7 +1394,7 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
     }(React.Component));
     exports.DetailParamsView = DetailParamsView;
 });
-define("app", ["require", "exports", "react", "tests/aes", "tests/rsa", "tests/sha", "tests/ec", "components/alg", "components/detail", "helper"], function (require, exports, React, aes_1, rsa_1, sha_1, ec_1, alg_1, detail_1, helper) {
+define("app", ["require", "exports", "react", "tests/aes", "tests/rsa", "tests/sha", "tests/ec", "components/alg", "components/detail", "components/property", "helper"], function (require, exports, React, aes_1, rsa_1, sha_1, ec_1, alg_1, detail_1, property_2, helper) {
     "use strict";
     var tests = [
         new sha_1.ShaTest(),
@@ -1090,10 +1415,32 @@ define("app", ["require", "exports", "react", "tests/aes", "tests/rsa", "tests/s
             _super.call(this, props);
             this.state = {};
         }
+        App.prototype.getTotalTestTime = function () {
+        };
+        App.prototype.getReport = function () {
+            var report = {
+                created: new Date(),
+                userAgent: window.navigator.userAgent,
+                duration: 0,
+                error: 0,
+                success: 0
+            };
+            tests.forEach(function (test) {
+                var testReport = test.report();
+                report.duration += testReport.duration;
+                report.error += testReport.error;
+                report.success += testReport.success;
+            });
+            this.setState({ report: report });
+        };
         App.prototype.render = function () {
             var _this = this;
             var info = helper.BrawserInfo();
-            return (React.createElement("div", null, React.createElement("h3", null, info.name, " v", info.version), React.createElement(alg_1.TestTable, {model: tests, onCellClick: function (test) { return _this.setState({ selectedTest: test }); }}), React.createElement("button", {onClick: function () { tests.forEach(function (item) { return item.run(); }); }}, "Run"), React.createElement("hr", null), this.state.selectedTest ?
+            var report = this.state.report;
+            return (React.createElement("div", {className: "container"}, React.createElement("h3", null, info.name, " v", info.version), React.createElement(alg_1.TestTable, {model: tests, onCellClick: function (test) { return _this.setState({ selectedTest: test }); }}), React.createElement("div", {className: "row"}, React.createElement("div", {className: "btn", onClick: function () { tests.forEach(function (item) { return item.run(); }); }}, "Run"), React.createElement("div", {className: "btn", onClick: function () { _this.getReport(); }}, "Report")), report ?
+                React.createElement("div", null, React.createElement("hr", null), React.createElement("h3", null, "Report"), React.createElement(property_2.PropertyView, null, React.createElement(property_2.PropertyViewItem, {label: "Browser", value: info.name + " v" + info.version}), React.createElement(property_2.PropertyViewItem, {label: "UserAgent", value: window.navigator.userAgent}), React.createElement(property_2.PropertyViewItem, {label: "Created", value: report.created.toString()}), React.createElement(property_2.PropertyViewItem, {label: "Test duration", value: report.duration / 1000 + "s"}), React.createElement(property_2.PropertyViewItem, {label: "Test success", value: report.success}), React.createElement(property_2.PropertyViewItem, {label: "Test error", value: report.error})))
+                :
+                    null, React.createElement("hr", null), this.state.selectedTest ?
                 React.createElement(detail_1.TestDetail, {model: this.state.selectedTest})
                 :
                     null));
