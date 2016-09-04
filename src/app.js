@@ -105,41 +105,6 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
         CaseStatus[CaseStatus["working"] = 3] = "working";
     })(exports.CaseStatus || (exports.CaseStatus = {}));
     var CaseStatus = exports.CaseStatus;
-    var GenerateKeyCase = (function (_super) {
-        __extends(GenerateKeyCase, _super);
-        function GenerateKeyCase(state) {
-            state.duration = 0;
-            _super.call(this, state);
-        }
-        GenerateKeyCase.prototype.run = function () {
-            var _this = this;
-            var params = this.state.params;
-            var startAt = new Date().getTime();
-            var promise = new Promise(function (resolve, reject) {
-                _this.setState({ status: CaseStatus.working });
-                crypto.subtle.generateKey(params.algorithm, params.extractble, params.keyUsages)
-                    .then(function (key) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.success,
-                        key: key,
-                        duration: endAt - startAt
-                    });
-                })
-                    .catch(function (e) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.error,
-                        message: e.message,
-                        stack: e.stack,
-                        duration: endAt - startAt
-                    });
-                });
-            });
-        };
-        return GenerateKeyCase;
-    }(store_1.BaseStore));
-    exports.GenerateKeyCase = GenerateKeyCase;
     var TestCaseCollection = (function (_super) {
         __extends(TestCaseCollection, _super);
         function TestCaseCollection(cases) {
@@ -278,6 +243,52 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
         return AlgorithmTest;
     }(store_1.BaseStore));
     exports.AlgorithmTest = AlgorithmTest;
+    var GenerateKeyCase = (function (_super) {
+        __extends(GenerateKeyCase, _super);
+        function GenerateKeyCase(state) {
+            state.duration = 0;
+            _super.call(this, state);
+        }
+        GenerateKeyCase.prototype.run = function () {
+            var _this = this;
+            var params = this.state.params;
+            var startAt = new Date().getTime();
+            var promise = new Promise(function (resolve, reject) {
+                _this.setState({ status: CaseStatus.working });
+                crypto.subtle.generateKey(params.algorithm, params.extractble, params.keyUsages)
+                    .then(function (key) {
+                    var endAt = new Date().getTime();
+                    _this.setState({
+                        status: CaseStatus.success,
+                        key: key,
+                        duration: endAt - startAt
+                    });
+                    resolve();
+                })
+                    .catch(function (e) {
+                    var endAt = new Date().getTime();
+                    _this.setState({
+                        status: CaseStatus.error,
+                        message: e.message,
+                        stack: e.stack,
+                        duration: endAt - startAt
+                    });
+                    resolve();
+                });
+            });
+            promise.catch(function (e) {
+                var endAt = new Date().getTime();
+                _this.setState({
+                    status: CaseStatus.error,
+                    message: e.message,
+                    stack: e.stack,
+                    duration: endAt - startAt
+                });
+            });
+        };
+        return GenerateKeyCase;
+    }(store_1.BaseStore));
+    exports.GenerateKeyCase = GenerateKeyCase;
     var ExportKeyCase = (function (_super) {
         __extends(ExportKeyCase, _super);
         function ExportKeyCase(state) {
@@ -300,6 +311,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                         status: CaseStatus.success,
                         duration: endAt - startAt
                     });
+                    resolve();
                 })
                     .catch(function (e) {
                     var endAt = new Date().getTime();
@@ -309,6 +321,16 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                         stack: e.stack,
                         duration: endAt - startAt
                     });
+                    resolve();
+                });
+            });
+            promise.catch(function (e) {
+                var endAt = new Date().getTime();
+                _this.setState({
+                    status: CaseStatus.error,
+                    message: e.message,
+                    stack: e.stack,
+                    duration: endAt - startAt
                 });
             });
         };
@@ -337,6 +359,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                         status: CaseStatus.success,
                         duration: endAt - startAt
                     });
+                    resolve();
                 })
                     .catch(function (e) {
                     var endAt = new Date().getTime();
@@ -346,6 +369,16 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                         stack: e.stack,
                         duration: endAt - startAt
                     });
+                    resolve();
+                });
+            });
+            promise.catch(function (e) {
+                var endAt = new Date().getTime();
+                _this.setState({
+                    status: CaseStatus.error,
+                    message: e.message,
+                    stack: e.stack,
+                    duration: endAt - startAt
                 });
             });
         };
@@ -374,6 +407,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                         status: CaseStatus.success,
                         duration: endAt - startAt
                     });
+                    resolve();
                 })
                     .catch(function (e) {
                     var endAt = new Date().getTime();
@@ -383,6 +417,16 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                         stack: e.stack,
                         duration: endAt - startAt
                     });
+                    resolve();
+                });
+            });
+            promise.catch(function (e) {
+                var endAt = new Date().getTime();
+                _this.setState({
+                    status: CaseStatus.error,
+                    message: e.message,
+                    stack: e.stack,
+                    duration: endAt - startAt
                 });
             });
         };
@@ -408,6 +452,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                         status: CaseStatus.success,
                         duration: endAt - startAt
                     });
+                    resolve();
                 })
                     .catch(function (e) {
                     var endAt = new Date().getTime();
@@ -417,6 +462,16 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                         stack: e.stack,
                         duration: endAt - startAt
                     });
+                    resolve();
+                });
+            });
+            promise.catch(function (e) {
+                var endAt = new Date().getTime();
+                _this.setState({
+                    status: CaseStatus.error,
+                    message: e.message,
+                    stack: e.stack,
+                    duration: endAt - startAt
                 });
             });
         };
@@ -442,6 +497,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                         status: CaseStatus.success,
                         duration: endAt - startAt
                     });
+                    resolve();
                 })
                     .catch(function (e) {
                     var endAt = new Date().getTime();
@@ -451,6 +507,16 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                         stack: e.stack,
                         duration: endAt - startAt
                     });
+                    resolve();
+                });
+            });
+            promise.catch(function (e) {
+                var endAt = new Date().getTime();
+                _this.setState({
+                    status: CaseStatus.error,
+                    message: e.message,
+                    stack: e.stack,
+                    duration: endAt - startAt
                 });
             });
         };
@@ -476,6 +542,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                         status: CaseStatus.success,
                         duration: endAt - startAt
                     });
+                    resolve();
                 })
                     .catch(function (e) {
                     var endAt = new Date().getTime();
@@ -485,6 +552,16 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                         stack: e.stack,
                         duration: endAt - startAt
                     });
+                    resolve();
+                });
+            });
+            promise.catch(function (e) {
+                var endAt = new Date().getTime();
+                _this.setState({
+                    status: CaseStatus.error,
+                    message: e.message,
+                    stack: e.stack,
+                    duration: endAt - startAt
                 });
             });
         };
@@ -513,6 +590,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                         status: CaseStatus.success,
                         duration: endAt - startAt
                     });
+                    resolve();
                 })
                     .catch(function (e) {
                     var endAt = new Date().getTime();
@@ -522,6 +600,16 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                         stack: e.stack,
                         duration: endAt - startAt
                     });
+                    resolve();
+                });
+            });
+            promise.catch(function (e) {
+                var endAt = new Date().getTime();
+                _this.setState({
+                    status: CaseStatus.error,
+                    message: e.message,
+                    stack: e.stack,
+                    duration: endAt - startAt
                 });
             });
         };
