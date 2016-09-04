@@ -1,0 +1,199 @@
+// As hex codes */
+
+$light-light-blue: #316A8C;	// Main Primary color */
+$light-blue: #57A6D5;
+$blue: #3B84B0;
+$dark-blue: #2D5268;
+$dark-dark-blue: #2A3942;
+
+$light-light-red: #DC4844;	// Main Secondary color (1) */
+$light-red: #FF6460;
+$red: #FF514C;
+$dark-red: #A34442;
+$dark-dark-red: #68403F;
+
+$ligth-ltight-green: #36AD3D;	// Main Secondary color (2) */
+$light-green: #57E660;
+$green: #3ED048;
+$dark-green: #348039;
+$dark-dark-green: #325234;
+
+$light-light-yellow: #DC9844;	// Main Complement color */
+$light-yellow: #FFB860;
+$yellow: #FFAF4C;
+$dark-yellow: #A37742;
+$dark-dark-yellow: #68563F;
+
+$shadow: black;
+
+$shadow-1: 0 1px 3px rgba($shadow, 0.12), 0 1px 2px rgba($shadow, 0.24);
+$shadow-2: 0 3px 6px rgba($shadow, 0.16), 0 3px 6px rgba($shadow, 0.23);
+$shadow-3: 0 10px 20px rgba($shadow, 0.19), 0 6px 6px rgba($shadow, 0.23);
+$shadow-4: 0 14px 28px rgba($shadow, 0.25), 0 10px 10px rgba($shadow, 0.22);
+$shadow-5: 0 19px 38px rgba($shadow, 0.30), 0 15px 12px rgba($shadow, 0.22);
+
+* {
+    font-family: 'Roboto Light', sans-serif;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+body {
+    background: url(../img/bg.png)
+}
+
+.shadow-1{
+    box-shadow: $shadow-1;
+}
+.shadow-2{
+    box-shadow: $shadow-2
+}
+.shadow-3{
+    box-shadow: $shadow-3;
+}
+.shadow-4{
+    box-shadow: $shadow-4;
+}
+.shadow-5{
+    box-shadow: $shadow-5;
+}
+
+.btn {
+    @extend .clickable;
+    @extend .shadow-1;
+    display: inline-flex;
+    padding: 8px 16px;
+    background-color: $dark-dark-blue;
+    color: white;
+    font-size: 12px;
+    transition: box-shadow 0.3s ease;
+}
+
+.btn:hover {
+    @extend .shadow-2;
+}
+
+.property-view .group tr:not(:first-child) .label {
+    padding-left: 16px;
+}
+
+td {
+    padding: 4px 8px;
+}
+
+.pie-chart {
+    transform: rotate(-90deg);
+    border-radius: 50%;
+    background: lightgray;
+    width: 25px;
+    height: 25px;
+    position: relative;
+    margin: 0;
+}
+
+.pie-chart svg {
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+}
+
+.pie-chart {
+    .pie {
+        line-height: 0;
+        stroke-width: 100%;
+        fill: none;
+        -ms-transition: stroke-dasharray .3s ease, transform .3s ease;
+        -webkit-transition: stroke-dasharray .3s ease, transform .3s ease;
+        transition: stroke-dasharray .3s ease, transform .3s ease;
+        transform-origin: 50% 50% 0;
+    }
+}
+
+.pie {
+    &.success {
+        stroke: $green;
+    }
+    &.error {
+        stroke: $red;
+    }
+}
+
+.test-chart {
+    display: inline-flex;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    height: 25px;
+    width: 25px;
+    cursor: pointer;
+    border-radius: 50%;
+
+    .value {
+        z-index: 1;
+        font-size: 10px;
+        color: white;
+    }
+
+    .pie-chart {
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+}
+
+.detail {
+
+    .status {
+        color: $blue;
+
+        &.success {
+            color: $green
+        }
+        &.error {
+            color: $red
+        }
+    }
+}
+
+.btn-collapse {
+    @extend .shadow-1;
+    background: gray;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    transition: box-shadow .3s ease
+}
+
+.btn-collapse:hover{
+    @extend .shadow-2
+}
+
+.container {
+    margin: 0 auto;
+    width: 1050px;
+}
+
+.row {
+    &>*:first-child {
+        margin-left: 0px;
+        margin-right: 4px;
+    }
+    &>*:last-child {
+        margin-left: 4px;
+        margin-right: 0px;
+    }
+    &>*:only-one{
+        margin-left: 4px;
+        margin-right: 4px;
+    }
+}
+
+.test-cell {
+    text-align: center;
+}

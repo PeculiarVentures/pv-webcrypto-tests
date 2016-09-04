@@ -1267,7 +1267,7 @@ define("components/pie-chart", ["require", "exports", "react"], function (requir
     }(React.Component));
     exports.Pie = Pie;
 });
-define("components/alg", ["require", "exports", "react", "store/store", "store/test", "components/pie-chart"], function (require, exports, React, store_2, test_5, pie_chart_1) {
+define("components/test-table", ["require", "exports", "react", "store/store", "store/test", "components/pie-chart"], function (require, exports, React, store_2, test_5, pie_chart_1) {
     "use strict";
     var TestTable = (function (_super) {
         __extends(TestTable, _super);
@@ -1482,7 +1482,7 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
     }(React.Component));
     exports.DetailParamsView = DetailParamsView;
 });
-define("app", ["require", "exports", "react", "tests/aes", "tests/rsa", "tests/sha", "tests/ec", "components/alg", "components/detail", "components/property", "helper"], function (require, exports, React, aes_1, rsa_1, sha_1, ec_1, alg_1, detail_1, property_2, helper) {
+define("app", ["require", "exports", "react", "tests/aes", "tests/rsa", "tests/sha", "tests/ec", "components/test-table", "components/detail", "components/property", "helper"], function (require, exports, React, aes_1, rsa_1, sha_1, ec_1, test_table_1, detail_1, property_2, helper) {
     "use strict";
     var tests = [
         new sha_1.ShaTest(),
@@ -1525,7 +1525,7 @@ define("app", ["require", "exports", "react", "tests/aes", "tests/rsa", "tests/s
             var _this = this;
             var info = helper.BrawserInfo();
             var report = this.state.report;
-            return (React.createElement("div", {className: "container"}, React.createElement("h3", null, info.name, " v", info.version), React.createElement(alg_1.TestTable, {model: tests, onCellClick: function (test) { return _this.setState({ selectedTest: test }); }}), React.createElement("div", {className: "row"}, React.createElement("div", {className: "btn", onClick: function () { tests.forEach(function (item) { return item.run(); }); }}, "Run"), React.createElement("div", {className: "btn", onClick: function () { _this.getReport(); }}, "Report")), report ?
+            return (React.createElement("div", {className: "container"}, React.createElement("h3", null, info.name, " v", info.version), React.createElement(test_table_1.TestTable, {model: tests, onCellClick: function (test) { return _this.setState({ selectedTest: test }); }}), React.createElement("div", {className: "row"}, React.createElement("div", {className: "btn", onClick: function () { tests.forEach(function (item) { return item.run(); }); }}, "Run"), React.createElement("div", {className: "btn", onClick: function () { _this.getReport(); }}, "Report")), report ?
                 React.createElement("div", null, React.createElement("hr", null), React.createElement("h3", null, "Report"), React.createElement(property_2.PropertyView, null, React.createElement(property_2.PropertyViewItem, {label: "Browser", value: info.name + " v" + info.version}), React.createElement(property_2.PropertyViewItem, {label: "UserAgent", value: window.navigator.userAgent}), React.createElement(property_2.PropertyViewItem, {label: "Created", value: report.created.toString()}), React.createElement(property_2.PropertyViewItem, {label: "Test duration", value: report.duration / 1000 + "s"}), React.createElement(property_2.PropertyViewItem, {label: "Test success", value: report.success}), React.createElement(property_2.PropertyViewItem, {label: "Test error", value: report.error})))
                 :
                     null, React.createElement("hr", null), this.state.selectedTest ?
