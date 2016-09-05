@@ -144,7 +144,8 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
             var state = this.state;
             var items = state.items;
             if (items.length && state.complited !== items.length) {
-                items[state.complited].run();
+                //items[state.complited].run();
+                items[state.complited]&&items[state.complited].run();
             }
             else {
                 this.emit("end", this);
