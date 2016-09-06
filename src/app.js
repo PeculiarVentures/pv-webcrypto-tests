@@ -628,7 +628,7 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
     function GenerateKey(name, keyUsages) {
         var cases = [];
         // length
-        [128, 196, 256].forEach(function (length) {
+        [128, 192, 256].forEach(function (length) {
             cases.push(new test_1.GenerateKeyCase({
                 name: "generate " + name + " length:" + length,
                 params: {
@@ -987,7 +987,7 @@ define("tests/ec", ["require", "exports", "store/test"], function (require, expo
                 // AES algs
                 ["AES-CBC", "AES-CTR", "AES-GCM", "AES-CFB-8"].forEach(function (alg) {
                     // AES alg length
-                    [128, 196, 256].forEach(function (algLen) {
+                    [128, 192, 256].forEach(function (algLen) {
                         var keyAlg = keyPair.privateKey.algorithm;
                         cases.push(new test_2.DeriveKeyCase({
                             name: "deriveKey " + keyAlg.name + "-" + keyAlg.namedCurve + " " + alg + "-" + algLen,
@@ -1014,7 +1014,7 @@ define("tests/ec", ["require", "exports", "store/test"], function (require, expo
             var cases = [];
             keys.forEach(function (keyPair) {
                 // bitsLength
-                [128, 196, 256].forEach(function (bitsLength) {
+                [128, 192, 256].forEach(function (bitsLength) {
                     var keyAlg = keyPair.privateKey.algorithm;
                     cases.push(new test_2.DeriveBitsCase({
                         name: "deriveKey " + keyAlg.name + "-" + keyAlg.namedCurve + " ",
