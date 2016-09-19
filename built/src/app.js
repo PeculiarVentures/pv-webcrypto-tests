@@ -60,7 +60,7 @@ define("store/store", ["require", "exports", "events"], function (require, expor
                 if (oldCompDidMount)
                     oldCompDidMount.call(this);
             };
-            var oldCompWillUnmount = target.prototype.componentDidMount;
+            var oldCompWillUnmount = target.prototype.componentWillUnmount;
             target.prototype.componentWillUnmount = function componentWillUnmount() {
                 this.props.model.removeListener(action, this.__onModelChange);
                 if (oldCompWillUnmount)
@@ -627,7 +627,7 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
     function GenerateKey(name, keyUsages) {
         var cases = [];
         // length
-        [128, 196, 256].forEach(function (length) {
+        [128, 192, 256].forEach(function (length) {
             cases.push(new test_1.GenerateKeyCase({
                 name: "generate " + name + " length:" + length,
                 params: {
@@ -984,9 +984,9 @@ define("tests/ec", ["require", "exports", "store/test"], function (require, expo
             var cases = [];
             keys.forEach(function (keyPair) {
                 // AES algs
-                ["AES-CBC", "AES-CTR", "AES-GCM", "AES-CFB-8"].forEach(function (alg) {
+                ["AES-CBC", "AES-GCM"].forEach(function (alg) {
                     // AES alg length
-                    [128, 196, 256].forEach(function (algLen) {
+                    [128, 192, 256].forEach(function (algLen) {
                         var keyAlg = keyPair.privateKey.algorithm;
                         cases.push(new test_2.DeriveKeyCase({
                             name: "deriveKey " + keyAlg.name + "-" + keyAlg.namedCurve + " " + alg + "-" + algLen,
@@ -1013,7 +1013,7 @@ define("tests/ec", ["require", "exports", "store/test"], function (require, expo
             var cases = [];
             keys.forEach(function (keyPair) {
                 // bitsLength
-                [128, 196, 256].forEach(function (bitsLength) {
+                [128, 192, 256].forEach(function (bitsLength) {
                     var keyAlg = keyPair.privateKey.algorithm;
                     cases.push(new test_2.DeriveBitsCase({
                         name: "deriveKey " + keyAlg.name + "-" + keyAlg.namedCurve + " ",
@@ -1429,7 +1429,7 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
         TestDetailItem.prototype.render = function () {
             var _this = this;
             var test = this.props.test;
-            return (React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement(collapse_button_1.CollapseButton, {collapsed: this.state.collapsed, onClick: function (e) { return _this.setState({ collapsed: !_this.state.collapsed }); }})), React.createElement("td", null, test.name), React.createElement("td", null, test.duration / 1000 + "s"), React.createElement("td", {className: "status " + test_6.CaseStatus[test.status]}, test_6.CaseStatus[test.status] || "not started"), React.createElement("td", null, test.message)), React.createElement("tr", {hidden: this.state.collapsed}, React.createElement("td", null), React.createElement("td", {colSpan: 3}, React.createElement(DetailParamsView, {params: test.params})))));
+            return (React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement(collapse_button_1.CollapseButton, {collapsed: this.state.collapsed, onClick: function (e) { return _this.setState({ collapsed: !_this.state.collapsed }); }})), React.createElement("td", null, test.name), React.createElement("td", null, test.duration / 1000 + "s"), React.createElement("td", {className: "status " + test_6.CaseStatus[test.status]}, test_6.CaseStatus[test.status] || "not started"), React.createElement("td", null, test.stack)), React.createElement("tr", {hidden: this.state.collapsed}, React.createElement("td", null), React.createElement("td", {colSpan: 3}, React.createElement(DetailParamsView, {params: test.params})))));
         };
         return TestDetailItem;
     }(React.Component));
@@ -1482,27 +1482,50 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
     }(React.Component));
     exports.DetailParamsView = DetailParamsView;
 });
-define("app", ["require", "exports", "react", "tests/aes", "tests/rsa", "tests/sha", "tests/ec", "components/test-table", "components/detail", "components/property", "helper"], function (require, exports, React, aes_1, rsa_1, sha_1, ec_1, test_table_1, detail_1, property_2, helper) {
+define("app", ["require", "exports", "react", "tests/aes", "tests/sha", "tests/ec", "components/test-table", "components/detail", "components/property", "helper"], function (require, exports, React, aes_1, sha_1, ec_1, test_table_1, detail_1, property_2, helper) {
     "use strict";
     var tests = [
         new sha_1.ShaTest(),
         new aes_1.AesCBCTest(),
-        new aes_1.AesCTRTest(),
+        // new AesCTRTest(),
         new aes_1.AesGCMTest(),
-        new aes_1.AesCFBTest(),
-        new aes_1.AesCMACTest(),
-        new rsa_1.RsaOAEPTest(),
-        new rsa_1.RsaPSSTest(),
-        new rsa_1.RsaSSATest(),
-        new ec_1.EcDSATest(),
-        new ec_1.EcDHTest(),
     ];
     var App = (function (_super) {
         __extends(App, _super);
         function App(props) {
             _super.call(this, props);
-            this.state = {};
+            this.state = {
+                tests: []
+            };
+            this.onCryptoChange = this.onCryptoChange.bind(this);
         }
+        App.prototype.createTests = function () {
+            var _this = this;
+            this.setState({
+                tests: [],
+                selectedTest: null
+            }, function () {
+                _this.setState({
+                    tests: [
+                        new sha_1.ShaTest(),
+                        new aes_1.AesCBCTest(),
+                        // new AesCTRTest(),
+                        new aes_1.AesGCMTest(),
+                        // new AesCFBTest(),
+                        // new AesCMACTest(),
+                        // new RsaOAEPTest(),
+                        // new RsaPSSTest(),
+                        // new RsaSSATest(),
+                        new ec_1.EcDSATest(),
+                        new ec_1.EcDHTest(),
+                    ]
+                });
+            });
+        };
+        App.prototype.componentDidMount = function () {
+            this.createTests();
+            window.crypto = cryptoEngines.native; // set default crypto -> Native
+        };
         App.prototype.getTotalTestTime = function () {
         };
         App.prototype.getReport = function () {
@@ -1513,7 +1536,7 @@ define("app", ["require", "exports", "react", "tests/aes", "tests/rsa", "tests/s
                 error: 0,
                 success: 0
             };
-            tests.forEach(function (test) {
+            this.state.tests.forEach(function (test) {
                 var testReport = test.report();
                 report.duration += testReport.duration;
                 report.error += testReport.error;
@@ -1521,11 +1544,25 @@ define("app", ["require", "exports", "react", "tests/aes", "tests/rsa", "tests/s
             });
             this.setState({ report: report });
         };
+        App.prototype.onCryptoChange = function (e) {
+            var selectedCrypto = e.target.value;
+            switch (selectedCrypto) {
+                case "0":
+                    window.crypto = cryptoEngines.native;
+                    break;
+                case "1":
+                    window.crypto = cryptoEngines.js;
+                    break;
+                default:
+                    throw new Error("Uknown type of crypto module");
+            }
+            this.createTests();
+        };
         App.prototype.render = function () {
             var _this = this;
             var info = helper.BrawserInfo();
-            var report = this.state.report;
-            return (React.createElement("div", {className: "container"}, React.createElement("h3", null, info.name, " v", info.version), React.createElement(test_table_1.TestTable, {model: tests, onCellClick: function (test) { return _this.setState({ selectedTest: test }); }}), React.createElement("div", {className: "row"}, React.createElement("div", {className: "btn", onClick: function () { tests.forEach(function (item) { return item.run(); }); }}, "Run"), React.createElement("div", {className: "btn", onClick: function () { _this.getReport(); }}, "Report")), report ?
+            var _a = this.state, report = _a.report, tests = _a.tests;
+            return (React.createElement("div", {className: "container"}, React.createElement("h3", null, info.name, " v", info.version), React.createElement("h4", null, "Select crypto module "), React.createElement("select", {name: "", defaultValue: "0", onChange: this.onCryptoChange}, React.createElement("option", {value: "0"}, "Native"), React.createElement("option", {value: "1"}, "JavaScript")), React.createElement("hr", null), React.createElement(test_table_1.TestTable, {model: tests, onCellClick: function (test) { return _this.setState({ selectedTest: test }); }}), React.createElement("div", {className: "row"}, React.createElement("div", {className: "btn", onClick: function () { tests.forEach(function (item) { return item.run(); }); }}, "Run"), React.createElement("div", {className: "btn", onClick: function () { _this.getReport(); }}, "Report")), report ?
                 React.createElement("div", null, React.createElement("hr", null), React.createElement("h3", null, "Report"), React.createElement(property_2.PropertyView, null, React.createElement(property_2.PropertyViewItem, {label: "Browser", value: info.name + " v" + info.version}), React.createElement(property_2.PropertyViewItem, {label: "UserAgent", value: window.navigator.userAgent}), React.createElement(property_2.PropertyViewItem, {label: "Created", value: report.created.toString()}), React.createElement(property_2.PropertyViewItem, {label: "Test duration", value: report.duration / 1000 + "s"}), React.createElement(property_2.PropertyViewItem, {label: "Test success", value: report.success}), React.createElement(property_2.PropertyViewItem, {label: "Test error", value: report.error})))
                 :
                     null, React.createElement("hr", null), this.state.selectedTest ?
@@ -1539,13 +1576,5 @@ define("app", ["require", "exports", "react", "tests/aes", "tests/rsa", "tests/s
 });
 define("main", ["require", "exports", "react", "react-dom", "app"], function (require, exports, React, ReactDOM, app_1) {
     "use strict";
-    // let testCol = new TestCaseCollection<GenerateKeyCase>([
-    //     new GenerateKeyCase({name: "Case 1"}),
-    //     new GenerateKeyCase({name: "Case 2"}),
-    //     new GenerateKeyCase({name: "Case 3"}),
-    // ]);
-    // Fix Sfari error
-    if (crypto.webkitSubtle)
-        crypto.subtle = crypto.webkitSubtle;
     ReactDOM.render(React.createElement(app_1.App, null), document.getElementById("app"));
 });

@@ -113,9 +113,9 @@ export class EcDHTest extends AlgorithmTest {
         keys.forEach(keyPair => {
 
             // AES algs
-            ["AES-CBC", "AES-CTR", "AES-GCM", "AES-CFB-8"].forEach(alg => {
+            ["AES-CBC", "AES-GCM"].forEach(alg => {
                 // AES alg length
-                [128, 196, 256].forEach(algLen => {
+                [128, 192, 256].forEach(algLen => {
                     const keyAlg: any = keyPair.privateKey.algorithm;
                     cases.push(new DeriveKeyCase({
                         name: `deriveKey ${keyAlg.name}-${keyAlg.namedCurve} ${alg}-${algLen}`,
@@ -145,7 +145,7 @@ export class EcDHTest extends AlgorithmTest {
         keys.forEach(keyPair => {
 
             // bitsLength
-            [128, 196, 256].forEach(bitsLength => {
+            [128, 192, 256].forEach(bitsLength => {
                 const keyAlg: any = keyPair.privateKey.algorithm;
                 cases.push(new DeriveBitsCase({
                     name: `deriveKey ${keyAlg.name}-${keyAlg.namedCurve} `,

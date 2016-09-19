@@ -71,7 +71,7 @@ export class TestDetailItem extends React.Component<ITestDetailItemProps, ITestD
                     <td>{test.name}</td>
                     <td>{`${test.duration / 1000}s`}</td>
                     <td className={`status ${CaseStatus[test.status]}`}>{CaseStatus[test.status] || "not started"}</td>
-                    <td>{test.message}</td>
+                    <td>{test.stack}</td>
                 </tr>
                 <tr hidden={this.state.collapsed}>
                     <td></td>

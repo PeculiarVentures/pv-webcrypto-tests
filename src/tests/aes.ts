@@ -10,7 +10,7 @@ function GenerateKey(name: string, keyUsages: string[]) {
     let cases: GenerateKeyCase[] = [];
 
     // length
-    [128, 196, 256].forEach(length => {
+    [128, 192, 256].forEach(length => {
         cases.push(
             new GenerateKeyCase({
                 name: `generate ${name} length:${length}`,

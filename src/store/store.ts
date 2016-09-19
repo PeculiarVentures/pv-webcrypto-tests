@@ -13,14 +13,14 @@ export let Store = (action: string = "change") => {
                 oldCompDidMount.call(this);
         };
 
-        let oldCompWillUnmount = target.prototype.componentDidMount;
+        let oldCompWillUnmount = target.prototype.componentWillUnmount;
         target.prototype.componentWillUnmount = function componentWillUnmount() {
             this.props.model.removeListener(action, this.__onModelChange);
             if (oldCompWillUnmount)
                 oldCompWillUnmount.call(this);
         };
     };
-}
+};
 
 export class BaseStore<T> extends EventEmitter {
 

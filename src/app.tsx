@@ -12,21 +12,22 @@ import * as helper from "./helper";
 const tests = [
     new ShaTest(),
     new AesCBCTest(),
-    new AesCTRTest(),
+    // new AesCTRTest(),
     new AesGCMTest(),
-    new AesCFBTest(),
-    new AesCMACTest(),
-    new RsaOAEPTest(),
-    new RsaPSSTest(),
-    new RsaSSATest(),
-    new EcDSATest(),
-    new EcDHTest(),
+    // new AesCFBTest(),
+    // new AesCMACTest(),
+    // new RsaOAEPTest(),
+    // new RsaPSSTest(),
+    // new RsaSSATest(),
+    // new EcDSATest(),
+    // new EcDHTest(),
 ];
 
 interface IAppProps {
 }
 
 interface IAppState {
+    tests?: AlgorithmTest[];
     selectedTest?: TestCaseCollection<any>;
     report?: any;
 }
@@ -36,7 +37,38 @@ export class App extends React.Component<IAppProps, IAppState> {
     constructor(props: IAppProps) {
         super(props);
         this.state = {
+            tests: []
         };
+
+        this.onCryptoChange = this.onCryptoChange.bind(this);
+    }
+
+    protected createTests() {
+        this.setState({
+            tests: [],
+            selectedTest: null
+        }, () => {
+            this.setState({
+                tests: [
+                    new ShaTest(),
+                    new AesCBCTest(),
+                    // new AesCTRTest(),
+                    new AesGCMTest(),
+                    // new AesCFBTest(),
+                    // new AesCMACTest(),
+                    // new RsaOAEPTest(),
+                    // new RsaPSSTest(),
+                    // new RsaSSATest(),
+                    new EcDSATest(),
+                    new EcDHTest(),
+                ]
+            });
+        });
+    }
+
+    componentDidMount() {
+        this.createTests();
+        window.crypto = cryptoEngines.native; // set default crypto -> Native
     }
 
     getTotalTestTime() {
@@ -51,21 +83,42 @@ export class App extends React.Component<IAppProps, IAppState> {
             error: 0,
             success: 0
         };
-        tests.forEach(test => {
+        this.state.tests.forEach(test => {
             let testReport = test.report();
             report.duration += testReport.duration;
             report.error += testReport.error;
             report.success += testReport.success;
         });
-        this.setState({report});
+        this.setState({ report });
+    }
+
+    onCryptoChange(e: React.FormEvent) {
+        const selectedCrypto = (e.target as HTMLInputElement).value;
+        switch (selectedCrypto) {
+            case "0": // Native
+                window.crypto = cryptoEngines.native;
+                break;
+            case "1": // JS
+                window.crypto = cryptoEngines.js;
+                break;
+            default:
+                throw new Error("Uknown type of crypto module");
+        }
+        this.createTests();
     }
 
     render() {
         const info = helper.BrawserInfo();
-        const {report} = this.state;
+        const {report, tests} = this.state;
         return (
             <div className="container">
                 <h3>{info.name} v{info.version}</h3>
+                <h4>Select crypto module </h4>
+                <select name="" defaultValue="0" onChange={this.onCryptoChange}>
+                    <option value="0">Native</option>
+                    <option value="1">JavaScript</option>
+                </select>
+                <hr/>
                 <TestTable model={tests} onCellClick={test => this.setState({ selectedTest: test }) }/>
                 <div className="row">
                     <div className="btn" onClick={() => { tests.forEach(item => item.run()); } }>Run</div>
