@@ -4,12 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Document</title>
-    <link rel="stylesheet" href="css/app.css"/>
+    <link rel="stylesheet" href="css/app.css" />
     <script>
         var cryptoEngines = {};
 
         // Copy standard native crypto module
-        cryptoEngines.native = window.crypto;
+        cryptoEngines.native = window.msCrypto || window.crypto;
+        if (cryptoEngines.native.webkitSubtle)  cryptoEngines.native.subtle = cryptoEngines.native.webkitSubtle;
     </script>
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <script src="https://www.promisejs.org/polyfills/promise-7.0.4.min.js"></script>
