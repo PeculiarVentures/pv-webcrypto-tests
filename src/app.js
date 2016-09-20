@@ -1504,7 +1504,8 @@ define("app", ["require", "exports", "react", "tests/aes", "tests/rsa", "tests/s
             var _this = this;
             this.setState({
                 tests: [],
-                selectedTest: null
+                selectedTest: null,
+                report: null
             }, function () {
                 _this.setState({
                     tests: [
