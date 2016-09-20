@@ -29,6 +29,7 @@ interface IAppProps {
 interface IAppState {
     tests?: AlgorithmTest[];
     selectedTest?: TestCaseCollection<any>;
+    selectedCrypto?: string;
     report?: any;
 }
 
@@ -37,7 +38,8 @@ export class App extends React.Component<IAppProps, IAppState> {
     constructor(props: IAppProps) {
         super(props);
         this.state = {
-            tests: []
+            tests: [],
+            selectedCrypto: "Native"
         };
 
         this.onCryptoChange = this.onCryptoChange.bind(this);
@@ -56,9 +58,9 @@ export class App extends React.Component<IAppProps, IAppState> {
                     new AesGCMTest(),
                     // new AesCFBTest(),
                     // new AesCMACTest(),
-                    // new RsaOAEPTest(),
-                    // new RsaPSSTest(),
-                    // new RsaSSATest(),
+                    new RsaOAEPTest(),
+                    new RsaPSSTest(),
+                    new RsaSSATest(),
                     new EcDSATest(),
                     new EcDHTest(),
                 ]
@@ -97,9 +99,11 @@ export class App extends React.Component<IAppProps, IAppState> {
         switch (selectedCrypto) {
             case "0": // Native
                 window.crypto = cryptoEngines.native;
+                this.setState({ selectedCrypto: "Native" });
                 break;
             case "1": // JS
                 window.crypto = cryptoEngines.js;
+                this.setState({ selectedCrypto: "Java Script" });
                 break;
             default:
                 throw new Error("Uknown type of crypto module");
@@ -114,7 +118,7 @@ export class App extends React.Component<IAppProps, IAppState> {
             <div className="container">
                 <h3>{info.name} v{info.version}</h3>
                 <h4>Select crypto module </h4>
-                <select name="" defaultValue="0" onChange={this.onCryptoChange}>
+                <select ref="crypto" name="" defaultValue="0" onChange={this.onCryptoChange}>
                     <option value="0">Native</option>
                     <option value="1">JavaScript</option>
                 </select>
@@ -128,7 +132,7 @@ export class App extends React.Component<IAppProps, IAppState> {
                     report ?
                         <div>
                             <hr/>
-                            <h3>Report</h3>
+                            <h3>Report: {this.state.selectedCrypto}</h3>
                             <PropertyView>
                                 <PropertyViewItem label="Browser" value={`${info.name} v${info.version}`}/>
                                 <PropertyViewItem label="UserAgent" value={window.navigator.userAgent}/>
