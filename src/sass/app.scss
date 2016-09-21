@@ -75,8 +75,31 @@ body {
     @extend .shadow-2;
 }
 
-.property-view .group tr:not(:first-child) .label {
-    padding-left: 16px;
+.property-view {
+    line-height: 1.5;
+    width: 600px;
+
+    .group {
+        .header {
+            border-bottom: lightgrey  1px solid;
+        }
+    }
+
+    .group {
+        >.group, >.item{
+            margin-left: 24px;
+        }
+    }
+
+    .item {
+        border-bottom: lightgrey  1px solid;
+        display: flex;
+        flex-direction: row;
+
+        >.label {
+            width: 150px;    
+        }
+    }
 }
 
 td {

@@ -98,16 +98,32 @@ export class DetailParamsView extends React.Component<IDetailParamsViewProps, ID
         this.state = {};
     }
 
+    renderKey(key: CryptoKey, groupName: string) {
+        console.log("renderKey");
+        return (
+            <PropertyViewGroup label={groupName}>
+                <PropertyViewItem label="type" value={key.type}/>
+                { this.renderAlgrithm(key.algorithm, "Algorithm") }
+                <PropertyViewItem label="extractable" value={key.extractable.toString() }/>
+                <PropertyViewItem label="usages" value={key.usages.join(", ") }/>
+            </PropertyViewGroup>
+        );
+    }
+
     renderItems(params: TestCaseParams) {
         let items: JSX.Element[] = [];
         for (let key in params) {
             let value: string = params[key];
             if (key === "algorithm" || key === "derivedKeyAlg") {
-                items = items.concat(this.renderAlgrithm(params[key], key));
+                items.push(this.renderAlgrithm(params[key], key));
                 continue;
             }
             else if (key === "keyUsages") {
                 value = params[key].join(", ");
+            }
+            else if (params[key].__proto__.constructor.name === "CryptoKey") {
+                items.push(this.renderKey(params[key], key));
+                continue;
             }
             else {
                 value = value.toString();

@@ -43,6 +43,7 @@ export class App extends React.Component<IAppProps, IAppState> {
         };
 
         this.onCryptoChange = this.onCryptoChange.bind(this);
+        this.onTestCaseClick = this.onTestCaseClick.bind(this);
     }
 
     protected createTests() {
@@ -53,17 +54,17 @@ export class App extends React.Component<IAppProps, IAppState> {
         }, () => {
             this.setState({
                 tests: [
-                    new ShaTest(),
-                    new AesCBCTest(),
+                    // new ShaTest(),
+                    // new AesCBCTest(),
                     // new AesCTRTest(),
-                    new AesGCMTest(),
+                    // new AesGCMTest(),
                     // new AesCFBTest(),
                     // new AesCMACTest(),
                     new RsaOAEPTest(),
-                    new RsaPSSTest(),
-                    new RsaSSATest(),
-                    new EcDSATest(),
-                    new EcDHTest(),
+                    // new RsaPSSTest(),
+                    // new RsaSSATest(),
+                    // new EcDSATest(),
+                    // new EcDHTest(),
                 ]
             });
         });
@@ -112,6 +113,13 @@ export class App extends React.Component<IAppProps, IAppState> {
         this.createTests();
     }
 
+    onTestCaseClick(test: TestCaseCollection<any>) {
+        if (this.state.selectedTest !== test)
+            this.setState({ selectedTest: new TestCaseCollection<any>([]) }, () => {
+                this.setState({ selectedTest: test });
+            });
+    }
+
     render() {
         const info = helper.BrawserInfo();
         const {report, tests} = this.state;
@@ -124,7 +132,7 @@ export class App extends React.Component<IAppProps, IAppState> {
                     <option value="1">JavaScript</option>
                 </select>
                 <hr/>
-                <TestTable model={tests} onCellClick={test => this.setState({ selectedTest: test }) }/>
+                <TestTable model={tests} onCellClick={this.onTestCaseClick}/>
                 <div className="row">
                     <div className="btn" onClick={() => { tests.forEach(item => item.run()); } }>Run</div>
                     <div className="btn" onClick={() => { this.createTests(); } }>Reset</div>

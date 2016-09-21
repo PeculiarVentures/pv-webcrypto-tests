@@ -13,7 +13,9 @@ export class PropertyView extends React.Component<IPropertyViewProps, IPropertyV
 
     render() {
         return (
-            <table className="property-view">{this.props.children}</table>
+            <div className="property-view">
+                {this.props.children}
+            </div>
         );
     }
 
@@ -35,10 +37,10 @@ export class PropertyViewItem extends React.Component<IPropertyViewItemProps, IP
 
     render() {
         return (
-            <tr className="item">
-                <td className="label">{this.props.label}</td>
-                <td className="value">{this.props.value}</td>
-            </tr>
+            <div className="item">
+                <div className="label">{this.props.label}</div>
+                <div className="value">{this.props.value}</div>
+            </div>
         );
     }
 
@@ -59,12 +61,12 @@ export class PropertyViewGroup extends React.Component<IPropertyViewGroupProps, 
 
     render() {
         return (
-            <tbody className="group">
-                <tr className="header">
-                    <td className="label" colSpan={2}>{this.props.label}</td>
-                </tr>
+            <div className="group">
+                <div className="header">
+                    <div className="label">{this.props.label}</div>
+                </div>
                 {this.props.children}
-            </tbody>
+            </div>
         );
     }
 
