@@ -1371,7 +1371,7 @@ define("components/property", ["require", "exports", "react"], function (require
             this.state = {};
         }
         PropertyView.prototype.render = function () {
-            return (React.createElement("table", {className: "property-view"}, this.props.children));
+            return (React.createElement("div", {className: "property-view"}, this.props.children));
         };
         return PropertyView;
     }(React.Component));
@@ -1383,7 +1383,7 @@ define("components/property", ["require", "exports", "react"], function (require
             this.state = {};
         }
         PropertyViewItem.prototype.render = function () {
-            return (React.createElement("tr", {className: "item"}, React.createElement("td", {className: "label"}, this.props.label), React.createElement("td", {className: "value"}, this.props.value)));
+            return (React.createElement("div", {className: "item"}, React.createElement("div", {className: "label"}, this.props.label), React.createElement("div", {className: "value"}, this.props.value)));
         };
         return PropertyViewItem;
     }(React.Component));
@@ -1395,7 +1395,7 @@ define("components/property", ["require", "exports", "react"], function (require
             this.state = {};
         }
         PropertyViewGroup.prototype.render = function () {
-            return (React.createElement("tbody", {className: "group"}, React.createElement("tr", {className: "header"}, React.createElement("td", {className: "label", colSpan: 2}, this.props.label)), this.props.children));
+            return (React.createElement("div", {className: "group"}, React.createElement("div", {className: "header"}, React.createElement("div", {className: "label"}, this.props.label)), this.props.children));
         };
         return PropertyViewGroup;
     }(React.Component));
@@ -1456,16 +1456,24 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
             _super.call(this, props);
             this.state = {};
         }
+        DetailParamsView.prototype.renderKey = function (key, groupName) {
+            console.log("renderKey");
+            return (React.createElement(property_1.PropertyViewGroup, {label: groupName}, React.createElement(property_1.PropertyViewItem, {label: "type", value: key.type}), this.renderAlgrithm(key.algorithm, "Algorithm"), React.createElement(property_1.PropertyViewItem, {label: "extractable", value: key.extractable.toString()}), React.createElement(property_1.PropertyViewItem, {label: "usages", value: key.usages.join(", ")})));
+        };
         DetailParamsView.prototype.renderItems = function (params) {
             var items = [];
             for (var key in params) {
                 var value = params[key];
                 if (key === "algorithm" || key === "derivedKeyAlg") {
-                    items = items.concat(this.renderAlgrithm(params[key], key));
+                    items.push(this.renderAlgrithm(params[key], key));
                     continue;
                 }
                 else if (key === "keyUsages") {
                     value = params[key].join(", ");
+                }
+                else if (params[key].__proto__.constructor.name === "CryptoKey") {
+                    items.push(this.renderKey(params[key], key));
+                    continue;
                 }
                 else {
                     value = value.toString();
@@ -1498,7 +1506,7 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
     }(React.Component));
     exports.DetailParamsView = DetailParamsView;
 });
-define("app", ["require", "exports", "react", "tests/aes", "tests/rsa", "tests/sha", "tests/ec", "components/test-table", "components/detail", "components/property", "helper"], function (require, exports, React, aes_1, rsa_1, sha_1, ec_1, test_table_1, detail_1, property_2, helper) {
+define("app", ["require", "exports", "react", "store/test", "tests/aes", "tests/rsa", "tests/sha", "tests/ec", "components/test-table", "components/detail", "components/property", "helper"], function (require, exports, React, test_7, aes_1, rsa_1, sha_1, ec_1, test_table_1, detail_1, property_2, helper) {
     "use strict";
     var tests = [
         new sha_1.ShaTest(),
@@ -1515,6 +1523,7 @@ define("app", ["require", "exports", "react", "tests/aes", "tests/rsa", "tests/s
                 selectedCrypto: "Native"
             };
             this.onCryptoChange = this.onCryptoChange.bind(this);
+            this.onTestCaseClick = this.onTestCaseClick.bind(this);
         }
         App.prototype.createTests = function () {
             var _this = this;
@@ -1578,11 +1587,18 @@ define("app", ["require", "exports", "react", "tests/aes", "tests/rsa", "tests/s
             }
             this.createTests();
         };
+        App.prototype.onTestCaseClick = function (test) {
+            var _this = this;
+            if (this.state.selectedTest !== test)
+                this.setState({ selectedTest: new test_7.TestCaseCollection([]) }, function () {
+                    _this.setState({ selectedTest: test });
+                });
+        };
         App.prototype.render = function () {
             var _this = this;
             var info = helper.BrawserInfo();
             var _a = this.state, report = _a.report, tests = _a.tests;
-            return (React.createElement("div", {className: "container"}, React.createElement("h3", null, info.name, " v", info.version), React.createElement("h4", null, "Select crypto module "), React.createElement("select", {ref: "crypto", name: "", defaultValue: "0", onChange: this.onCryptoChange}, React.createElement("option", {value: "0"}, "Native"), React.createElement("option", {value: "1"}, "JavaScript")), React.createElement("hr", null), React.createElement(test_table_1.TestTable, {model: tests, onCellClick: function (test) { return _this.setState({ selectedTest: test }); }}), React.createElement("div", {className: "row"}, React.createElement("div", {className: "btn", onClick: function () { tests.forEach(function (item) { return item.run(); }); }}, "Run"), React.createElement("div", {className: "btn", onClick: function () { _this.createTests(); }}, "Reset"), React.createElement("div", {className: "btn", onClick: function () { _this.getReport(); }}, "Report")), report ?
+            return (React.createElement("div", {className: "container"}, React.createElement("h3", null, info.name, " v", info.version), React.createElement("h4", null, "Select crypto module "), React.createElement("select", {ref: "crypto", name: "", defaultValue: "0", onChange: this.onCryptoChange}, React.createElement("option", {value: "0"}, "Native"), React.createElement("option", {value: "1"}, "JavaScript")), React.createElement("hr", null), React.createElement(test_table_1.TestTable, {model: tests, onCellClick: this.onTestCaseClick}), React.createElement("div", {className: "row"}, React.createElement("div", {className: "btn", onClick: function () { tests.forEach(function (item) { return item.run(); }); }}, "Run"), React.createElement("div", {className: "btn", onClick: function () { _this.createTests(); }}, "Reset"), React.createElement("div", {className: "btn", onClick: function () { _this.getReport(); }}, "Report")), report ?
                 React.createElement("div", null, React.createElement("hr", null), React.createElement("h3", null, "Report: ", this.state.selectedCrypto), React.createElement(property_2.PropertyView, null, React.createElement(property_2.PropertyViewItem, {label: "Browser", value: info.name + " v" + info.version}), React.createElement(property_2.PropertyViewItem, {label: "UserAgent", value: window.navigator.userAgent}), React.createElement(property_2.PropertyViewItem, {label: "Created", value: report.created.toString()}), React.createElement(property_2.PropertyViewItem, {label: "Test duration", value: report.duration / 1000 + "s"}), React.createElement(property_2.PropertyViewItem, {label: "Test success", value: report.success}), React.createElement(property_2.PropertyViewItem, {label: "Test error", value: report.error})))
                 :
                     null, React.createElement("hr", null), this.state.selectedTest ?

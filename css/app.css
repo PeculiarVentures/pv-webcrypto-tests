@@ -31,8 +31,21 @@ body {
   font-size: 12px;
   transition: box-shadow 0.3s ease; }
 
-.property-view .group tr:not(:first-child) .label {
-  padding-left: 16px; }
+.property-view {
+  line-height: 1.5;
+  width: 600px; }
+  .property-view .group .header {
+    border-bottom: lightgrey  1px solid; }
+  .property-view .group > .group, .property-view .group > .item {
+    margin-left: 24px; }
+  .property-view .item {
+    border-bottom: lightgrey  1px solid;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: row;
+        flex-direction: row; }
+    .property-view .item > .label {
+      width: 150px; }
 
 td {
   padding: 4px 8px; }
