@@ -582,7 +582,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                 _this.setState({ status: CaseStatus.working });
                 crypto.subtle.wrapKey(params.format, params.key, params.wrappingKey, params.algorithm)
                     .then(function (data) {
-                    return crypto.subtle.unwrapKey(params.format, new Uint8Array(data), params.unwrappingKey, params.algorithm, params.unwrappedAlgorithm, true, params.keyUsage);
+                    return crypto.subtle.unwrapKey(params.format, new Uint8Array(data), params.unwrappingKey, params.algorithm, params.key.algorithm, true, params.key.usages);
                 })
                     .then(function (key) {
                     var endAt = new Date().getTime();
@@ -707,8 +707,6 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
                                 name: alg,
                                 iv: new Uint8Array(16)
                             },
-                            unwrappedAlgorithm: key.algorithm,
-                            keyUsage: key.usages
                         }
                     }));
                 });
@@ -774,8 +772,6 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
                                     tagLength: tagLength,
                                     iv: new Uint8Array(16)
                                 },
-                                unwrappedAlgorithm: key.algorithm,
-                                keyUsage: key.usages
                             }
                         }));
                     });
@@ -831,8 +827,6 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
                                 counter: new Uint8Array(16),
                                 length: 128
                             },
-                            unwrappedAlgorithm: key.algorithm,
-                            keyUsage: key.usages
                         }
                     }));
                 });
@@ -1158,8 +1152,10 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
             this.on("generate", function (keys) {
                 _this.exportKey.push(ExportKey(keys));
                 _this.encrypt.push(RsaOAEPTest.Encrypt(ALG_RSA_OAEP, keys));
-                _this.wrap.push(RsaOAEPTest.Wrap(ALG_RSA_OAEP, keys));
-                _this.run();
+                RsaOAEPTest.Wrap(ALG_RSA_OAEP, keys, function (cases) {
+                    _this.wrap.push(cases);
+                    _this.run();
+                });
             });
         }
         RsaOAEPTest.Encrypt = function (alg, keys) {
@@ -1168,7 +1164,7 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
             [null, new Uint8Array(5)].forEach(function (label) {
                 keys.forEach(function (keyPair) {
                     cases.push(new test_3.EncryptCase({
-                        name: alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 0 : 1) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + " lable:" + label,
+                        name: alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 0 : 1) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + " label:" + label,
                         params: {
                             encryptKey: keyPair.publicKey,
                             decryptKey: keyPair.privateKey,
@@ -1184,34 +1180,54 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
             });
             return cases;
         };
-        RsaOAEPTest.Wrap = function (alg, keys) {
+        RsaOAEPTest.Wrap = function (alg, keys, cb) {
             var cases = [];
-            // format
-            ["jwk", "spki"].forEach(function (format) {
-                // label
-                [null, new Uint8Array(5)].forEach(function (label) {
-                    keys.forEach(function (keyPair) {
-                        cases.push(new test_3.WrapCase({
-                            name: "wrap " + alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 0 : 1) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + " lable:" + label,
-                            params: {
-                                format: format,
-                                key: keyPair.publicKey,
-                                wrappingKey: keyPair.publicKey,
-                                unwrappingKey: keyPair.privateKey,
-                                algorithm: label ? {
-                                    name: alg,
-                                    label: label
-                                } : {
-                                    name: alg
-                                },
-                                unwrappedAlgorithm: keyPair.publicKey.algorithm,
-                                keyUsage: keyPair.publicKey.usages
-                            }
-                        }));
+            var ref = 0;
+            function refCount() {
+                if (!--ref)
+                    cb(cases);
+            }
+            // wrapKey
+            ["AES-CBC", "AES-GCM"].forEach(function (aesKeyAlg) {
+                try {
+                    ref++;
+                    crypto.subtle.generateKey({ name: aesKeyAlg, length: 128 }, true, ["encrypt"])
+                        .then(function (aesKey) {
+                        // format
+                        ["jwk", "raw"].forEach(function (format) {
+                            // label
+                            [null, new Uint8Array(5)].forEach(function (label) {
+                                keys.forEach(function (keyPair) {
+                                    cases.push(new test_3.WrapCase({
+                                        name: "wrap " + alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 0 : 1) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + " label:" + label + " wrapKey:" + aesKeyAlg,
+                                        params: {
+                                            format: format,
+                                            key: aesKey,
+                                            wrappingKey: keyPair.publicKey,
+                                            unwrappingKey: keyPair.privateKey,
+                                            algorithm: label ? {
+                                                name: alg,
+                                                label: label
+                                            } : {
+                                                name: alg
+                                            }
+                                        }
+                                    }));
+                                });
+                            });
+                        });
+                        refCount();
+                    })
+                        .catch(function (e) {
+                        refCount();
+                        console.error(e);
                     });
-                });
+                }
+                catch (e) {
+                    console.error(e);
+                    refCount();
+                }
             });
-            return cases;
         };
         return RsaOAEPTest;
     }(test_3.AlgorithmTest));
