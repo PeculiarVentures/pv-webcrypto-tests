@@ -569,9 +569,7 @@ export interface WrapCaseState extends TestCaseState {
         algorithm: any;
         key: CryptoKey;
         wrappingKey: CryptoKey;
-        unwrappedAlgorithm: any;
         unwrappingKey: CryptoKey;
-        keyUsage: string[];
     };
 }
 export class WrapCase extends BaseStore<WrapCaseState> {
@@ -587,7 +585,7 @@ export class WrapCase extends BaseStore<WrapCaseState> {
             this.setState({ status: CaseStatus.working });
             crypto.subtle.wrapKey(params.format, params.key, params.wrappingKey, params.algorithm)
                 .then((data: ArrayBuffer) => {
-                    return crypto.subtle.unwrapKey(params.format, new Uint8Array(data), params.unwrappingKey, params.algorithm, params.unwrappedAlgorithm, true, params.keyUsage);
+                    return crypto.subtle.unwrapKey(params.format, new Uint8Array(data), params.unwrappingKey, params.algorithm, params.key.algorithm, true, params.key.usages);
                 })
                 .then((key: CryptoKey) => {
                     const endAt = new Date().getTime();

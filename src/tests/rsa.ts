@@ -134,9 +134,10 @@ export class RsaOAEPTest extends AlgorithmTest {
         this.on("generate", (keys: CryptoKeyPair[]) => {
             this.exportKey.push(ExportKey(keys));
             this.encrypt.push(RsaOAEPTest.Encrypt(ALG_RSA_OAEP, keys));
-            this.wrap.push(RsaOAEPTest.Wrap(ALG_RSA_OAEP, keys));
-
-            this.run();
+            RsaOAEPTest.Wrap(ALG_RSA_OAEP, keys, cases => {
+                this.wrap.push(cases);
+                this.run();
+            });
         });
     }
 
@@ -147,7 +148,7 @@ export class RsaOAEPTest extends AlgorithmTest {
         [null, new Uint8Array(5)].forEach(label => {
             keys.forEach(keyPair => {
                 cases.push(new EncryptCase({
-                    name: `${alg} hash:${(keyPair.publicKey.algorithm as any).hash.name} pubExp:${(keyPair.publicKey.algorithm as any).publicExponent.length === 1 ? 0 : 1} modLen:${(keyPair.publicKey.algorithm as any).modulusLength} lable:${label}`,
+                    name: `${alg} hash:${(keyPair.publicKey.algorithm as any).hash.name} pubExp:${(keyPair.publicKey.algorithm as any).publicExponent.length === 1 ? 0 : 1} modLen:${(keyPair.publicKey.algorithm as any).modulusLength} label:${label}`,
                     params: {
                         encryptKey: keyPair.publicKey,
                         decryptKey: keyPair.privateKey,
@@ -165,35 +166,56 @@ export class RsaOAEPTest extends AlgorithmTest {
         return cases;
     }
 
-    static Wrap(alg: string, keys: CryptoKeyPair[]) {
+    static Wrap(alg: string, keys: CryptoKeyPair[], cb: (cases: WrapCase[]) => void) {
         let cases: WrapCase[] = [];
+        let ref = 0;
 
-        // format
-        ["jwk", "spki"].forEach(format => {
-            // label
-            [null, new Uint8Array(5)].forEach(label => {
-                keys.forEach(keyPair => {
-                    cases.push(new WrapCase({
-                        name: `wrap ${alg} hash:${(keyPair.publicKey.algorithm as any).hash.name} pubExp:${(keyPair.publicKey.algorithm as any).publicExponent.length === 1 ? 0 : 1} modLen:${(keyPair.publicKey.algorithm as any).modulusLength} lable:${label}`,
-                        params: {
-                            format,
-                            key: keyPair.publicKey,
-                            wrappingKey: keyPair.publicKey,
-                            unwrappingKey: keyPair.privateKey,
-                            algorithm: label ? {
-                                name: alg,
-                                label: label
-                            } : {
-                                    name: alg
-                                },
-                            unwrappedAlgorithm: keyPair.publicKey.algorithm,
-                            keyUsage: keyPair.publicKey.usages
-                        }
-                    }));
-                });
-            });
+        function refCount() {
+            if (!--ref)
+                cb(cases);
+        }
+
+        // wrapKey
+        ["AES-CBC", "AES-GCM"].forEach(aesKeyAlg => {
+
+            try {
+                ref++;
+                crypto.subtle.generateKey({ name: aesKeyAlg, length: 128 } as any, true, ["encrypt"])
+                    .then((aesKey: CryptoKey) => {
+                        // format
+                        ["jwk", "raw"].forEach(format => {
+                            // label
+                            [null, new Uint8Array(5)].forEach(label => {
+                                keys.forEach(keyPair => {
+                                    cases.push(new WrapCase({
+                                        name: `wrap ${alg} hash:${(keyPair.publicKey.algorithm as any).hash.name} pubExp:${(keyPair.publicKey.algorithm as any).publicExponent.length === 1 ? 0 : 1} modLen:${(keyPair.publicKey.algorithm as any).modulusLength} label:${label} wrapKey:${aesKeyAlg}`,
+                                        params: {
+                                            format,
+                                            key: aesKey,
+                                            wrappingKey: keyPair.publicKey,
+                                            unwrappingKey: keyPair.privateKey,
+                                            algorithm: label ? {
+                                                name: alg,
+                                                label: label
+                                            } : {
+                                                    name: alg
+                                                }
+                                        }
+                                    }));
+                                });
+                            });
+                        });
+                        refCount();
+                    })
+                    .catch((e: Error) => {
+                        refCount();
+                        console.error(e);
+                    });
+            }
+            catch (e) {
+                console.error(e);
+                refCount();
+            }
         });
-
-        return cases;
     }
 }

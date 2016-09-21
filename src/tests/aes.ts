@@ -101,8 +101,6 @@ export class AesCBCTest extends AlgorithmTest {
                             name: alg,
                             iv: new Uint8Array(16)
                         },
-                        unwrappedAlgorithm: key.algorithm,
-                        keyUsage: key.usages
                     }
                 }));
             });
@@ -169,8 +167,6 @@ export class AesGCMTest extends AlgorithmTest {
                                 tagLength: tagLength,
                                 iv: new Uint8Array(16)
                             },
-                            unwrappedAlgorithm: key.algorithm,
-                            keyUsage: key.usages
                         }
                     }));
                 });
@@ -225,8 +221,6 @@ export class AesCTRTest extends AlgorithmTest {
                             counter: new Uint8Array(16),
                             length: 128
                         },
-                        unwrappedAlgorithm: key.algorithm,
-                        keyUsage: key.usages
                     }
                 }));
             });

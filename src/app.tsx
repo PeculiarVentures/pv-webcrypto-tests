@@ -48,7 +48,8 @@ export class App extends React.Component<IAppProps, IAppState> {
     protected createTests() {
         this.setState({
             tests: [],
-            selectedTest: null
+            selectedTest: null,
+            report: null
         }, () => {
             this.setState({
                 tests: [
@@ -126,6 +127,7 @@ export class App extends React.Component<IAppProps, IAppState> {
                 <TestTable model={tests} onCellClick={test => this.setState({ selectedTest: test }) }/>
                 <div className="row">
                     <div className="btn" onClick={() => { tests.forEach(item => item.run()); } }>Run</div>
+                    <div className="btn" onClick={() => { this.createTests(); } }>Reset</div>
                     <div className="btn" onClick={() => { this.getReport(); } }>Report</div>
                 </div>
                 {
