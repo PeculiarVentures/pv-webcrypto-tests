@@ -54,17 +54,17 @@ export class App extends React.Component<IAppProps, IAppState> {
         }, () => {
             this.setState({
                 tests: [
-                    // new ShaTest(),
-                    // new AesCBCTest(),
+                    new ShaTest(),
+                    new AesCBCTest(),
                     // new AesCTRTest(),
-                    // new AesGCMTest(),
+                    new AesGCMTest(),
                     // new AesCFBTest(),
                     // new AesCMACTest(),
                     new RsaOAEPTest(),
-                    // new RsaPSSTest(),
-                    // new RsaSSATest(),
-                    // new EcDSATest(),
-                    // new EcDHTest(),
+                    new RsaPSSTest(),
+                    new RsaSSATest(),
+                    new EcDSATest(),
+                    new EcDHTest(),
                 ]
             });
         });
