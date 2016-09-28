@@ -1043,7 +1043,7 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
                 // sha
                 ["SHA-1", "SHA-256", "SHA-384", "SHA-512"].forEach(function (hash) {
                     cases.push(new test_3.GenerateKeyCase({
-                        name: "generate " + name + " exp:" + index + " mod:" + modulusLength + " hash:" + hash,
+                        name: "generate " + name + " exp:" + (index ? 65535 : 3) + " mod:" + modulusLength + " hash:" + hash,
                         params: {
                             algorithm: {
                                 name: name,
@@ -1070,7 +1070,7 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
                 // format
                 ["jwk", keyType === "publicKey" ? "spki" : "pkcs8"].forEach(function (format) {
                     cases.push(new test_3.ExportKeyCase({
-                        name: key.algorithm.name + " mod:" + key.algorithm.modulusLength + " format:" + format,
+                        name: key.algorithm.name + " mod:" + key.algorithm.modulusLength + " pubExp:" + (key.algorithm.publicExponent.length === 1 ? 3 : 65535) + "  format:" + format,
                         params: {
                             format: format,
                             key: key,
@@ -1101,7 +1101,7 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
         }
         RsaSSATest.Sign = function (alg, keys) {
             return keys.map(function (keyPair) { return new test_3.SignCase({
-                name: alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 0 : 1) + " modLen:" + keyPair.publicKey.algorithm.modulusLength,
+                name: alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 3 : 65535) + " modLen:" + keyPair.publicKey.algorithm.modulusLength,
                 params: {
                     signKey: keyPair.privateKey,
                     verifyKey: keyPair.publicKey,
@@ -1129,7 +1129,7 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
         RsaPSSTest.Sign = function (alg, keys) {
             var saltLength = 20;
             return keys.map(function (keyPair) { return new test_3.SignCase({
-                name: alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 0 : 1) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + "  saltLen:" + saltLength,
+                name: alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 3 : 65535) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + "  saltLen:" + saltLength,
                 params: {
                     signKey: keyPair.privateKey,
                     verifyKey: keyPair.publicKey,
@@ -1164,7 +1164,7 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
             [null, new Uint8Array(5)].forEach(function (label) {
                 keys.forEach(function (keyPair) {
                     cases.push(new test_3.EncryptCase({
-                        name: alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 0 : 1) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + " label:" + label,
+                        name: alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 3 : 65535) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + " label:" + label,
                         params: {
                             encryptKey: keyPair.publicKey,
                             decryptKey: keyPair.privateKey,
@@ -1199,7 +1199,7 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
                             [null, new Uint8Array(5)].forEach(function (label) {
                                 keys.forEach(function (keyPair) {
                                     cases.push(new test_3.WrapCase({
-                                        name: "wrap " + alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 0 : 1) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + " label:" + label + " wrapKey:" + aesKeyAlg,
+                                        name: "wrap " + alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 3 : 65535) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + " label:" + label + " wrapKey:" + aesKeyAlg,
                                         params: {
                                             format: format,
                                             key: aesKey,
@@ -1445,7 +1445,7 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
         TestDetailItem.prototype.render = function () {
             var _this = this;
             var test = this.props.test;
-            return (React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement(collapse_button_1.CollapseButton, {collapsed: this.state.collapsed, onClick: function (e) { return _this.setState({ collapsed: !_this.state.collapsed }); }})), React.createElement("td", null, test.name), React.createElement("td", null, test.duration / 1000 + "s"), React.createElement("td", {className: "status " + test_6.CaseStatus[test.status]}, test_6.CaseStatus[test.status] || "not started"), React.createElement("td", null, test.stack)), React.createElement("tr", {hidden: this.state.collapsed}, React.createElement("td", null), React.createElement("td", {colSpan: 3}, React.createElement(DetailParamsView, {params: test.params})))));
+            return (React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement(collapse_button_1.CollapseButton, {collapsed: this.state.collapsed, onClick: function (e) { return _this.setState({ collapsed: !_this.state.collapsed }); }})), React.createElement("td", null, test.name), React.createElement("td", null, test.duration / 1000 + "s"), React.createElement("td", {className: "status " + test_6.CaseStatus[test.status]}, test_6.CaseStatus[test.status] || "not started"), React.createElement("td", null, test.message)), React.createElement("tr", {hidden: this.state.collapsed}, React.createElement("td", null), React.createElement("td", {colSpan: 3}, React.createElement(DetailParamsView, {params: test.params})))));
         };
         return TestDetailItem;
     }(React.Component));
@@ -1471,7 +1471,7 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
                 else if (key === "keyUsages") {
                     value = params[key].join(", ");
                 }
-                else if (params[key].__proto__.constructor.name === "CryptoKey") {
+                else if (params[key].constructor.name === "CryptoKey") {
                     items.push(this.renderKey(params[key], key));
                     continue;
                 }
@@ -1488,7 +1488,7 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
                 var value = alg[key];
                 var text = void 0;
                 if (key === "publicExponent")
-                    text = "[" + value.toString() + "]";
+                    text = value[0] === 1 ? "65535" : "3";
                 else if (ArrayBuffer.isView(value))
                     text = "ArrayBuffer";
                 else if (key === "hash")
