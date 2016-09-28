@@ -71,7 +71,7 @@ export class TestDetailItem extends React.Component<ITestDetailItemProps, ITestD
                     <td>{test.name}</td>
                     <td>{`${test.duration / 1000}s`}</td>
                     <td className={`status ${CaseStatus[test.status]}`}>{CaseStatus[test.status] || "not started"}</td>
-                    <td>{test.stack}</td>
+                    <td>{test.message}</td>
                 </tr>
                 <tr hidden={this.state.collapsed}>
                     <td></td>
@@ -121,7 +121,7 @@ export class DetailParamsView extends React.Component<IDetailParamsViewProps, ID
             else if (key === "keyUsages") {
                 value = params[key].join(", ");
             }
-            else if (params[key].__proto__.constructor.name === "CryptoKey") {
+            else if (params[key].constructor.name === "CryptoKey") {
                 items.push(this.renderKey(params[key], key));
                 continue;
             }
@@ -140,7 +140,7 @@ export class DetailParamsView extends React.Component<IDetailParamsViewProps, ID
             let value = alg[key];
             let text: string;
             if (key === "publicExponent")
-                text = `[${value.toString()}]`;
+                text = value[0] === 1 ? "65535" : "3";
             else if (ArrayBuffer.isView(value))
                 text = "ArrayBuffer";
             else if (key === "hash")

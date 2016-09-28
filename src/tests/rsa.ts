@@ -17,7 +17,7 @@ function GenerateKey(name: string, keyUsages: string[]) {
             ["SHA-1", "SHA-256", "SHA-384", "SHA-512"].forEach(hash => {
                 cases.push(
                     new GenerateKeyCase({
-                        name: `generate ${name} exp:${index} mod:${modulusLength} hash:${hash}`,
+                        name: `generate ${name} exp:${index ? 65535 : 3} mod:${modulusLength} hash:${hash}`,
                         params: {
                             algorithm: {
                                 name: name,
@@ -50,7 +50,7 @@ function ExportKey(keys: CryptoKeyPair[]) {
             ["jwk", keyType === "publicKey" ? "spki" : "pkcs8"].forEach(format => {
                 cases.push(
                     new ExportKeyCase({
-                        name: `${key.algorithm.name} mod:${(key as any).algorithm.modulusLength} format:${format}`,
+                        name: `${key.algorithm.name} mod:${(key as any).algorithm.modulusLength} pubExp:${(key as any).algorithm.publicExponent.length === 1 ? 3 : 65535 }  format:${format}`,
                         params: {
                             format: format,
                             key: key,
@@ -83,7 +83,7 @@ export class RsaSSATest extends AlgorithmTest {
     }
     static Sign(alg: string, keys: CryptoKeyPair[]) {
         return keys.map(keyPair => new SignCase({
-            name: `${alg} hash:${(keyPair.publicKey.algorithm as any).hash.name} pubExp:${(keyPair.publicKey.algorithm as any).publicExponent.length === 1 ? 0 : 1} modLen:${(keyPair.publicKey.algorithm as any).modulusLength}`,
+            name: `${alg} hash:${(keyPair.publicKey.algorithm as any).hash.name} pubExp:${(keyPair.publicKey.algorithm as any).publicExponent.length === 1 ? 3 : 65535} modLen:${(keyPair.publicKey.algorithm as any).modulusLength}`,
             params: {
                 signKey: keyPair.privateKey,
                 verifyKey: keyPair.publicKey,
@@ -113,7 +113,7 @@ export class RsaPSSTest extends AlgorithmTest {
     static Sign(alg: string, keys: CryptoKeyPair[]) {
         const saltLength = 20;
         return keys.map(keyPair => new SignCase({
-            name: `${alg} hash:${(keyPair.publicKey.algorithm as any).hash.name} pubExp:${(keyPair.publicKey.algorithm as any).publicExponent.length === 1 ? 0 : 1} modLen:${(keyPair.publicKey.algorithm as any).modulusLength}  saltLen:${saltLength}`,
+            name: `${alg} hash:${(keyPair.publicKey.algorithm as any).hash.name} pubExp:${(keyPair.publicKey.algorithm as any).publicExponent.length === 1 ? 3 : 65535} modLen:${(keyPair.publicKey.algorithm as any).modulusLength}  saltLen:${saltLength}`,
             params: {
                 signKey: keyPair.privateKey,
                 verifyKey: keyPair.publicKey,
@@ -148,7 +148,7 @@ export class RsaOAEPTest extends AlgorithmTest {
         [null, new Uint8Array(5)].forEach(label => {
             keys.forEach(keyPair => {
                 cases.push(new EncryptCase({
-                    name: `${alg} hash:${(keyPair.publicKey.algorithm as any).hash.name} pubExp:${(keyPair.publicKey.algorithm as any).publicExponent.length === 1 ? 0 : 1} modLen:${(keyPair.publicKey.algorithm as any).modulusLength} label:${label}`,
+                    name: `${alg} hash:${(keyPair.publicKey.algorithm as any).hash.name} pubExp:${(keyPair.publicKey.algorithm as any).publicExponent.length === 1 ? 3 : 65535} modLen:${(keyPair.publicKey.algorithm as any).modulusLength} label:${label}`,
                     params: {
                         encryptKey: keyPair.publicKey,
                         decryptKey: keyPair.privateKey,
@@ -188,7 +188,7 @@ export class RsaOAEPTest extends AlgorithmTest {
                             [null, new Uint8Array(5)].forEach(label => {
                                 keys.forEach(keyPair => {
                                     cases.push(new WrapCase({
-                                        name: `wrap ${alg} hash:${(keyPair.publicKey.algorithm as any).hash.name} pubExp:${(keyPair.publicKey.algorithm as any).publicExponent.length === 1 ? 0 : 1} modLen:${(keyPair.publicKey.algorithm as any).modulusLength} label:${label} wrapKey:${aesKeyAlg}`,
+                                        name: `wrap ${alg} hash:${(keyPair.publicKey.algorithm as any).hash.name} pubExp:${(keyPair.publicKey.algorithm as any).publicExponent.length === 1 ? 3 : 65535} modLen:${(keyPair.publicKey.algorithm as any).modulusLength} label:${label} wrapKey:${aesKeyAlg}`,
                                         params: {
                                             format,
                                             key: aesKey,
