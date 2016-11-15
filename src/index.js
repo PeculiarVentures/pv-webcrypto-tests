@@ -1745,6 +1745,7 @@
 	// Base
 	var init_1 = __webpack_require__(1);
 	var crypto_1 = __webpack_require__(5);
+	var helper_1 = __webpack_require__(3);
 	// Crypto
 	var crypto_2 = __webpack_require__(17);
 	var crypto_3 = __webpack_require__(20);
@@ -2139,8 +2140,11 @@
 	            }
 	        })
 	            .then(function (msg) {
-	            if (msg)
+	            if (msg) {
+	                if (format === "jwk" && msg instanceof ArrayBuffer)
+	                    msg = helper_1.buffer2string(new Uint8Array(msg));
 	                return Promise.resolve(msg);
+	            }
 	            if (!key.key)
 	                throw new crypto_1.LinerError("Cannot export native CryptoKey from JS implementation");
 	            var Class;
