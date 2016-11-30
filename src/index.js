@@ -2035,7 +2035,7 @@
 	        })
 	            .then(function (result) {
 	            if (typeof result === "boolean")
-	                return new Promise(function (resolve) { return resolve(signature); });
+	                return new Promise(function (resolve) { return resolve(result); });
 	            var Class;
 	            switch (_alg.name.toLowerCase()) {
 	                case webcrypto_core_1.AlgorithmNames.EcDSA.toLowerCase():
