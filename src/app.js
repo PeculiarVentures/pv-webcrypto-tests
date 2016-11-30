@@ -1542,7 +1542,6 @@ define("app", ["require", "exports", "react", "store/test", "tests/aes", "tests/
                         // new AesCMACTest(),
                         new rsa_1.RsaOAEPTest(),
                         new rsa_1.RsaPSSTest(),
-                        new rsa_1.RsaPSSTest(),
                         new rsa_1.RsaSSATest(),
                         new ec_1.EcDSATest(),
                         new ec_1.EcDHTest(),
