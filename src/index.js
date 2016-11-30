@@ -129,7 +129,7 @@
 	        name: "",
 	        version: ""
 	    };
-	    if (typeof module === "object" && module.exports !== void 0)
+	    if (typeof window !== "object" && typeof self !== void "object")
 	        return {
 	            name: "NodeJS",
 	            version: process.version
@@ -188,6 +188,21 @@
 	    return res;
 	}
 	exports.concat = concat;
+	function assign(target) {
+	    var sources = [];
+	    for (var _i = 1; _i < arguments.length; _i++) {
+	        sources[_i - 1] = arguments[_i];
+	    }
+	    var res = arguments[0];
+	    for (var i = 1; i < arguments.length; i++) {
+	        var obj = arguments[i];
+	        for (var prop in obj) {
+	            res[prop] = obj[prop];
+	        }
+	    }
+	    return res;
+	}
+	exports.assign = assign;
 
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
@@ -388,19 +403,20 @@
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var webcrypto_core_1 = __webpack_require__(6);
-	var subtle_1 = __webpack_require__(16);
+	var subtle_1 = __webpack_require__(17);
 	var init_1 = __webpack_require__(1);
 	var LinerError = (function (_super) {
 	    __extends(LinerError, _super);
 	    function LinerError() {
-	        _super.apply(this, arguments);
-	        this.code = 10;
+	        var _this = _super.apply(this, arguments) || this;
+	        _this.code = 10;
+	        return _this;
 	    }
-	    LinerError.MODULE_NOT_FOUND = "Module '%1' is not found. Download it from %2.\nOnly hash algorithms supported by the user agent will be supported.";
-	    LinerError.UNSUPPORTED_ALGORITHM = "Unsupported algorithm '%1'";
 	    return LinerError;
 	}(webcrypto_core_1.WebCryptoError));
 	exports.LinerError = LinerError;
+	LinerError.MODULE_NOT_FOUND = "Module '%1' is not found. Download it from %2.\nOnly hash algorithms supported by the user agent will be supported.";
+	LinerError.UNSUPPORTED_ALGORITHM = "Unsupported algorithm '%1'";
 	var Crypto = (function () {
 	    function Crypto() {
 	        this.subtle = new subtle_1.SubtleCrypto();
@@ -472,48 +488,51 @@
 	        for (var _i = 1; _i < arguments.length; _i++) {
 	            args[_i - 1] = arguments[_i];
 	        }
-	        _super.call(this);
-	        this.code = 0;
-	        this.message = printf.apply(void 0, [template].concat(args));
-	        var error = new Error(this.message);
-	        error.name = this["constructor"].name;
-	        this.stack = error.stack;
+	        var _this = _super.call(this) || this;
+	        _this.code = 0;
+	        _this.message = printf.apply(void 0, [template].concat(args));
+	        var error = new Error(_this.message);
+	        error.name = _this["constructor"].name;
+	        _this.stack = error.stack;
+	        return _this;
 	    }
-	    WebCryptoError.NOT_SUPPORTED = "Method is not supported";
 	    return WebCryptoError;
 	}(Error));
 	exports.WebCryptoError = WebCryptoError;
+	WebCryptoError.NOT_SUPPORTED = "Method is not supported";
 	var AlgorithmError = (function (_super) {
 	    __extends(AlgorithmError, _super);
 	    function AlgorithmError() {
-	        _super.apply(this, arguments);
-	        this.code = 1;
+	        var _this = _super.apply(this, arguments) || this;
+	        _this.code = 1;
+	        return _this;
 	    }
-	    AlgorithmError.PARAM_REQUIRED = "Algorithm hasn't got required paramter '%1'";
-	    AlgorithmError.PARAM_WRONG_TYPE = "Algorithm has got wrong type for paramter '%1'. Must be %2";
-	    AlgorithmError.PARAM_WRONG_VALUE = "Algorithm has got wrong value for paramter '%1'. Must be %2";
-	    AlgorithmError.WRONG_ALG_NAME = "Algorithm has got wrong name '%1'. Must be '%2'";
-	    AlgorithmError.UNSUPPORTED_ALGORITHM = "Algorithm '%1' is not supported";
 	    return AlgorithmError;
 	}(WebCryptoError));
 	exports.AlgorithmError = AlgorithmError;
+	AlgorithmError.PARAM_REQUIRED = "Algorithm hasn't got required paramter '%1'";
+	AlgorithmError.PARAM_WRONG_TYPE = "Algorithm has got wrong type for paramter '%1'. Must be %2";
+	AlgorithmError.PARAM_WRONG_VALUE = "Algorithm has got wrong value for paramter '%1'. Must be %2";
+	AlgorithmError.WRONG_ALG_NAME = "Algorithm has got wrong name '%1'. Must be '%2'";
+	AlgorithmError.UNSUPPORTED_ALGORITHM = "Algorithm '%1' is not supported";
 	var CryptoKeyError = (function (_super) {
 	    __extends(CryptoKeyError, _super);
 	    function CryptoKeyError() {
-	        _super.apply(this, arguments);
-	        this.code = 3;
+	        var _this = _super.apply(this, arguments) || this;
+	        _this.code = 3;
+	        return _this;
 	    }
-	    CryptoKeyError.EMPTY_KEY = "CryptoKey is empty";
-	    CryptoKeyError.WRONG_KEY_ALG = "CryptoKey has wrong algorithm '%1'. Must be '%2'";
-	    CryptoKeyError.WRONG_KEY_TYPE = "CryptoKey has wrong type '%1'. Must be '%2'";
-	    CryptoKeyError.WRONG_KEY_USAGE = "CryptoKey has wrong key usage. Must be '%1'";
-	    CryptoKeyError.NOT_EXTRACTABLE = "CryptoKey is not extractable";
-	    CryptoKeyError.WRONG_FORMAT = "CryptoKey has '%1' type. It can be used with '%2' format";
-	    CryptoKeyError.UNKNOWN_FORMAT = "Uknown format in use '%1'. Must be one of 'raw', 'pkcs8', 'spki'  or 'jwk'";
-	    CryptoKeyError.ALLOWED_FORMAT = "Wrong format value '%1'. Must be %2";
 	    return CryptoKeyError;
 	}(WebCryptoError));
 	exports.CryptoKeyError = CryptoKeyError;
+	CryptoKeyError.EMPTY_KEY = "CryptoKey is empty";
+	CryptoKeyError.WRONG_KEY_ALG = "CryptoKey has wrong algorithm '%1'. Must be '%2'";
+	CryptoKeyError.WRONG_KEY_TYPE = "CryptoKey has wrong type '%1'. Must be '%2'";
+	CryptoKeyError.WRONG_KEY_USAGE = "CryptoKey has wrong key usage. Must be '%1'";
+	CryptoKeyError.NOT_EXTRACTABLE = "CryptoKey is not extractable";
+	CryptoKeyError.WRONG_FORMAT = "CryptoKey has '%1' type. It can be used with '%2' format";
+	CryptoKeyError.UNKNOWN_FORMAT = "Uknown format in use '%1'. Must be one of 'raw', 'pkcs8', 'spki'  or 'jwk'";
+	CryptoKeyError.ALLOWED_FORMAT = "Wrong format value '%1'. Must be %2";
 
 
 /***/ },
@@ -689,7 +708,8 @@
 	    Sha384: "SHA-384",
 	    Sha512: "SHA-512",
 	    EcDSA: "ECDSA",
-	    EcDH: "ECDH"
+	    EcDH: "ECDH",
+	    Hmac: "HMAC",
 	};
 
 
@@ -754,6 +774,7 @@
 	var crypto_2 = __webpack_require__(13);
 	var crypto_3 = __webpack_require__(14);
 	var crypto_4 = __webpack_require__(15);
+	var crypto_5 = __webpack_require__(16);
 	var SubtleCrypto = (function () {
 	    function SubtleCrypto() {
 	    }
@@ -785,6 +806,9 @@
 	                    break;
 	                case alg_1.AlgorithmNames.EcDH.toUpperCase():
 	                    Class = crypto_4.EcDH;
+	                    break;
+	                case alg_1.AlgorithmNames.Hmac.toUpperCase():
+	                    Class = crypto_5.Hmac;
 	                    break;
 	                default:
 	                    throw new error_1.AlgorithmError(error_1.AlgorithmError.UNSUPPORTED_ALGORITHM, alg.name);
@@ -825,6 +849,9 @@
 	                case alg_1.AlgorithmNames.EcDSA.toUpperCase():
 	                    Class = crypto_4.EcDSA;
 	                    break;
+	                case alg_1.AlgorithmNames.Hmac.toUpperCase():
+	                    Class = crypto_5.Hmac;
+	                    break;
 	                default:
 	                    throw new error_1.AlgorithmError(error_1.AlgorithmError.UNSUPPORTED_ALGORITHM, alg.name);
 	            }
@@ -846,6 +873,9 @@
 	                    break;
 	                case alg_1.AlgorithmNames.EcDSA.toUpperCase():
 	                    Class = crypto_4.EcDSA;
+	                    break;
+	                case alg_1.AlgorithmNames.Hmac.toUpperCase():
+	                    Class = crypto_5.Hmac;
 	                    break;
 	                default:
 	                    throw new error_1.AlgorithmError(error_1.AlgorithmError.UNSUPPORTED_ALGORITHM, alg.name);
@@ -961,6 +991,9 @@
 	                case alg_1.AlgorithmNames.EcDH.toUpperCase():
 	                    Class = crypto_4.EcDH;
 	                    break;
+	                case alg_1.AlgorithmNames.Hmac.toUpperCase():
+	                    Class = crypto_5.Hmac;
+	                    break;
 	                default:
 	                    throw new error_1.AlgorithmError(error_1.AlgorithmError.UNSUPPORTED_ALGORITHM, key.algorithm.name);
 	            }
@@ -996,6 +1029,9 @@
 	                    break;
 	                case alg_1.AlgorithmNames.EcDH.toUpperCase():
 	                    Class = crypto_4.EcDH;
+	                    break;
+	                case alg_1.AlgorithmNames.Hmac.toUpperCase():
+	                    Class = crypto_5.Hmac;
 	                    break;
 	                default:
 	                    throw new error_1.AlgorithmError(error_1.AlgorithmError.UNSUPPORTED_ALGORITHM, alg.name);
@@ -1073,7 +1109,7 @@
 	var Sha = (function (_super) {
 	    __extends(Sha, _super);
 	    function Sha() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    Sha.checkAlgorithm = function (alg) {
 	        var _alg;
@@ -1121,8 +1157,9 @@
 	var RsaKeyGenParamsError = (function (_super) {
 	    __extends(RsaKeyGenParamsError, _super);
 	    function RsaKeyGenParamsError() {
-	        _super.apply(this, arguments);
-	        this.code = 2;
+	        var _this = _super.apply(this, arguments) || this;
+	        _this.code = 2;
+	        return _this;
 	    }
 	    return RsaKeyGenParamsError;
 	}(error_1.AlgorithmError));
@@ -1130,8 +1167,9 @@
 	var RsaHashedImportParamsError = (function (_super) {
 	    __extends(RsaHashedImportParamsError, _super);
 	    function RsaHashedImportParamsError() {
-	        _super.apply(this, arguments);
-	        this.code = 6;
+	        var _this = _super.apply(this, arguments) || this;
+	        _this.code = 6;
+	        return _this;
 	    }
 	    return RsaHashedImportParamsError;
 	}(error_1.AlgorithmError));
@@ -1139,7 +1177,7 @@
 	var Rsa = (function (_super) {
 	    __extends(Rsa, _super);
 	    function Rsa() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    Rsa.checkAlgorithm = function (alg) {
 	        if (alg.name.toUpperCase() !== this.ALG_NAME.toUpperCase())
@@ -1222,15 +1260,15 @@
 	            resolve(undefined);
 	        });
 	    };
-	    Rsa.ALG_NAME = "";
-	    Rsa.KEY_USAGES = [];
 	    return Rsa;
 	}(base_1.BaseCrypto));
 	exports.Rsa = Rsa;
+	Rsa.ALG_NAME = "";
+	Rsa.KEY_USAGES = [];
 	var RsaSSA = (function (_super) {
 	    __extends(RsaSSA, _super);
 	    function RsaSSA() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    RsaSSA.sign = function (algorithm, key, data) {
 	        var _this = this;
@@ -1248,16 +1286,17 @@
 	            resolve(undefined);
 	        });
 	    };
-	    RsaSSA.ALG_NAME = alg_1.AlgorithmNames.RsaSSA;
-	    RsaSSA.KEY_USAGES = ["sign", "verify"];
 	    return RsaSSA;
 	}(Rsa));
 	exports.RsaSSA = RsaSSA;
+	RsaSSA.ALG_NAME = alg_1.AlgorithmNames.RsaSSA;
+	RsaSSA.KEY_USAGES = ["sign", "verify"];
 	var RsaPSSParamsError = (function (_super) {
 	    __extends(RsaPSSParamsError, _super);
 	    function RsaPSSParamsError() {
-	        _super.apply(this, arguments);
-	        this.code = 4;
+	        var _this = _super.apply(this, arguments) || this;
+	        _this.code = 4;
+	        return _this;
 	    }
 	    return RsaPSSParamsError;
 	}(error_1.AlgorithmError));
@@ -1265,7 +1304,7 @@
 	var RsaPSS = (function (_super) {
 	    __extends(RsaPSS, _super);
 	    function RsaPSS() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    RsaPSS.checkRsaPssParams = function (alg) {
 	        /**
@@ -1277,16 +1316,17 @@
 	        if (alg.saltLength % 8)
 	            return new RsaPSSParamsError("Parameter 'saltLength' should be a multiple of 8");
 	    };
-	    RsaPSS.ALG_NAME = alg_1.AlgorithmNames.RsaPSS;
-	    RsaPSS.KEY_USAGES = ["sign", "verify"];
 	    return RsaPSS;
 	}(RsaSSA));
 	exports.RsaPSS = RsaPSS;
+	RsaPSS.ALG_NAME = alg_1.AlgorithmNames.RsaPSS;
+	RsaPSS.KEY_USAGES = ["sign", "verify"];
 	var RsaOAEPParamsError = (function (_super) {
 	    __extends(RsaOAEPParamsError, _super);
 	    function RsaOAEPParamsError() {
-	        _super.apply(this, arguments);
-	        this.code = 5;
+	        var _this = _super.apply(this, arguments) || this;
+	        _this.code = 5;
+	        return _this;
 	    }
 	    return RsaOAEPParamsError;
 	}(error_1.AlgorithmError));
@@ -1294,7 +1334,7 @@
 	var RsaOAEP = (function (_super) {
 	    __extends(RsaOAEP, _super);
 	    function RsaOAEP() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    RsaOAEP.checkAlgorithmParams = function (alg) {
 	        if (alg.label) {
@@ -1339,11 +1379,11 @@
 	            resolve(undefined);
 	        });
 	    };
-	    RsaOAEP.ALG_NAME = alg_1.AlgorithmNames.RsaOAEP;
-	    RsaOAEP.KEY_USAGES = ["encrypt", "decrypt", "wrapKey", "unwrapKey"];
 	    return RsaOAEP;
 	}(Rsa));
 	exports.RsaOAEP = RsaOAEP;
+	RsaOAEP.ALG_NAME = alg_1.AlgorithmNames.RsaOAEP;
+	RsaOAEP.KEY_USAGES = ["encrypt", "decrypt", "wrapKey", "unwrapKey"];
 
 
 /***/ },
@@ -1362,15 +1402,16 @@
 	var AesKeyGenParamsError = (function (_super) {
 	    __extends(AesKeyGenParamsError, _super);
 	    function AesKeyGenParamsError() {
-	        _super.apply(this, arguments);
-	        this.code = 7;
+	        var _this = _super.apply(this, arguments) || this;
+	        _this.code = 7;
+	        return _this;
 	    }
 	    return AesKeyGenParamsError;
 	}(error_1.AlgorithmError));
 	var Aes = (function (_super) {
 	    __extends(Aes, _super);
 	    function Aes() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    Aes.checkAlgorithm = function (alg) {
 	        if (alg.name.toUpperCase() !== this.ALG_NAME.toUpperCase())
@@ -1427,16 +1468,17 @@
 	            resolve(undefined);
 	        });
 	    };
-	    Aes.ALG_NAME = "";
-	    Aes.KEY_USAGES = [];
 	    return Aes;
 	}(base_1.BaseCrypto));
 	exports.Aes = Aes;
+	Aes.ALG_NAME = "";
+	Aes.KEY_USAGES = [];
 	var AesAlgorithmError = (function (_super) {
 	    __extends(AesAlgorithmError, _super);
 	    function AesAlgorithmError() {
-	        _super.apply(this, arguments);
-	        this.code = 8;
+	        var _this = _super.apply(this, arguments) || this;
+	        _this.code = 8;
+	        return _this;
 	    }
 	    return AesAlgorithmError;
 	}(error_1.AlgorithmError));
@@ -1444,7 +1486,7 @@
 	var AesEncrypt = (function (_super) {
 	    __extends(AesEncrypt, _super);
 	    function AesEncrypt() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    AesEncrypt.encrypt = function (algorithm, key, data) {
 	        var _this = this;
@@ -1483,14 +1525,14 @@
 	            resolve(undefined);
 	        });
 	    };
-	    AesEncrypt.KEY_USAGES = ["encrypt", "decrypt", "wrapKey", "unwrapKey"];
 	    return AesEncrypt;
 	}(Aes));
 	exports.AesEncrypt = AesEncrypt;
+	AesEncrypt.KEY_USAGES = ["encrypt", "decrypt", "wrapKey", "unwrapKey"];
 	var AesCBC = (function (_super) {
 	    __extends(AesCBC, _super);
 	    function AesCBC() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    AesCBC.checkAlgorithmParams = function (alg) {
 	        this.checkAlgorithm(alg);
@@ -1501,14 +1543,14 @@
 	        if (alg.iv.byteLength !== 16)
 	            throw new AesAlgorithmError(AesAlgorithmError.PARAM_WRONG_VALUE, "iv", "ArrayBufferView with size 16");
 	    };
-	    AesCBC.ALG_NAME = alg_1.AlgorithmNames.AesCBC;
 	    return AesCBC;
 	}(AesEncrypt));
 	exports.AesCBC = AesCBC;
+	AesCBC.ALG_NAME = alg_1.AlgorithmNames.AesCBC;
 	var AesCTR = (function (_super) {
 	    __extends(AesCTR, _super);
 	    function AesCTR() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    AesCTR.checkAlgorithmParams = function (alg) {
 	        this.checkAlgorithm(alg);
@@ -1519,14 +1561,14 @@
 	        if (!(alg.length > 0 && alg.length <= 128))
 	            throw new AesAlgorithmError(AesAlgorithmError.PARAM_WRONG_VALUE, "length", "number [1-128]");
 	    };
-	    AesCTR.ALG_NAME = alg_1.AlgorithmNames.AesCTR;
 	    return AesCTR;
 	}(AesEncrypt));
 	exports.AesCTR = AesCTR;
+	AesCTR.ALG_NAME = alg_1.AlgorithmNames.AesCTR;
 	var AesGCM = (function (_super) {
 	    __extends(AesGCM, _super);
 	    function AesGCM() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    AesGCM.checkAlgorithmParams = function (alg) {
 	        this.checkAlgorithm(alg);
@@ -1541,10 +1583,10 @@
 	            if (!(alg.tagLength >= 0 && alg.tagLength <= 128))
 	                throw new AesAlgorithmError(AesAlgorithmError.PARAM_WRONG_VALUE, "tagLength", "number [0-128]");
 	    };
-	    AesGCM.ALG_NAME = alg_1.AlgorithmNames.AesGCM;
 	    return AesGCM;
 	}(AesEncrypt));
 	exports.AesGCM = AesGCM;
+	AesGCM.ALG_NAME = alg_1.AlgorithmNames.AesGCM;
 
 
 /***/ },
@@ -1565,8 +1607,9 @@
 	var EcKeyGenParamsError = (function (_super) {
 	    __extends(EcKeyGenParamsError, _super);
 	    function EcKeyGenParamsError() {
-	        _super.apply(this, arguments);
-	        this.code = 9;
+	        var _this = _super.apply(this, arguments) || this;
+	        _this.code = 9;
+	        return _this;
 	    }
 	    return EcKeyGenParamsError;
 	}(error_1.AlgorithmError));
@@ -1574,7 +1617,7 @@
 	var Ec = (function (_super) {
 	    __extends(Ec, _super);
 	    function Ec() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    Ec.checkAlgorithm = function (alg) {
 	        if (alg.name.toUpperCase() !== this.ALG_NAME.toUpperCase())
@@ -1635,16 +1678,17 @@
 	            resolve(undefined);
 	        });
 	    };
-	    Ec.ALG_NAME = "";
-	    Ec.KEY_USAGES = [];
 	    return Ec;
 	}(base_1.BaseCrypto));
 	exports.Ec = Ec;
+	Ec.ALG_NAME = "";
+	Ec.KEY_USAGES = [];
 	var EcAlgorithmError = (function (_super) {
 	    __extends(EcAlgorithmError, _super);
 	    function EcAlgorithmError() {
-	        _super.apply(this, arguments);
-	        this.code = 10;
+	        var _this = _super.apply(this, arguments) || this;
+	        _this.code = 10;
+	        return _this;
 	    }
 	    return EcAlgorithmError;
 	}(error_1.AlgorithmError));
@@ -1652,7 +1696,7 @@
 	var EcDSA = (function (_super) {
 	    __extends(EcDSA, _super);
 	    function EcDSA() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    EcDSA.checkAlgorithmParams = function (alg) {
 	        this.checkAlgorithm(alg);
@@ -1674,15 +1718,15 @@
 	            resolve(undefined);
 	        });
 	    };
-	    EcDSA.ALG_NAME = alg_1.AlgorithmNames.EcDSA;
-	    EcDSA.KEY_USAGES = ["sign", "verify", "deriveKey", "deriveBits"];
 	    return EcDSA;
 	}(Ec));
 	exports.EcDSA = EcDSA;
+	EcDSA.ALG_NAME = alg_1.AlgorithmNames.EcDSA;
+	EcDSA.KEY_USAGES = ["sign", "verify", "deriveKey", "deriveBits"];
 	var EcDH = (function (_super) {
 	    __extends(EcDH, _super);
 	    function EcDH() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    EcDH.checkDeriveParams = function (algorithm) {
 	        var param_public = "public";
@@ -1721,15 +1765,107 @@
 	            resolve(undefined);
 	        });
 	    };
-	    EcDH.ALG_NAME = alg_1.AlgorithmNames.EcDH;
-	    EcDH.KEY_USAGES = ["deriveKey", "deriveBits"];
 	    return EcDH;
 	}(Ec));
 	exports.EcDH = EcDH;
+	EcDH.ALG_NAME = alg_1.AlgorithmNames.EcDH;
+	EcDH.KEY_USAGES = ["deriveKey", "deriveBits"];
 
 
 /***/ },
 /* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var error_1 = __webpack_require__(7);
+	var base_1 = __webpack_require__(8);
+	var alg_1 = __webpack_require__(9);
+	var Hmac = (function (_super) {
+	    __extends(Hmac, _super);
+	    function Hmac() {
+	        return _super.apply(this, arguments) || this;
+	    }
+	    Hmac.checkAlgorithm = function (alg) {
+	        if (alg.name.toUpperCase() !== this.ALG_NAME.toUpperCase())
+	            throw new error_1.AlgorithmError(error_1.AlgorithmError.WRONG_ALG_NAME, alg.name, this.ALG_NAME);
+	    };
+	    Hmac.checkKeyGenParams = function (alg) {
+	        // length is optional
+	        if ("length" in alg && !(alg.length > 0 && alg.length <= 512)) {
+	            throw new error_1.AlgorithmError(error_1.AlgorithmError.PARAM_WRONG_VALUE, "length", "more 0 and less than 512");
+	        }
+	    };
+	    Hmac.checkKeyGenUsages = function (keyUsages) {
+	        var _this = this;
+	        this.checkKeyUsages(keyUsages);
+	        keyUsages.forEach(function (usage) {
+	            var i = 0;
+	            for (i; i < _this.KEY_USAGES.length; i++)
+	                if (_this.KEY_USAGES[i].toLowerCase() === usage.toLowerCase()) {
+	                    break;
+	                }
+	            if (i === _this.KEY_USAGES.length)
+	                throw new error_1.WebCryptoError("Unsuported key usage '" + usage + "'. Should be one of [" + _this.KEY_USAGES.join(", ") + "]");
+	        });
+	    };
+	    Hmac.generateKey = function (algorithm, extractable, keyUsages) {
+	        var _this = this;
+	        return new Promise(function (resolve, reject) {
+	            _this.checkAlgorithm(algorithm);
+	            _this.checkKeyGenParams(algorithm);
+	            _this.checkKeyGenUsages(keyUsages);
+	            resolve(undefined);
+	        });
+	    };
+	    Hmac.exportKey = function (format, key) {
+	        var _this = this;
+	        return new Promise(function (resolve, reject) {
+	            _this.checkKey(key, _this.ALG_NAME);
+	            _this.checkFormat(format, key.type);
+	            resolve(undefined);
+	        });
+	    };
+	    Hmac.importKey = function (format, keyData, algorithm, extractable, keyUsages) {
+	        var _this = this;
+	        return new Promise(function (resolve, reject) {
+	            _this.checkAlgorithm(algorithm);
+	            _this.checkFormat(format);
+	            if (!(format.toLowerCase() === "raw" || format.toLowerCase() === "jwk"))
+	                throw new error_1.CryptoKeyError(error_1.CryptoKeyError.ALLOWED_FORMAT, format, "'jwk' or 'raw'");
+	            _this.checkKeyGenUsages(keyUsages);
+	            resolve(undefined);
+	        });
+	    };
+	    Hmac.sign = function (algorithm, key, data) {
+	        var _this = this;
+	        return new Promise(function (resolve, reject) {
+	            _this.checkAlgorithmParams(algorithm);
+	            _this.checkKey(key, _this.ALG_NAME, "secret", "sign");
+	            resolve(undefined);
+	        });
+	    };
+	    Hmac.verify = function (algorithm, key, signature, data) {
+	        var _this = this;
+	        return new Promise(function (resolve, reject) {
+	            _this.checkAlgorithmParams(algorithm);
+	            _this.checkKey(key, _this.ALG_NAME, "secret", "verify");
+	            resolve(undefined);
+	        });
+	    };
+	    return Hmac;
+	}(base_1.BaseCrypto));
+	exports.Hmac = Hmac;
+	Hmac.ALG_NAME = alg_1.AlgorithmNames.Hmac;
+	Hmac.KEY_USAGES = ["sign", "verify"];
+
+
+/***/ },
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1747,10 +1883,10 @@
 	var crypto_1 = __webpack_require__(5);
 	var helper_1 = __webpack_require__(3);
 	// Crypto
-	var crypto_2 = __webpack_require__(17);
-	var crypto_3 = __webpack_require__(20);
-	var crypto_4 = __webpack_require__(21);
-	var crypto_5 = __webpack_require__(22);
+	var crypto_2 = __webpack_require__(18);
+	var crypto_3 = __webpack_require__(21);
+	var crypto_4 = __webpack_require__(22);
+	var crypto_5 = __webpack_require__(23);
 	function PrepareKey(key, subtle) {
 	    var promise = Promise.resolve(key);
 	    if (!key.key)
@@ -1770,7 +1906,7 @@
 	var SubtleCrypto = (function (_super) {
 	    __extends(SubtleCrypto, _super);
 	    function SubtleCrypto() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    SubtleCrypto.prototype.generateKey = function (algorithm, extractable, keyUsages) {
 	        var args = arguments;
@@ -2141,8 +2277,10 @@
 	        })
 	            .then(function (msg) {
 	            if (msg) {
-	                if (format === "jwk" && msg instanceof ArrayBuffer)
+	                if (format === "jwk" && msg instanceof ArrayBuffer) {
 	                    msg = helper_1.buffer2string(new Uint8Array(msg));
+	                    msg = JSON.parse(msg);
+	                }
 	                return Promise.resolve(msg);
 	            }
 	            if (!key.key)
@@ -2175,6 +2313,13 @@
 	            .then(function (bits) {
 	            _alg = webcrypto_core_2.PrepareAlgorithm(algorithm);
 	            _data = keyData;
+	            // Fix: Safari
+	            if (helper_1.BrowserInfo().name === helper_1.Browser.Safari) {
+	                // Converts JWK to ArrayBuffer
+	                _data = helper_1.string2buffer(JSON.stringify(keyData)).buffer;
+	                args[1] = _data;
+	            }
+	            // End: Fix
 	            if (ArrayBuffer.isView(keyData)) {
 	                _data = webcrypto_core_2.PrepareData(keyData, "keyData");
 	            }
@@ -2217,7 +2362,7 @@
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2228,14 +2373,14 @@
 	};
 	var webcrypto_core_1 = __webpack_require__(6);
 	var crypto_1 = __webpack_require__(5);
-	var key_1 = __webpack_require__(18);
+	var key_1 = __webpack_require__(19);
 	var helper_1 = __webpack_require__(3);
-	var asmCrypto = __webpack_require__(19);
+	var asmCrypto = __webpack_require__(20);
 	var init_1 = __webpack_require__(1);
 	var AesCrypto = (function (_super) {
 	    __extends(AesCrypto, _super);
 	    function AesCrypto() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    AesCrypto.checkModule = function () {
 	        if (typeof asmCrypto === "undefined")
@@ -2368,7 +2513,7 @@
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2381,7 +2526,7 @@
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! asmCrypto v0.0.11, (c) 2013 Artem S Vybornov, opensource.org/licenses/MIT */
@@ -2392,7 +2537,7 @@
 	//# sourceMappingURL=asmcrypto.js.map
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2403,11 +2548,11 @@
 	};
 	var webcrypto_core_1 = __webpack_require__(6);
 	var crypto_1 = __webpack_require__(5);
-	var asmCrypto = __webpack_require__(19);
+	var asmCrypto = __webpack_require__(20);
 	var ShaCrypto = (function (_super) {
 	    __extends(ShaCrypto, _super);
 	    function ShaCrypto() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    ShaCrypto.digest = function (alg, message) {
 	        return new Promise(function (resolve) {
@@ -2431,7 +2576,7 @@
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2442,9 +2587,9 @@
 	};
 	var webcrypto_core_1 = __webpack_require__(6);
 	var crypto_1 = __webpack_require__(5);
-	var key_1 = __webpack_require__(18);
+	var key_1 = __webpack_require__(19);
 	var helper_1 = __webpack_require__(3);
-	var asmCrypto = __webpack_require__(19);
+	var asmCrypto = __webpack_require__(20);
 	function removeLeadingZero(buf) {
 	    var first = true;
 	    return buf.filter(function (v) {
@@ -2459,7 +2604,7 @@
 	var RsaCrypto = (function (_super) {
 	    __extends(RsaCrypto, _super);
 	    function RsaCrypto() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    RsaCrypto.checkModule = function () {
 	        if (typeof asmCrypto === "undefined")
@@ -2701,7 +2846,7 @@
 
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2712,9 +2857,9 @@
 	};
 	var webcrypto_core_1 = __webpack_require__(6);
 	var crypto_1 = __webpack_require__(5);
-	var key_1 = __webpack_require__(18);
+	var key_1 = __webpack_require__(19);
 	var helper_1 = __webpack_require__(3);
-	var elliptic = __webpack_require__(23);
+	var elliptic = __webpack_require__(24);
 	// Helper
 	function b2a(buffer) {
 	    var buf = new Uint8Array(buffer);
@@ -2759,7 +2904,7 @@
 	var EcCrypto = (function (_super) {
 	    __extends(EcCrypto, _super);
 	    function EcCrypto() {
-	        _super.apply(this, arguments);
+	        return _super.apply(this, arguments) || this;
 	    }
 	    EcCrypto.checkModule = function () {
 	        if (typeof elliptic === "undefined")
@@ -2917,7 +3062,7 @@
 
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2925,25 +3070,25 @@
 	var elliptic = exports;
 
 	elliptic.version = "";
-	elliptic.utils = __webpack_require__(24);
-	elliptic.rand = __webpack_require__(31);
-	elliptic.hmacDRBG = __webpack_require__(33);
-	elliptic.curve = __webpack_require__(41);
-	elliptic.curves = __webpack_require__(46);
+	elliptic.utils = __webpack_require__(25);
+	elliptic.rand = __webpack_require__(32);
+	elliptic.hmacDRBG = __webpack_require__(34);
+	elliptic.curve = __webpack_require__(42);
+	elliptic.curves = __webpack_require__(47);
 
 	// Protocols
-	elliptic.ec = __webpack_require__(48);
-	elliptic.eddsa = __webpack_require__(51);
+	elliptic.ec = __webpack_require__(49);
+	elliptic.eddsa = __webpack_require__(52);
 
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var utils = exports;
-	var BN = __webpack_require__(25);
+	var BN = __webpack_require__(26);
 
 	utils.assert = function assert(val, msg) {
 	  if (!val)
@@ -3115,7 +3260,7 @@
 
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {(function (module, exports) {
@@ -3170,7 +3315,7 @@
 
 	  var Buffer;
 	  try {
-	    Buffer = __webpack_require__(27).Buffer;
+	    Buffer = __webpack_require__(28).Buffer;
 	  } catch (e) {
 	  }
 
@@ -6546,10 +6691,10 @@
 	  };
 	})(typeof module === 'undefined' || module, this);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(26)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)(module)))
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -6565,7 +6710,7 @@
 
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*!
@@ -6578,9 +6723,9 @@
 
 	'use strict'
 
-	var base64 = __webpack_require__(28)
-	var ieee754 = __webpack_require__(29)
-	var isArray = __webpack_require__(30)
+	var base64 = __webpack_require__(29)
+	var ieee754 = __webpack_require__(30)
+	var isArray = __webpack_require__(31)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = SlowBuffer
@@ -8361,7 +8506,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports) {
 
 	'use strict'
@@ -8481,7 +8626,7 @@
 
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports) {
 
 	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -8571,7 +8716,7 @@
 
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports) {
 
 	var toString = {}.toString;
@@ -8582,7 +8727,7 @@
 
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var r;
@@ -8627,7 +8772,7 @@
 	} else {
 	  // Node.js or Web worker
 	  try {
-	    var crypto = __webpack_require__(32);
+	    var crypto = __webpack_require__(33);
 
 	    Rand.prototype._rand = function _rand(n) {
 	      return crypto.randomBytes(n);
@@ -8645,19 +8790,19 @@
 
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports) {
 
 	/* (ignored) */
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var hash = __webpack_require__(34);
-	var elliptic = __webpack_require__(23);
+	var hash = __webpack_require__(35);
+	var elliptic = __webpack_require__(24);
 	var utils = elliptic.utils;
 	var assert = utils.assert;
 
@@ -8771,16 +8916,16 @@
 
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var hash = exports;
 
-	hash.utils = __webpack_require__(35);
-	hash.common = __webpack_require__(37);
-	hash.sha = __webpack_require__(38);
-	hash.ripemd = __webpack_require__(39);
-	hash.hmac = __webpack_require__(40);
+	hash.utils = __webpack_require__(36);
+	hash.common = __webpack_require__(38);
+	hash.sha = __webpack_require__(39);
+	hash.ripemd = __webpack_require__(40);
+	hash.hmac = __webpack_require__(41);
 
 	// Proxy hash functions to the main object
 	hash.sha1 = hash.sha.sha1;
@@ -8792,11 +8937,11 @@
 
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = exports;
-	var inherits = __webpack_require__(36);
+	var inherits = __webpack_require__(37);
 
 	function toArray(msg, enc) {
 	  if (Array.isArray(msg))
@@ -9055,7 +9200,7 @@
 
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports) {
 
 	if (typeof Object.create === 'function') {
@@ -9084,10 +9229,10 @@
 
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hash = __webpack_require__(34);
+	var hash = __webpack_require__(35);
 	var utils = hash.utils;
 	var assert = utils.assert;
 
@@ -9181,10 +9326,10 @@
 
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hash = __webpack_require__(34);
+	var hash = __webpack_require__(35);
 	var utils = hash.utils;
 	var assert = utils.assert;
 
@@ -9751,10 +9896,10 @@
 
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var hash = __webpack_require__(34);
+	var hash = __webpack_require__(35);
 	var utils = hash.utils;
 
 	var rotl32 = utils.rotl32;
@@ -9901,12 +10046,12 @@
 
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var hmac = exports;
 
-	var hash = __webpack_require__(34);
+	var hash = __webpack_require__(35);
 	var utils = hash.utils;
 	var assert = utils.assert;
 
@@ -9955,27 +10100,27 @@
 
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var curve = exports;
 
-	curve.base = __webpack_require__(42);
-	curve.short = __webpack_require__(43);
-	curve.mont = __webpack_require__(44);
-	curve.edwards = __webpack_require__(45);
+	curve.base = __webpack_require__(43);
+	curve.short = __webpack_require__(44);
+	curve.mont = __webpack_require__(45);
+	curve.edwards = __webpack_require__(46);
 
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var BN = __webpack_require__(25);
-	var elliptic = __webpack_require__(23);
+	var BN = __webpack_require__(26);
+	var elliptic = __webpack_require__(24);
 	var utils = elliptic.utils;
 	var getNAF = utils.getNAF;
 	var getJSF = utils.getJSF;
@@ -10350,15 +10495,15 @@
 
 
 /***/ },
-/* 43 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var curve = __webpack_require__(41);
-	var elliptic = __webpack_require__(23);
-	var BN = __webpack_require__(25);
-	var inherits = __webpack_require__(36);
+	var curve = __webpack_require__(42);
+	var elliptic = __webpack_require__(24);
+	var BN = __webpack_require__(26);
+	var inherits = __webpack_require__(37);
 	var Base = curve.base;
 
 	var assert = elliptic.utils.assert;
@@ -11294,17 +11439,17 @@
 
 
 /***/ },
-/* 44 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var curve = __webpack_require__(41);
-	var BN = __webpack_require__(25);
-	var inherits = __webpack_require__(36);
+	var curve = __webpack_require__(42);
+	var BN = __webpack_require__(26);
+	var inherits = __webpack_require__(37);
 	var Base = curve.base;
 
-	var elliptic = __webpack_require__(23);
+	var elliptic = __webpack_require__(24);
 	var utils = elliptic.utils;
 
 	function MontCurve(conf) {
@@ -11480,15 +11625,15 @@
 
 
 /***/ },
-/* 45 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var curve = __webpack_require__(41);
-	var elliptic = __webpack_require__(23);
-	var BN = __webpack_require__(25);
-	var inherits = __webpack_require__(36);
+	var curve = __webpack_require__(42);
+	var elliptic = __webpack_require__(24);
+	var BN = __webpack_require__(26);
+	var inherits = __webpack_require__(37);
 	var Base = curve.base;
 
 	var assert = elliptic.utils.assert;
@@ -11919,15 +12064,15 @@
 
 
 /***/ },
-/* 46 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var curves = exports;
 
-	var hash = __webpack_require__(34);
-	var elliptic = __webpack_require__(23);
+	var hash = __webpack_require__(35);
+	var elliptic = __webpack_require__(24);
 
 	var assert = elliptic.utils.assert;
 
@@ -12091,7 +12236,7 @@
 
 	var pre;
 	try {
-	  pre = __webpack_require__(47);
+	  pre = __webpack_require__(48);
 	} catch (e) {
 	  pre = undefined;
 	}
@@ -12130,7 +12275,7 @@
 
 
 /***/ },
-/* 47 */
+/* 48 */
 /***/ function(module, exports) {
 
 	module.exports = {
@@ -12916,18 +13061,18 @@
 
 
 /***/ },
-/* 48 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var BN = __webpack_require__(25);
-	var elliptic = __webpack_require__(23);
+	var BN = __webpack_require__(26);
+	var elliptic = __webpack_require__(24);
 	var utils = elliptic.utils;
 	var assert = utils.assert;
 
-	var KeyPair = __webpack_require__(49);
-	var Signature = __webpack_require__(50);
+	var KeyPair = __webpack_require__(50);
+	var Signature = __webpack_require__(51);
 
 	function EC(options) {
 	  if (!(this instanceof EC))
@@ -13159,12 +13304,12 @@
 
 
 /***/ },
-/* 49 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var BN = __webpack_require__(25);
+	var BN = __webpack_require__(26);
 
 	function KeyPair(ec, options) {
 	  this.ec = ec;
@@ -13272,14 +13417,14 @@
 
 
 /***/ },
-/* 50 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var BN = __webpack_require__(25);
+	var BN = __webpack_require__(26);
 
-	var elliptic = __webpack_require__(23);
+	var elliptic = __webpack_require__(24);
 	var utils = elliptic.utils;
 	var assert = utils.assert;
 
@@ -13413,18 +13558,18 @@
 
 
 /***/ },
-/* 51 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var hash = __webpack_require__(34);
-	var elliptic = __webpack_require__(23);
+	var hash = __webpack_require__(35);
+	var elliptic = __webpack_require__(24);
 	var utils = elliptic.utils;
 	var assert = utils.assert;
 	var parseBytes = utils.parseBytes;
-	var KeyPair = __webpack_require__(52);
-	var Signature = __webpack_require__(53);
+	var KeyPair = __webpack_require__(53);
+	var Signature = __webpack_require__(54);
 
 	function EDDSA(curve) {
 	  assert(curve === 'ed25519', 'only tested with ed25519 so far');
@@ -13537,12 +13682,12 @@
 
 
 /***/ },
-/* 52 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var elliptic = __webpack_require__(23);
+	var elliptic = __webpack_require__(24);
 	var utils = elliptic.utils;
 	var assert = utils.assert;
 	var parseBytes = utils.parseBytes;
@@ -13639,13 +13784,13 @@
 
 
 /***/ },
-/* 53 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var BN = __webpack_require__(25);
-	var elliptic = __webpack_require__(23);
+	var BN = __webpack_require__(26);
+	var elliptic = __webpack_require__(24);
 	var utils = elliptic.utils;
 	var assert = utils.assert;
 	var cachedProperty = utils.cachedProperty;
