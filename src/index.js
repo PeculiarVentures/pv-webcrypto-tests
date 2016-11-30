@@ -2316,8 +2316,7 @@
 	            // Fix: Safari
 	            if (helper_1.BrowserInfo().name === helper_1.Browser.Safari) {
 	                // Converts JWK to ArrayBuffer
-	                _data = helper_1.string2buffer(JSON.stringify(keyData)).buffer;
-	                args[1] = _data;
+	                args[1] = helper_1.string2buffer(JSON.stringify(keyData)).buffer;
 	            }
 	            // End: Fix
 	            if (ArrayBuffer.isView(keyData)) {
