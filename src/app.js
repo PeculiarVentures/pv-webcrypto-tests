@@ -1037,7 +1037,7 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
     function GenerateKey(name, keyUsages) {
         var cases = [];
         // modulusLength
-        [1024, 2048,].forEach(function (modulusLength) {
+        [1024, 2048, 4096].forEach(function (modulusLength) {
             // publicExponent
             [new Uint8Array([3]), new Uint8Array([1, 0, 1])].forEach(function (publicExponent, index) {
                 // sha
