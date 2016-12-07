@@ -50,6 +50,7 @@
 	}
 	__export(__webpack_require__(1));
 	__export(__webpack_require__(2));
+	__export(__webpack_require__(5));
 
 
 /***/ },
@@ -57,7 +58,12 @@
 /***/ function(module, exports) {
 
 	"use strict";
-	var _w = self;
+	var _w;
+	if (typeof self === "undefined") {
+	    _w = { crypto: { subtle: {} } };
+	}
+	else
+	    _w = self;
 	exports.nativeCrypto = _w.msCrypto || _w.crypto;
 	exports.nativeSubtle = exports.nativeCrypto.subtle || exports.nativeCrypto.webkitSubtle;
 
@@ -176,7 +182,7 @@
 	function concat() {
 	    var buf = [];
 	    for (var _i = 0; _i < arguments.length; _i++) {
-	        buf[_i - 0] = arguments[_i];
+	        buf[_i] = arguments[_i];
 	    }
 	    var res = new Uint8Array(buf.map(function (item) { return item.length; }).reduce(function (prev, cur) { return prev + cur; }));
 	    var offset = 0;
@@ -414,9 +420,9 @@
 	    }
 	    return LinerError;
 	}(webcrypto_core_1.WebCryptoError));
-	exports.LinerError = LinerError;
 	LinerError.MODULE_NOT_FOUND = "Module '%1' is not found. Download it from %2.\nOnly hash algorithms supported by the user agent will be supported.";
 	LinerError.UNSUPPORTED_ALGORITHM = "Unsupported algorithm '%1'";
+	exports.LinerError = LinerError;
 	var Crypto = (function () {
 	    function Crypto() {
 	        this.subtle = new subtle_1.SubtleCrypto();
@@ -1887,6 +1893,7 @@
 	var crypto_3 = __webpack_require__(21);
 	var crypto_4 = __webpack_require__(22);
 	var crypto_5 = __webpack_require__(23);
+	var EdgeKeys = [];
 	function PrepareKey(key, subtle) {
 	    var promise = Promise.resolve(key);
 	    if (!key.key)
@@ -1931,6 +1938,7 @@
 	                    if (!_keys.privateKey)
 	                        _keys.usages = keyUsages;
 	                }
+	                SetHashAlgorithm(_alg, keys);
 	                return new Promise(function (resolve) { return resolve(keys); });
 	            }
 	            var Class;
@@ -1985,6 +1993,7 @@
 	            .then(function (d) {
 	            _alg = webcrypto_core_2.PrepareAlgorithm(algorithm);
 	            _data = webcrypto_core_2.PrepareData(data, "data");
+	            GetHashAlgorithm(_alg, key);
 	            try {
 	                return init_1.nativeSubtle.sign.apply(init_1.nativeSubtle, args)
 	                    .catch(function (e) {
@@ -2023,6 +2032,7 @@
 	            _alg = webcrypto_core_2.PrepareAlgorithm(algorithm);
 	            _signature = webcrypto_core_2.PrepareData(signature, "data");
 	            _data = webcrypto_core_2.PrepareData(data, "data");
+	            GetHashAlgorithm(_alg, key);
 	            try {
 	                return init_1.nativeSubtle.verify.apply(init_1.nativeSubtle, args)
 	                    .catch(function (e) {
@@ -2333,8 +2343,10 @@
 	            }
 	        })
 	            .then(function (msg) {
-	            if (msg)
+	            if (msg) {
+	                SetHashAlgorithm(_alg, msg);
 	                return new Promise(function (resolve) { return resolve(msg); });
+	            }
 	            var Class;
 	            switch (_alg.name.toLowerCase()) {
 	                case webcrypto_core_1.AlgorithmNames.AesCBC.toLowerCase():
@@ -2358,6 +2370,29 @@
 	    return SubtleCrypto;
 	}(core.SubtleCrypto));
 	exports.SubtleCrypto = SubtleCrypto;
+	// save hash alg for RSA keys
+	function SetHashAlgorithm(alg, key) {
+	    if (helper_1.BrowserInfo().name === helper_1.Browser.Edge && /^rsa/i.test(alg.name)) {
+	        if (key.privateKey) {
+	            EdgeKeys.push({ hash: alg.hash, key: key.privateKey });
+	            EdgeKeys.push({ hash: alg.hash, key: key.publicKey });
+	        }
+	        else
+	            EdgeKeys.push({ hash: alg.hash, key: key });
+	    }
+	}
+	// fix hash alg for rsa key
+	function GetHashAlgorithm(alg, key) {
+	    if (helper_1.BrowserInfo().name === helper_1.Browser.Edge && /^rsa/i.test(alg.name)) {
+	        EdgeKeys.some(function (item) {
+	            if (item.key = key) {
+	                alg.hash = item.hash;
+	                return true;
+	            }
+	            return false;
+	        });
+	    }
+	}
 
 
 /***/ },
