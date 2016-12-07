@@ -42,35 +42,7 @@
 
         // Start loading the main app file. Put all of
         // your application logic in there.
-        requirejs(['main']);
-
-        // Test
-        var keyPair;
-        var subtle = cryptoEngines.native.subtle;
-
-        subtle.generateKey(
-            {
-                name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1])
-            },
-            true,
-            ["sign", "verify"]
-        )
-            .then(function (keys) {
-                keyPair = keys;
-                return subtle.sign({ name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, keyPair.privateKey, new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]));
-            })
-            .then(function (signature) {
-                console.log(new Uint8Array(signature).length);
-                return subtle.verify({ name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, keyPair.publicKey, signature, new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]));
-            })
-            .then(function (res) {
-                console.log(res);
-                alert("Success: " + res);
-            })
-            .catch(function (e) {
-                alert("Error:\n" + e.message);
-                console.error(e)
-            }); 
+        requirejs(['main']); 
     </script>
 </body>
 

@@ -1893,7 +1893,7 @@
 	var crypto_3 = __webpack_require__(21);
 	var crypto_4 = __webpack_require__(22);
 	var crypto_5 = __webpack_require__(23);
-	var EdgeKeys = [];
+	var keys = [];
 	function PrepareKey(key, subtle) {
 	    var promise = Promise.resolve(key);
 	    if (!key.key)
@@ -2372,19 +2372,19 @@
 	exports.SubtleCrypto = SubtleCrypto;
 	// save hash alg for RSA keys
 	function SetHashAlgorithm(alg, key) {
-	    if (helper_1.BrowserInfo().name === helper_1.Browser.Edge && /^rsa/i.test(alg.name)) {
+	    if ((helper_1.BrowserInfo().name === helper_1.Browser.Edge || helper_1.BrowserInfo().name === helper_1.Browser.Safari) && /^rsa/i.test(alg.name)) {
 	        if (key.privateKey) {
-	            EdgeKeys.push({ hash: alg.hash, key: key.privateKey });
-	            EdgeKeys.push({ hash: alg.hash, key: key.publicKey });
+	            keys.push({ hash: alg.hash, key: key.privateKey });
+	            keys.push({ hash: alg.hash, key: key.publicKey });
 	        }
 	        else
-	            EdgeKeys.push({ hash: alg.hash, key: key });
+	            keys.push({ hash: alg.hash, key: key });
 	    }
 	}
 	// fix hash alg for rsa key
 	function GetHashAlgorithm(alg, key) {
-	    if (helper_1.BrowserInfo().name === helper_1.Browser.Edge && /^rsa/i.test(alg.name)) {
-	        EdgeKeys.some(function (item) {
+	    if ((helper_1.BrowserInfo().name === helper_1.Browser.Edge || helper_1.BrowserInfo().name === helper_1.Browser.Safari) && /^rsa/i.test(alg.name)) {
+	        keys.some(function (item) {
 	            if (item.key = key) {
 	                alg.hash = item.hash;
 	                return true;
