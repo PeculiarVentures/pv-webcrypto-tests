@@ -2431,6 +2431,16 @@
 	        return new Uint8Array(this.buffer.slice(start, end));
 	    };
 	}
+	if (!Uint8Array.prototype.filter) {
+	    Uint8Array.prototype.filter = function (cb) {
+	        var buf = [];
+	        for (var i = 0; i < this.length; i++) {
+	            if (cb(this[i], i, this))
+	                buf.push(this[i]);
+	        }
+	        return new Uint8Array(buf);
+	    };
+	}
 
 
 /***/ },
