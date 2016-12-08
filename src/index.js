@@ -150,6 +150,10 @@
 	        res.name = exports.Browser.IE;
 	        res.version = /msie ([\d\.]+)/i.exec(userAgent)[1];
 	    }
+	    else if (/Trident/i.test(userAgent)) {
+	        res.name = exports.Browser.IE;
+	        res.version = /rv:([\d\.]+)/i.exec(userAgent)[1];
+	    }
 	    else if (/chrome/i.test(userAgent)) {
 	        res.name = exports.Browser.Chrome;
 	        res.version = /chrome\/([\d\.]+)/i.exec(userAgent)[1];
@@ -2144,8 +2148,19 @@
 	            }
 	        })
 	            .then(function (msg) {
-	            if (msg)
-	                return new Promise(function (resolve) { return resolve(msg); });
+	            if (msg) {
+	                if (helper_1.BrowserInfo().name === helper_1.Browser.IE &&
+	                    _alg.name.toUpperCase() === webcrypto_core_1.AlgorithmNames.AesGCM &&
+	                    msg.ciphertext) {
+	                    // Concatinate values in IE
+	                    var buf_1 = new Uint8Array(msg.ciphertext.byteLength + msg.tag.byteLength);
+	                    var count_1 = 0;
+	                    new Uint8Array(msg.ciphertext).forEach(function (v) { return buf_1[count_1++] = v; });
+	                    new Uint8Array(msg.tag).forEach(function (v) { return buf_1[count_1++] = v; });
+	                    msg = buf_1.buffer;
+	                }
+	                return Promise.resolve(msg);
+	            }
 	            var Class;
 	            switch (_alg.name.toLowerCase()) {
 	                case webcrypto_core_1.AlgorithmNames.AesCBC.toLowerCase():
@@ -2170,8 +2185,18 @@
 	            .then(function (bits) {
 	            _alg = webcrypto_core_2.PrepareAlgorithm(algorithm);
 	            _data = webcrypto_core_2.PrepareData(data, "data");
+	            var _data2 = _data;
+	            if (helper_1.BrowserInfo().name === helper_1.Browser.IE &&
+	                _alg.name.toUpperCase() === webcrypto_core_1.AlgorithmNames.AesGCM) {
+	                // Split buffer
+	                var len = _data.byteLength - (_alg.tagLength / 8);
+	                _data2 = {
+	                    ciphertext: _data.buffer.slice(0, len),
+	                    tag: _data.buffer.slice(len, _data.byteLength)
+	                };
+	            }
 	            try {
-	                return init_1.nativeSubtle.decrypt.apply(init_1.nativeSubtle, args)
+	                return init_1.nativeSubtle.decrypt.call(init_1.nativeSubtle, _alg, key, _data2)
 	                    .catch(function (e) {
 	                    console.warn("WebCrypto: native 'decrypt' for " + _alg.name + " doesn't work.", e.message || "");
 	                });
@@ -2385,13 +2410,26 @@
 	function GetHashAlgorithm(alg, key) {
 	    if ((helper_1.BrowserInfo().name === helper_1.Browser.Edge || helper_1.BrowserInfo().name === helper_1.Browser.Safari) && /^rsa/i.test(alg.name)) {
 	        keys.some(function (item) {
-	            if (item.key = key) {
+	            if (item.key === key) {
 	                alg.hash = item.hash;
 	                return true;
 	            }
 	            return false;
 	        });
 	    }
+	}
+	// Extend Uint8Array for IE
+	if (!Uint8Array.prototype.forEach) {
+	    Uint8Array.prototype.forEach = function (cb) {
+	        for (var i = 0; i < this.length; i++) {
+	            cb(this[i], i, this);
+	        }
+	    };
+	}
+	if (!Uint8Array.prototype.slice) {
+	    Uint8Array.prototype.slice = function (start, end) {
+	        return new Uint8Array(this.buffer.slice(start, end));
+	    };
 	}
 
 

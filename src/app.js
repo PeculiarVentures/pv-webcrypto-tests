@@ -29,6 +29,10 @@ define("helper", ["require", "exports"], function (require, exports) {
             res.name = "Internet Explorer";
             res.version = /msie ([\d\.]+)/i.exec(userAgent)[1];
         }
+        else if (/Trident/i.test(userAgent)) {
+            res.name = "Internet Explorer";
+            res.version = /rv:([\d\.]+)/i.exec(userAgent)[1];
+        }
         else if (/chrome/i.test(userAgent)) {
             res.name = "Chrome";
             res.version = /chrome\/([\d\.]+)/i.exec(userAgent)[1];
@@ -85,7 +89,7 @@ define("store/store", ["require", "exports", "events"], function (require, expor
             this.emit("change", inState);
         };
         return BaseStore;
-    }(events_1.EventEmitter));
+    } (events_1.EventEmitter));
     exports.BaseStore = BaseStore;
 });
 define("store/test", ["require", "exports", "store/store"], function (require, exports, store_1) {
@@ -96,7 +100,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
             _super.call(this);
         }
         return Test;
-    }(store_1.BaseStore));
+    } (store_1.BaseStore));
     exports.Test = Test;
     (function (CaseStatus) {
         CaseStatus[CaseStatus["error"] = 0] = "error";
@@ -151,7 +155,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
             }
         };
         return TestCaseCollection;
-    }(store_1.BaseStore));
+    } (store_1.BaseStore));
     exports.TestCaseCollection = TestCaseCollection;
     var AlgorithmTest = (function (_super) {
         __extends(AlgorithmTest, _super);
@@ -241,7 +245,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
             this.getAllTests().forEach(function (test) { return test.run(); });
         };
         return AlgorithmTest;
-    }(store_1.BaseStore));
+    } (store_1.BaseStore));
     exports.AlgorithmTest = AlgorithmTest;
     var GenerateKeyCase = (function (_super) {
         __extends(GenerateKeyCase, _super);
@@ -257,24 +261,24 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                 _this.setState({ status: CaseStatus.working });
                 crypto.subtle.generateKey(params.algorithm, params.extractble, params.keyUsages)
                     .then(function (key) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.success,
-                        key: key,
-                        duration: endAt - startAt
-                    });
-                    resolve();
-                })
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.success,
+                            key: key,
+                            duration: endAt - startAt
+                        });
+                        resolve();
+                    })
                     .catch(function (e) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.error,
-                        message: e.message,
-                        stack: e.stack,
-                        duration: endAt - startAt
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.error,
+                            message: e.message,
+                            stack: e.stack,
+                            duration: endAt - startAt
+                        });
+                        resolve();
                     });
-                    resolve();
-                });
             });
             promise.catch(function (e) {
                 var endAt = new Date().getTime();
@@ -287,7 +291,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
             });
         };
         return GenerateKeyCase;
-    }(store_1.BaseStore));
+    } (store_1.BaseStore));
     exports.GenerateKeyCase = GenerateKeyCase;
     var ExportKeyCase = (function (_super) {
         __extends(ExportKeyCase, _super);
@@ -303,26 +307,26 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                 _this.setState({ status: CaseStatus.working });
                 crypto.subtle.exportKey(params.format, params.key)
                     .then(function (data) {
-                    return crypto.subtle.importKey(params.format, data, params.algorithm, params.extractble, params.keyUsages);
-                })
+                        return crypto.subtle.importKey(params.format, data, params.algorithm, params.extractble, params.keyUsages);
+                    })
                     .then(function (key) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.success,
-                        duration: endAt - startAt
-                    });
-                    resolve();
-                })
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.success,
+                            duration: endAt - startAt
+                        });
+                        resolve();
+                    })
                     .catch(function (e) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.error,
-                        message: e.message,
-                        stack: e.stack,
-                        duration: endAt - startAt
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.error,
+                            message: e.message,
+                            stack: e.stack,
+                            duration: endAt - startAt
+                        });
+                        resolve();
                     });
-                    resolve();
-                });
             });
             promise.catch(function (e) {
                 var endAt = new Date().getTime();
@@ -335,7 +339,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
             });
         };
         return ExportKeyCase;
-    }(store_1.BaseStore));
+    } (store_1.BaseStore));
     exports.ExportKeyCase = ExportKeyCase;
     var SignCase = (function (_super) {
         __extends(SignCase, _super);
@@ -351,26 +355,26 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                 _this.setState({ status: CaseStatus.working });
                 crypto.subtle.sign(params.algorithm, params.signKey, new Uint8Array([1, 2, 3, 4, 5]))
                     .then(function (data) {
-                    return crypto.subtle.verify(params.algorithm, params.verifyKey, data, new Uint8Array([1, 2, 3, 4, 5]));
-                })
+                        return crypto.subtle.verify(params.algorithm, params.verifyKey, data, new Uint8Array([1, 2, 3, 4, 5]));
+                    })
                     .then(function (key) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.success,
-                        duration: endAt - startAt
-                    });
-                    resolve();
-                })
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.success,
+                            duration: endAt - startAt
+                        });
+                        resolve();
+                    })
                     .catch(function (e) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.error,
-                        message: e.message,
-                        stack: e.stack,
-                        duration: endAt - startAt
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.error,
+                            message: e.message,
+                            stack: e.stack,
+                            duration: endAt - startAt
+                        });
+                        resolve();
                     });
-                    resolve();
-                });
             });
             promise.catch(function (e) {
                 var endAt = new Date().getTime();
@@ -383,7 +387,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
             });
         };
         return SignCase;
-    }(store_1.BaseStore));
+    } (store_1.BaseStore));
     exports.SignCase = SignCase;
     var EncryptCase = (function (_super) {
         __extends(EncryptCase, _super);
@@ -399,26 +403,26 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                 _this.setState({ status: CaseStatus.working });
                 crypto.subtle.encrypt(params.algorithm, params.encryptKey, new Uint8Array([1, 2, 3, 4, 5]))
                     .then(function (data) {
-                    return crypto.subtle.decrypt(params.algorithm, params.decryptKey, data);
-                })
+                        return crypto.subtle.decrypt(params.algorithm, params.decryptKey, data);
+                    })
                     .then(function (key) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.success,
-                        duration: endAt - startAt
-                    });
-                    resolve();
-                })
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.success,
+                            duration: endAt - startAt
+                        });
+                        resolve();
+                    })
                     .catch(function (e) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.error,
-                        message: e.message,
-                        stack: e.stack,
-                        duration: endAt - startAt
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.error,
+                            message: e.message,
+                            stack: e.stack,
+                            duration: endAt - startAt
+                        });
+                        resolve();
                     });
-                    resolve();
-                });
             });
             promise.catch(function (e) {
                 var endAt = new Date().getTime();
@@ -431,7 +435,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
             });
         };
         return EncryptCase;
-    }(store_1.BaseStore));
+    } (store_1.BaseStore));
     exports.EncryptCase = EncryptCase;
     var DigestCase = (function (_super) {
         __extends(DigestCase, _super);
@@ -447,23 +451,23 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                 _this.setState({ status: CaseStatus.working });
                 crypto.subtle.digest(params.algorithm, new Uint8Array([1, 2, 3, 4, 5]))
                     .then(function (data) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.success,
-                        duration: endAt - startAt
-                    });
-                    resolve();
-                })
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.success,
+                            duration: endAt - startAt
+                        });
+                        resolve();
+                    })
                     .catch(function (e) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.error,
-                        message: e.message,
-                        stack: e.stack,
-                        duration: endAt - startAt
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.error,
+                            message: e.message,
+                            stack: e.stack,
+                            duration: endAt - startAt
+                        });
+                        resolve();
                     });
-                    resolve();
-                });
             });
             promise.catch(function (e) {
                 var endAt = new Date().getTime();
@@ -476,7 +480,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
             });
         };
         return DigestCase;
-    }(store_1.BaseStore));
+    } (store_1.BaseStore));
     exports.DigestCase = DigestCase;
     var DeriveKeyCase = (function (_super) {
         __extends(DeriveKeyCase, _super);
@@ -492,23 +496,23 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                 _this.setState({ status: CaseStatus.working });
                 crypto.subtle.deriveKey(params.algorithm, params.key, params.derivedKeyAlg, true, params.keyUsage)
                     .then(function (data) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.success,
-                        duration: endAt - startAt
-                    });
-                    resolve();
-                })
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.success,
+                            duration: endAt - startAt
+                        });
+                        resolve();
+                    })
                     .catch(function (e) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.error,
-                        message: e.message,
-                        stack: e.stack,
-                        duration: endAt - startAt
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.error,
+                            message: e.message,
+                            stack: e.stack,
+                            duration: endAt - startAt
+                        });
+                        resolve();
                     });
-                    resolve();
-                });
             });
             promise.catch(function (e) {
                 var endAt = new Date().getTime();
@@ -521,7 +525,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
             });
         };
         return DeriveKeyCase;
-    }(store_1.BaseStore));
+    } (store_1.BaseStore));
     exports.DeriveKeyCase = DeriveKeyCase;
     var DeriveBitsCase = (function (_super) {
         __extends(DeriveBitsCase, _super);
@@ -537,23 +541,23 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                 _this.setState({ status: CaseStatus.working });
                 crypto.subtle.deriveBits(params.algorithm, params.key, params.bitsLength)
                     .then(function (data) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.success,
-                        duration: endAt - startAt
-                    });
-                    resolve();
-                })
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.success,
+                            duration: endAt - startAt
+                        });
+                        resolve();
+                    })
                     .catch(function (e) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.error,
-                        message: e.message,
-                        stack: e.stack,
-                        duration: endAt - startAt
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.error,
+                            message: e.message,
+                            stack: e.stack,
+                            duration: endAt - startAt
+                        });
+                        resolve();
                     });
-                    resolve();
-                });
             });
             promise.catch(function (e) {
                 var endAt = new Date().getTime();
@@ -566,7 +570,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
             });
         };
         return DeriveBitsCase;
-    }(store_1.BaseStore));
+    } (store_1.BaseStore));
     exports.DeriveBitsCase = DeriveBitsCase;
     var WrapCase = (function (_super) {
         __extends(WrapCase, _super);
@@ -582,26 +586,26 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
                 _this.setState({ status: CaseStatus.working });
                 crypto.subtle.wrapKey(params.format, params.key, params.wrappingKey, params.algorithm)
                     .then(function (data) {
-                    return crypto.subtle.unwrapKey(params.format, new Uint8Array(data), params.unwrappingKey, params.algorithm, params.key.algorithm, true, params.key.usages);
-                })
+                        return crypto.subtle.unwrapKey(params.format, new Uint8Array(data), params.unwrappingKey, params.algorithm, params.key.algorithm, true, params.key.usages);
+                    })
                     .then(function (key) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.success,
-                        duration: endAt - startAt
-                    });
-                    resolve();
-                })
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.success,
+                            duration: endAt - startAt
+                        });
+                        resolve();
+                    })
                     .catch(function (e) {
-                    var endAt = new Date().getTime();
-                    _this.setState({
-                        status: CaseStatus.error,
-                        message: e.message,
-                        stack: e.stack,
-                        duration: endAt - startAt
+                        var endAt = new Date().getTime();
+                        _this.setState({
+                            status: CaseStatus.error,
+                            message: e.message,
+                            stack: e.stack,
+                            duration: endAt - startAt
+                        });
+                        resolve();
                     });
-                    resolve();
-                });
             });
             promise.catch(function (e) {
                 var endAt = new Date().getTime();
@@ -614,7 +618,7 @@ define("store/test", ["require", "exports", "store/store"], function (require, e
             });
         };
         return WrapCase;
-    }(store_1.BaseStore));
+    } (store_1.BaseStore));
     exports.WrapCase = WrapCase;
 });
 define("tests/aes", ["require", "exports", "store/test"], function (require, exports, test_1) {
@@ -714,7 +718,7 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
             return cases;
         };
         return AesCBCTest;
-    }(test_1.AlgorithmTest));
+    } (test_1.AlgorithmTest));
     exports.AesCBCTest = AesCBCTest;
     var AesGCMTest = (function (_super) {
         __extends(AesGCMTest, _super);
@@ -735,20 +739,20 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
                 // tagLength
                 [32, 64, 96, 104, 112, 120, 128]
                     .forEach(function (tagLength) {
-                    cases.push(new test_1.EncryptCase({
-                        name: ALG_AES_GCM + " len:" + key.algorithm.length + " tagLen:" + tagLength,
-                        params: {
-                            encryptKey: key,
-                            decryptKey: key,
-                            algorithm: {
-                                name: ALG_AES_GCM,
-                                iv: new Uint8Array(12),
-                                additionalData: new Uint8Array(3),
-                                tagLength: tagLength
+                        cases.push(new test_1.EncryptCase({
+                            name: ALG_AES_GCM + " len:" + key.algorithm.length + " tagLen:" + tagLength,
+                            params: {
+                                encryptKey: key,
+                                decryptKey: key,
+                                algorithm: {
+                                    name: ALG_AES_GCM,
+                                    iv: new Uint8Array(12),
+                                    additionalData: new Uint8Array(3),
+                                    tagLength: tagLength
+                                }
                             }
-                        }
-                    }));
-                });
+                        }));
+                    });
             });
             return cases;
         };
@@ -780,7 +784,7 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
             return cases;
         };
         return AesGCMTest;
-    }(test_1.AlgorithmTest));
+    } (test_1.AlgorithmTest));
     exports.AesGCMTest = AesGCMTest;
     var AesCTRTest = (function (_super) {
         __extends(AesCTRTest, _super);
@@ -796,18 +800,20 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
             });
         }
         AesCTRTest.Encrypt = function (alg, keys) {
-            return keys.map(function (key) { return new test_1.EncryptCase({
-                name: alg + " len:" + key.algorithm.length,
-                params: {
-                    encryptKey: key,
-                    decryptKey: key,
-                    algorithm: {
-                        name: alg,
-                        counter: new Uint8Array(16),
-                        length: 128
+            return keys.map(function (key) {
+                return new test_1.EncryptCase({
+                    name: alg + " len:" + key.algorithm.length,
+                    params: {
+                        encryptKey: key,
+                        decryptKey: key,
+                        algorithm: {
+                            name: alg,
+                            counter: new Uint8Array(16),
+                            length: 128
+                        }
                     }
-                }
-            }); });
+                });
+            });
         };
         AesCTRTest.Wrap = function (alg, keys) {
             var cases = [];
@@ -834,7 +840,7 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
             return cases;
         };
         return AesCTRTest;
-    }(test_1.AlgorithmTest));
+    } (test_1.AlgorithmTest));
     exports.AesCTRTest = AesCTRTest;
     var AesCFBTest = (function (_super) {
         __extends(AesCFBTest, _super);
@@ -848,7 +854,7 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
             });
         }
         return AesCFBTest;
-    }(test_1.AlgorithmTest));
+    } (test_1.AlgorithmTest));
     exports.AesCFBTest = AesCFBTest;
     var AesCMACTest = (function (_super) {
         __extends(AesCMACTest, _super);
@@ -863,17 +869,19 @@ define("tests/aes", ["require", "exports", "store/test"], function (require, exp
             });
         }
         AesCMACTest.Sign = function (alg, keys) {
-            return keys.map(function (key) { return new test_1.SignCase({
-                name: alg + " len:" + key.algorithm.length,
-                params: {
-                    algorithm: key.algorithm,
-                    signKey: key,
-                    verifyKey: key
-                }
-            }); });
+            return keys.map(function (key) {
+                return new test_1.SignCase({
+                    name: alg + " len:" + key.algorithm.length,
+                    params: {
+                        algorithm: key.algorithm,
+                        signKey: key,
+                        verifyKey: key
+                    }
+                });
+            });
         };
         return AesCMACTest;
-    }(test_1.AlgorithmTest));
+    } (test_1.AlgorithmTest));
     exports.AesCMACTest = AesCMACTest;
 });
 define("tests/ec", ["require", "exports", "store/test"], function (require, exports, test_2) {
@@ -901,7 +909,7 @@ define("tests/ec", ["require", "exports", "store/test"], function (require, expo
     function ExportKey(keys) {
         var cases = [];
         keys.forEach(function (keyPair) {
-            var _loop_1 = function(keyType) {
+            var _loop_1 = function (keyType) {
                 var key = keyPair[keyType];
                 // format
                 ["jwk", keyType === "publicKey" ? "spki" : "pkcs8"].forEach(function (format) {
@@ -941,25 +949,25 @@ define("tests/ec", ["require", "exports", "store/test"], function (require, expo
                 // hash
                 ["SHA-1", "SHA-256", "SHA-384", "SHA-512"]
                     .forEach(function (hash) {
-                    cases.push(new test_2.SignCase({
-                        name: alg + " curve:" + keyPair.publicKey.algorithm.namedCurve + " hash:" + hash,
-                        params: {
-                            signKey: keyPair.privateKey,
-                            verifyKey: keyPair.publicKey,
-                            algorithm: {
-                                name: alg,
-                                hash: {
-                                    name: hash
+                        cases.push(new test_2.SignCase({
+                            name: alg + " curve:" + keyPair.publicKey.algorithm.namedCurve + " hash:" + hash,
+                            params: {
+                                signKey: keyPair.privateKey,
+                                verifyKey: keyPair.publicKey,
+                                algorithm: {
+                                    name: alg,
+                                    hash: {
+                                        name: hash
+                                    }
                                 }
                             }
-                        }
-                    }));
-                });
+                        }));
+                    });
             });
             return cases;
         };
         return EcDSATest;
-    }(test_2.AlgorithmTest));
+    } (test_2.AlgorithmTest));
     exports.EcDSATest = EcDSATest;
     var EcDHTest = (function (_super) {
         __extends(EcDHTest, _super);
@@ -1026,7 +1034,7 @@ define("tests/ec", ["require", "exports", "store/test"], function (require, expo
             return cases;
         };
         return EcDHTest;
-    }(test_2.AlgorithmTest));
+    } (test_2.AlgorithmTest));
     exports.EcDHTest = EcDHTest;
 });
 define("tests/rsa", ["require", "exports", "store/test"], function (require, exports, test_3) {
@@ -1065,7 +1073,7 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
     function ExportKey(keys) {
         var cases = [];
         keys.forEach(function (keyPair) {
-            var _loop_2 = function(keyType) {
+            var _loop_2 = function (keyType) {
                 var key = keyPair[keyType];
                 // format
                 ["jwk", keyType === "publicKey" ? "spki" : "pkcs8"].forEach(function (format) {
@@ -1100,19 +1108,22 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
             });
         }
         RsaSSATest.Sign = function (alg, keys) {
-            return keys.map(function (keyPair) { return new test_3.SignCase({
-                name: alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 3 : 65535) + " modLen:" + keyPair.publicKey.algorithm.modulusLength,
-                params: {
-                    signKey: keyPair.privateKey,
-                    verifyKey: keyPair.publicKey,
-                    algorithm: {
-                        name: alg
+            return keys.map(function (keyPair) {
+                var hash = keyPair.publicKey.algorithm.hash ? keyPair.publicKey.algorithm.hash.name : "IE";
+                return new test_3.SignCase({
+                    name: alg + " hash:" + hash + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 3 : 65535) + " modLen:" + keyPair.publicKey.algorithm.modulusLength,
+                    params: {
+                        signKey: keyPair.privateKey,
+                        verifyKey: keyPair.publicKey,
+                        algorithm: {
+                            name: alg
+                        }
                     }
-                }
-            }); });
+                });
+            });
         };
         return RsaSSATest;
-    }(test_3.AlgorithmTest));
+    } (test_3.AlgorithmTest));
     exports.RsaSSATest = RsaSSATest;
     var RsaPSSTest = (function (_super) {
         __extends(RsaPSSTest, _super);
@@ -1128,20 +1139,22 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
         }
         RsaPSSTest.Sign = function (alg, keys) {
             var saltLength = 20;
-            return keys.map(function (keyPair) { return new test_3.SignCase({
-                name: alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 3 : 65535) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + "  saltLen:" + saltLength,
-                params: {
-                    signKey: keyPair.privateKey,
-                    verifyKey: keyPair.publicKey,
-                    algorithm: {
-                        name: alg,
-                        saltLength: 128
+            return keys.map(function (keyPair) {
+                return new test_3.SignCase({
+                    name: alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 3 : 65535) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + "  saltLen:" + saltLength,
+                    params: {
+                        signKey: keyPair.privateKey,
+                        verifyKey: keyPair.publicKey,
+                        algorithm: {
+                            name: alg,
+                            saltLength: 128
+                        }
                     }
-                }
-            }); });
+                });
+            });
         };
         return RsaPSSTest;
-    }(test_3.AlgorithmTest));
+    } (test_3.AlgorithmTest));
     exports.RsaPSSTest = RsaPSSTest;
     var RsaOAEPTest = (function (_super) {
         __extends(RsaOAEPTest, _super);
@@ -1172,8 +1185,8 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
                                 name: alg,
                                 label: label
                             } : {
-                                name: alg
-                            }
+                                    name: alg
+                                }
                         }
                     }));
                 });
@@ -1193,35 +1206,35 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
                     ref++;
                     crypto.subtle.generateKey({ name: aesKeyAlg, length: 128 }, true, ["encrypt"])
                         .then(function (aesKey) {
-                        // format
-                        ["jwk", "raw"].forEach(function (format) {
-                            // label
-                            [null, new Uint8Array(5)].forEach(function (label) {
-                                keys.forEach(function (keyPair) {
-                                    cases.push(new test_3.WrapCase({
-                                        name: "wrap " + alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 3 : 65535) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + " label:" + label + " wrapKey:" + aesKeyAlg,
-                                        params: {
-                                            format: format,
-                                            key: aesKey,
-                                            wrappingKey: keyPair.publicKey,
-                                            unwrappingKey: keyPair.privateKey,
-                                            algorithm: label ? {
-                                                name: alg,
-                                                label: label
-                                            } : {
-                                                name: alg
+                            // format
+                            ["jwk", "raw"].forEach(function (format) {
+                                // label
+                                [null, new Uint8Array(5)].forEach(function (label) {
+                                    keys.forEach(function (keyPair) {
+                                        cases.push(new test_3.WrapCase({
+                                            name: "wrap " + alg + " hash:" + keyPair.publicKey.algorithm.hash.name + " pubExp:" + (keyPair.publicKey.algorithm.publicExponent.length === 1 ? 3 : 65535) + " modLen:" + keyPair.publicKey.algorithm.modulusLength + " label:" + label + " wrapKey:" + aesKeyAlg,
+                                            params: {
+                                                format: format,
+                                                key: aesKey,
+                                                wrappingKey: keyPair.publicKey,
+                                                unwrappingKey: keyPair.privateKey,
+                                                algorithm: label ? {
+                                                    name: alg,
+                                                    label: label
+                                                } : {
+                                                        name: alg
+                                                    }
                                             }
-                                        }
-                                    }));
+                                        }));
+                                    });
                                 });
                             });
-                        });
-                        refCount();
-                    })
+                            refCount();
+                        })
                         .catch(function (e) {
-                        refCount();
-                        console.error(e);
-                    });
+                            refCount();
+                            console.error(e);
+                        });
                 }
                 catch (e) {
                     console.error(e);
@@ -1230,7 +1243,7 @@ define("tests/rsa", ["require", "exports", "store/test"], function (require, exp
             });
         };
         return RsaOAEPTest;
-    }(test_3.AlgorithmTest));
+    } (test_3.AlgorithmTest));
     exports.RsaOAEPTest = RsaOAEPTest;
 });
 define("tests/sha", ["require", "exports", "store/test"], function (require, exports, test_4) {
@@ -1251,7 +1264,7 @@ define("tests/sha", ["require", "exports", "store/test"], function (require, exp
             }));
         }
         return ShaTest;
-    }(test_4.AlgorithmTest));
+    } (test_4.AlgorithmTest));
     exports.ShaTest = ShaTest;
 });
 define("components/pie-chart", ["require", "exports", "react"], function (require, exports, React) {
@@ -1263,10 +1276,10 @@ define("components/pie-chart", ["require", "exports", "react"], function (requir
             this.state = {};
         }
         PieChart.prototype.render = function () {
-            return (React.createElement("figure", {className: "pie-chart"}, React.createElement("svg", null, this.props.children.map(function (item) { return item.props.value ? item : null; }))));
+            return (React.createElement("figure", { className: "pie-chart" }, React.createElement("svg", null, this.props.children.map(function (item) { return item.props.value ? item : null; }))));
         };
         return PieChart;
-    }(React.Component));
+    } (React.Component));
     exports.PieChart = PieChart;
     var Pie = (function (_super) {
         __extends(Pie, _super);
@@ -1277,10 +1290,10 @@ define("components/pie-chart", ["require", "exports", "react"], function (requir
         Pie.prototype.render = function () {
             var _a = this.props, className = _a.className, value = _a.value, size = _a.size;
             var rotate = this.props.rotate || 0;
-            return (React.createElement("circle", {className: "pie " + className, r: size || 0, cy: size || 0, cx: size || 0, style: { strokeDasharray: value + ", 158", transform: "rotate(" + rotate + "deg)" }}));
+            return (React.createElement("circle", { className: "pie " + className, r: size || 0, cy: size || 0, cx: size || 0, style: { strokeDasharray: value + ", 158", transform: "rotate(" + rotate + "deg)" } }));
         };
         return Pie;
-    }(React.Component));
+    } (React.Component));
     exports.Pie = Pie;
 });
 define("components/test-table", ["require", "exports", "react", "store/store", "store/test", "components/pie-chart"], function (require, exports, React, store_2, test_5, pie_chart_1) {
@@ -1293,10 +1306,10 @@ define("components/test-table", ["require", "exports", "react", "store/store", "
         }
         TestTable.prototype.render = function () {
             var _this = this;
-            return (React.createElement("table", {className: "test-table"}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("td", null, "Allgorithm"), React.createElement("td", null, "generateKey"), React.createElement("td", null, "digest"), React.createElement("td", null, "export/import "), React.createElement("td", null, "sign/verify"), React.createElement("td", null, "encrypt/decrypt"), React.createElement("td", null, "derive key"), React.createElement("td", null, "derive bits"), React.createElement("td", null, "wrap/unwrap"))), React.createElement("tbody", null, this.props.model.map(function (item) { return React.createElement(TestTableItem, {model: item, onCellClick: _this.props.onCellClick}); }))));
+            return (React.createElement("table", { className: "test-table" }, React.createElement("thead", null, React.createElement("tr", null, React.createElement("td", null, "Allgorithm"), React.createElement("td", null, "generateKey"), React.createElement("td", null, "digest"), React.createElement("td", null, "export/import "), React.createElement("td", null, "sign/verify"), React.createElement("td", null, "encrypt/decrypt"), React.createElement("td", null, "derive key"), React.createElement("td", null, "derive bits"), React.createElement("td", null, "wrap/unwrap"))), React.createElement("tbody", null, this.props.model.map(function (item) { return React.createElement(TestTableItem, { model: item, onCellClick: _this.props.onCellClick }); }))));
         };
         return TestTable;
-    }(React.Component));
+    } (React.Component));
     exports.TestTable = TestTable;
     var TestTableItem = (function (_super) {
         __extends(TestTableItem, _super);
@@ -1306,13 +1319,13 @@ define("components/test-table", ["require", "exports", "react", "store/store", "
         }
         TestTableItem.prototype.render = function () {
             var model = this.props.model;
-            return (React.createElement("tr", null, React.createElement("td", null, model.state.name), React.createElement(TestTableItemCell, {model: model.generateKey, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.digest, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.exportKey, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.sign, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.encrypt, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.deriveKey, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.deriveBits, onCellClick: this.props.onCellClick}), React.createElement(TestTableItemCell, {model: model.wrap, onCellClick: this.props.onCellClick})));
+            return (React.createElement("tr", null, React.createElement("td", null, model.state.name), React.createElement(TestTableItemCell, { model: model.generateKey, onCellClick: this.props.onCellClick }), React.createElement(TestTableItemCell, { model: model.digest, onCellClick: this.props.onCellClick }), React.createElement(TestTableItemCell, { model: model.exportKey, onCellClick: this.props.onCellClick }), React.createElement(TestTableItemCell, { model: model.sign, onCellClick: this.props.onCellClick }), React.createElement(TestTableItemCell, { model: model.encrypt, onCellClick: this.props.onCellClick }), React.createElement(TestTableItemCell, { model: model.deriveKey, onCellClick: this.props.onCellClick }), React.createElement(TestTableItemCell, { model: model.deriveBits, onCellClick: this.props.onCellClick }), React.createElement(TestTableItemCell, { model: model.wrap, onCellClick: this.props.onCellClick })));
         };
         TestTableItem = __decorate([
             store_2.Store()
         ], TestTableItem);
         return TestTableItem;
-    }(React.Component));
+    } (React.Component));
     exports.TestTableItem = TestTableItem;
     var TestTableItemCell = (function (_super) {
         __extends(TestTableItemCell, _super);
@@ -1337,13 +1350,13 @@ define("components/test-table", ["require", "exports", "react", "store/store", "
                 }
             });
             var length = items.length;
-            return (React.createElement("td", {className: "test-cell"}, React.createElement("div", {onClick: function (e) { return _this.props.onCellClick(model); }}, React.createElement(TestChar, {success: success, error: error, length: length}))));
+            return (React.createElement("td", { className: "test-cell" }, React.createElement("div", { onClick: function (e) { return _this.props.onCellClick(model); } }, React.createElement(TestChar, { success: success, error: error, length: length }))));
         };
         TestTableItemCell = __decorate([
             store_2.Store()
         ], TestTableItemCell);
         return TestTableItemCell;
-    }(React.Component));
+    } (React.Component));
     exports.TestTableItemCell = TestTableItemCell;
     var TestChar = (function (_super) {
         __extends(TestChar, _super);
@@ -1356,10 +1369,10 @@ define("components/test-table", ["require", "exports", "react", "store/store", "
         };
         TestChar.prototype.render = function () {
             var _a = this.props, success = _a.success, error = _a.error, length = _a.length;
-            return (React.createElement("div", {className: "test-chart shadow-1"}, React.createElement("div", {className: "value"}, Math.floor(this.count(length, success + error) * 100)), React.createElement(pie_chart_1.PieChart, null, React.createElement(pie_chart_1.Pie, {className: "error", value: 79 * this.count(length, error + success), size: 12.5}), React.createElement(pie_chart_1.Pie, {className: "success", value: 79 * this.count(length, success), size: 12.5}))));
+            return (React.createElement("div", { className: "test-chart shadow-1" }, React.createElement("div", { className: "value" }, Math.floor(this.count(length, success + error) * 100)), React.createElement(pie_chart_1.PieChart, null, React.createElement(pie_chart_1.Pie, { className: "error", value: 79 * this.count(length, error + success), size: 12.5 }), React.createElement(pie_chart_1.Pie, { className: "success", value: 79 * this.count(length, success), size: 12.5 }))));
         };
         return TestChar;
-    }(React.Component));
+    } (React.Component));
     exports.TestChar = TestChar;
 });
 define("components/property", ["require", "exports", "react"], function (require, exports, React) {
@@ -1371,10 +1384,10 @@ define("components/property", ["require", "exports", "react"], function (require
             this.state = {};
         }
         PropertyView.prototype.render = function () {
-            return (React.createElement("div", {className: "property-view"}, this.props.children));
+            return (React.createElement("div", { className: "property-view" }, this.props.children));
         };
         return PropertyView;
-    }(React.Component));
+    } (React.Component));
     exports.PropertyView = PropertyView;
     var PropertyViewItem = (function (_super) {
         __extends(PropertyViewItem, _super);
@@ -1383,10 +1396,10 @@ define("components/property", ["require", "exports", "react"], function (require
             this.state = {};
         }
         PropertyViewItem.prototype.render = function () {
-            return (React.createElement("div", {className: "item"}, React.createElement("div", {className: "label"}, this.props.label), React.createElement("div", {className: "value"}, this.props.value)));
+            return (React.createElement("div", { className: "item" }, React.createElement("div", { className: "label" }, this.props.label), React.createElement("div", { className: "value" }, this.props.value)));
         };
         return PropertyViewItem;
-    }(React.Component));
+    } (React.Component));
     exports.PropertyViewItem = PropertyViewItem;
     var PropertyViewGroup = (function (_super) {
         __extends(PropertyViewGroup, _super);
@@ -1395,10 +1408,10 @@ define("components/property", ["require", "exports", "react"], function (require
             this.state = {};
         }
         PropertyViewGroup.prototype.render = function () {
-            return (React.createElement("div", {className: "group"}, React.createElement("div", {className: "header"}, React.createElement("div", {className: "label"}, this.props.label)), this.props.children));
+            return (React.createElement("div", { className: "group" }, React.createElement("div", { className: "header" }, React.createElement("div", { className: "label" }, this.props.label)), this.props.children));
         };
         return PropertyViewGroup;
-    }(React.Component));
+    } (React.Component));
     exports.PropertyViewGroup = PropertyViewGroup;
 });
 define("components/collapse-button", ["require", "exports", "react"], function (require, exports, React) {
@@ -1411,10 +1424,10 @@ define("components/collapse-button", ["require", "exports", "react"], function (
         }
         CollapseButton.prototype.render = function () {
             var _a = this.props, collapsed = _a.collapsed, onClick = _a.onClick;
-            return (React.createElement("div", {className: "btn-collapse ", onClick: onClick}, collapsed ? "+" : "-"));
+            return (React.createElement("div", { className: "btn-collapse ", onClick: onClick }, collapsed ? "+" : "-"));
         };
         return CollapseButton;
-    }(React.Component));
+    } (React.Component));
     exports.CollapseButton = CollapseButton;
 });
 define("components/detail", ["require", "exports", "react", "store/store", "store/test", "components/property", "components/collapse-button"], function (require, exports, React, store_3, test_6, property_1, collapse_button_1) {
@@ -1426,13 +1439,13 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
             this.state = {};
         }
         TestDetail.prototype.render = function () {
-            return (React.createElement("table", {className: "detail"}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("td", null), React.createElement("td", null, "name"), React.createElement("td", null, "time"), React.createElement("td", null, "status"), React.createElement("td", null, "message"))), this.props.model.state.items.map(function (item) { return (React.createElement(TestDetailItem, {test: item.state})); }), React.createElement("tbody", null)));
+            return (React.createElement("table", { className: "detail" }, React.createElement("thead", null, React.createElement("tr", null, React.createElement("td", null), React.createElement("td", null, "name"), React.createElement("td", null, "time"), React.createElement("td", null, "status"), React.createElement("td", null, "message"))), this.props.model.state.items.map(function (item) { return (React.createElement(TestDetailItem, { test: item.state })); }), React.createElement("tbody", null)));
         };
         TestDetail = __decorate([
             store_3.Store()
         ], TestDetail);
         return TestDetail;
-    }(React.Component));
+    } (React.Component));
     exports.TestDetail = TestDetail;
     var TestDetailItem = (function (_super) {
         __extends(TestDetailItem, _super);
@@ -1445,10 +1458,10 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
         TestDetailItem.prototype.render = function () {
             var _this = this;
             var test = this.props.test;
-            return (React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement(collapse_button_1.CollapseButton, {collapsed: this.state.collapsed, onClick: function (e) { return _this.setState({ collapsed: !_this.state.collapsed }); }})), React.createElement("td", null, test.name), React.createElement("td", null, test.duration / 1000 + "s"), React.createElement("td", {className: "status " + test_6.CaseStatus[test.status]}, test_6.CaseStatus[test.status] || "not started"), React.createElement("td", null, test.message)), React.createElement("tr", {hidden: this.state.collapsed}, React.createElement("td", null), React.createElement("td", {colSpan: 3}, React.createElement(DetailParamsView, {params: test.params})))));
+            return (React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement(collapse_button_1.CollapseButton, { collapsed: this.state.collapsed, onClick: function (e) { return _this.setState({ collapsed: !_this.state.collapsed }); } })), React.createElement("td", null, test.name), React.createElement("td", null, test.duration / 1000 + "s"), React.createElement("td", { className: "status " + test_6.CaseStatus[test.status] }, test_6.CaseStatus[test.status] || "not started"), React.createElement("td", null, test.message)), React.createElement("tr", { hidden: this.state.collapsed }, React.createElement("td", null), React.createElement("td", { colSpan: 3 }, React.createElement(DetailParamsView, { params: test.params })))));
         };
         return TestDetailItem;
-    }(React.Component));
+    } (React.Component));
     exports.TestDetailItem = TestDetailItem;
     var DetailParamsView = (function (_super) {
         __extends(DetailParamsView, _super);
@@ -1458,7 +1471,7 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
         }
         DetailParamsView.prototype.renderKey = function (key, groupName) {
             console.log("renderKey");
-            return (React.createElement(property_1.PropertyViewGroup, {label: groupName}, React.createElement(property_1.PropertyViewItem, {label: "type", value: key.type}), this.renderAlgrithm(key.algorithm, "Algorithm"), React.createElement(property_1.PropertyViewItem, {label: "extractable", value: key.extractable.toString()}), React.createElement(property_1.PropertyViewItem, {label: "usages", value: key.usages.join(", ")})));
+            return (React.createElement(property_1.PropertyViewGroup, { label: groupName }, React.createElement(property_1.PropertyViewItem, { label: "type", value: key.type }), this.renderAlgrithm(key.algorithm, "Algorithm"), React.createElement(property_1.PropertyViewItem, { label: "extractable", value: key.extractable.toString() }), React.createElement(property_1.PropertyViewItem, { label: "usages", value: key.usages.join(", ") })));
         };
         DetailParamsView.prototype.renderItems = function (params) {
             var items = [];
@@ -1478,7 +1491,7 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
                 else {
                     value = value.toString();
                 }
-                items.push(React.createElement(property_1.PropertyViewItem, {label: key, value: value}));
+                items.push(React.createElement(property_1.PropertyViewItem, { label: key, value: value }));
             }
             return items;
         };
@@ -1495,15 +1508,15 @@ define("components/detail", ["require", "exports", "react", "store/store", "stor
                     text = value.name;
                 else
                     text = value ? value.toString() : "null";
-                items.push(React.createElement(property_1.PropertyViewItem, {label: key, value: text}));
+                items.push(React.createElement(property_1.PropertyViewItem, { label: key, value: text }));
             }
-            return (React.createElement(property_1.PropertyViewGroup, {label: groupName}, items));
+            return (React.createElement(property_1.PropertyViewGroup, { label: groupName }, items));
         };
         DetailParamsView.prototype.render = function () {
             return (React.createElement(property_1.PropertyView, null, this.renderItems(this.props.params)));
         };
         return DetailParamsView;
-    }(React.Component));
+    } (React.Component));
     exports.DetailParamsView = DetailParamsView;
 });
 define("app", ["require", "exports", "react", "store/test", "tests/aes", "tests/rsa", "tests/sha", "tests/ec", "components/test-table", "components/detail", "components/property", "helper"], function (require, exports, React, test_7, aes_1, rsa_1, sha_1, ec_1, test_table_1, detail_1, property_2, helper) {
@@ -1598,16 +1611,16 @@ define("app", ["require", "exports", "react", "store/test", "tests/aes", "tests/
             var _this = this;
             var info = helper.BrawserInfo();
             var _a = this.state, report = _a.report, tests = _a.tests;
-            return (React.createElement("div", {className: "container"}, React.createElement("h3", null, info.name, " v", info.version), React.createElement("h4", null, "Select crypto module "), React.createElement("select", {ref: "crypto", name: "", defaultValue: "0", onChange: this.onCryptoChange}, React.createElement("option", {value: "0"}, "Native"), React.createElement("option", {value: "1"}, "JavaScript")), React.createElement("hr", null), React.createElement(test_table_1.TestTable, {model: tests, onCellClick: this.onTestCaseClick}), React.createElement("div", {className: "row"}, React.createElement("div", {className: "btn", onClick: function () { tests.forEach(function (item) { return item.run(); }); }}, "Run"), React.createElement("div", {className: "btn", onClick: function () { _this.createTests(); }}, "Reset"), React.createElement("div", {className: "btn", onClick: function () { _this.getReport(); }}, "Report")), report ?
-                React.createElement("div", null, React.createElement("hr", null), React.createElement("h3", null, "Report: ", this.state.selectedCrypto), React.createElement(property_2.PropertyView, null, React.createElement(property_2.PropertyViewItem, {label: "Browser", value: info.name + " v" + info.version}), React.createElement(property_2.PropertyViewItem, {label: "UserAgent", value: window.navigator.userAgent}), React.createElement(property_2.PropertyViewItem, {label: "Created", value: report.created.toString()}), React.createElement(property_2.PropertyViewItem, {label: "Test duration", value: report.duration / 1000 + "s"}), React.createElement(property_2.PropertyViewItem, {label: "Test success", value: report.success}), React.createElement(property_2.PropertyViewItem, {label: "Test error", value: report.error})))
+            return (React.createElement("div", { className: "container" }, React.createElement("h3", null, info.name, " v", info.version), React.createElement("h4", null, "Select crypto module "), React.createElement("select", { ref: "crypto", name: "", defaultValue: "0", onChange: this.onCryptoChange }, React.createElement("option", { value: "0" }, "Native"), React.createElement("option", { value: "1" }, "JavaScript")), React.createElement("hr", null), React.createElement(test_table_1.TestTable, { model: tests, onCellClick: this.onTestCaseClick }), React.createElement("div", { className: "row" }, React.createElement("div", { className: "btn", onClick: function () { tests.forEach(function (item) { return item.run(); }); } }, "Run"), React.createElement("div", { className: "btn", onClick: function () { _this.createTests(); } }, "Reset"), React.createElement("div", { className: "btn", onClick: function () { _this.getReport(); } }, "Report")), report ?
+                React.createElement("div", null, React.createElement("hr", null), React.createElement("h3", null, "Report: ", this.state.selectedCrypto), React.createElement(property_2.PropertyView, null, React.createElement(property_2.PropertyViewItem, { label: "Browser", value: info.name + " v" + info.version }), React.createElement(property_2.PropertyViewItem, { label: "UserAgent", value: window.navigator.userAgent }), React.createElement(property_2.PropertyViewItem, { label: "Created", value: report.created.toString() }), React.createElement(property_2.PropertyViewItem, { label: "Test duration", value: report.duration / 1000 + "s" }), React.createElement(property_2.PropertyViewItem, { label: "Test success", value: report.success }), React.createElement(property_2.PropertyViewItem, { label: "Test error", value: report.error })))
                 :
-                    null, React.createElement("hr", null), this.state.selectedTest ?
-                React.createElement(detail_1.TestDetail, {model: this.state.selectedTest})
-                :
+                null, React.createElement("hr", null), this.state.selectedTest ?
+                    React.createElement(detail_1.TestDetail, { model: this.state.selectedTest })
+                    :
                     null));
         };
         return App;
-    }(React.Component));
+    } (React.Component));
     exports.App = App;
 });
 define("main", ["require", "exports", "react", "react-dom", "app"], function (require, exports, React, ReactDOM, app_1) {
