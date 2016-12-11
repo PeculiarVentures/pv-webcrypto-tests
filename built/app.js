@@ -76,14 +76,17 @@ var app =
 	};
 	var React = __webpack_require__(1);
 	var test_1 = __webpack_require__(4);
-	var rsa_1 = __webpack_require__(7);
-	var test_table_1 = __webpack_require__(8);
-	var detail_1 = __webpack_require__(10);
-	var property_1 = __webpack_require__(11);
-	var helper = __webpack_require__(13);
+	var aes_1 = __webpack_require__(7);
+	var rsa_1 = __webpack_require__(8);
+	var sha_1 = __webpack_require__(9);
+	var ec_1 = __webpack_require__(10);
+	var test_table_1 = __webpack_require__(11);
+	var detail_1 = __webpack_require__(13);
+	var property_1 = __webpack_require__(14);
+	var helper = __webpack_require__(16);
 	var self = window;
-	// const tests = [ShaTest, AesCBCTest, AesGCMTest, RsaOAEPTest, RsaPSSTest, RsaSSATest, EcDSATest, EcDHTest];
-	var tests = [rsa_1.RsaSSATest];
+	var tests = [sha_1.ShaTest, aes_1.AesCBCTest, aes_1.AesGCMTest, rsa_1.RsaOAEPTest, rsa_1.RsaPSSTest, rsa_1.RsaSSATest, ec_1.EcDSATest, ec_1.EcDHTest];
+	// const tests = [RsaSSATest];
 	function newTests() {
 	    return tests.map(function (Test) { return new Test(); });
 	}
@@ -1192,6 +1195,275 @@ var app =
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var test_1 = __webpack_require__(4);
+	var ALG_AES_CBC = "AES-CBC";
+	var ALG_AES_CTR = "AES-CTR";
+	var ALG_AES_GCM = "AES-GCM";
+	var ALG_AES_CFB = "AES-CFB-8";
+	var ALG_AES_CMAC = "AES-CMAC";
+	function GenerateKey(name, keyUsages) {
+	    var cases = [];
+	    // length
+	    [128, 192, 256].forEach(function (length) {
+	        cases.push(new test_1.GenerateKeyCase({
+	            name: "generate " + name + " length:" + length,
+	            params: {
+	                algorithm: {
+	                    name: name,
+	                    length: length
+	                },
+	                extractble: true,
+	                keyUsages: keyUsages
+	            }
+	        }));
+	    });
+	    return cases;
+	}
+	function ExportKey(keys) {
+	    var cases = [];
+	    keys.forEach(function (item) {
+	        // format
+	        var alg_length = item.algorithm.length;
+	        ["raw", "jwk"].forEach(function (format) {
+	            cases.push(new test_1.ExportKeyCase({
+	                name: item.algorithm.name + " length:" + alg_length + " format:" + format,
+	                params: {
+	                    format: format,
+	                    key: item.key,
+	                    algorithm: item.algorithm,
+	                    extractble: true,
+	                    keyUsages: item.key.usages
+	                }
+	            }));
+	        });
+	    });
+	    return cases;
+	}
+	var AesCBCTest = (function (_super) {
+	    __extends(AesCBCTest, _super);
+	    function AesCBCTest() {
+	        var _this = _super.call(this, ALG_AES_CBC) || this;
+	        _this.generateKey.addRange(GenerateKey(ALG_AES_CBC, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]));
+	        _this.on("generate", function (keys) {
+	            _this.exportKey.addRange(ExportKey(keys));
+	            _this.encrypt.addRange(AesCBCTest.Encrypt(ALG_AES_CBC, keys));
+	            _this.wrap.addRange(AesCBCTest.Wrap(ALG_AES_CBC, keys));
+	            _this.run();
+	        });
+	        return _this;
+	    }
+	    AesCBCTest.Encrypt = function (alg, keys) {
+	        return keys.map(function (item) {
+	            return new test_1.EncryptCase({
+	                name: alg + " len:" + item.algorithm.length,
+	                params: {
+	                    encryptKey: item.key,
+	                    decryptKey: item.key,
+	                    algorithm: {
+	                        name: ALG_AES_CBC,
+	                        iv: new Uint8Array(16),
+	                    }
+	                }
+	            });
+	        });
+	    };
+	    AesCBCTest.Wrap = function (alg, keys) {
+	        var cases = [];
+	        keys.forEach(function (item) {
+	            var _alg = item.algorithm;
+	            // format
+	            ["jwk", "raw"].forEach(function (format) {
+	                cases.push(new test_1.WrapCase({
+	                    name: "wrap " + alg + " len:" + _alg.length,
+	                    params: {
+	                        format: format,
+	                        key: item.key,
+	                        wrappingKey: item.key,
+	                        unwrappingKey: item.key,
+	                        algorithm: {
+	                            name: alg,
+	                            iv: new Uint8Array(16)
+	                        },
+	                    }
+	                }));
+	            });
+	        });
+	        return cases;
+	    };
+	    return AesCBCTest;
+	}(test_1.AlgorithmTest));
+	exports.AesCBCTest = AesCBCTest;
+	var AesGCMTest = (function (_super) {
+	    __extends(AesGCMTest, _super);
+	    function AesGCMTest() {
+	        var _this = _super.call(this, ALG_AES_GCM) || this;
+	        _this.generateKey.addRange(GenerateKey(ALG_AES_GCM, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]));
+	        _this.on("generate", function (keys) {
+	            _this.exportKey.addRange(ExportKey(keys));
+	            _this.encrypt.addRange(AesGCMTest.Encrypt(keys));
+	            _this.wrap.addRange(AesGCMTest.Wrap(ALG_AES_GCM, keys));
+	            _this.run();
+	        });
+	        return _this;
+	    }
+	    AesGCMTest.Encrypt = function (keys) {
+	        var cases = [];
+	        keys.forEach(function (item) {
+	            // tagLength
+	            [32, 64, 96, 104, 112, 120, 128]
+	                .forEach(function (tagLength) {
+	                cases.push(new test_1.EncryptCase({
+	                    name: ALG_AES_GCM + " len:" + item.algorithm.length + " tagLen:" + tagLength,
+	                    params: {
+	                        encryptKey: item.key,
+	                        decryptKey: item.key,
+	                        algorithm: {
+	                            name: ALG_AES_GCM,
+	                            iv: new Uint8Array(12),
+	                            additionalData: new Uint8Array(3),
+	                            tagLength: tagLength
+	                        }
+	                    }
+	                }));
+	            });
+	        });
+	        return cases;
+	    };
+	    AesGCMTest.Wrap = function (alg, keys) {
+	        var cases = [];
+	        keys.forEach(function (item) {
+	            var _alg = item.algorithm;
+	            // format
+	            ["jwk", "raw"].forEach(function (format) {
+	                // tagLength
+	                [32, 64, 96, 104, 112, 120, 128].forEach(function (tagLength) {
+	                    cases.push(new test_1.WrapCase({
+	                        name: "wrap " + alg + " len:" + _alg.length + " tagLen:" + tagLength,
+	                        params: {
+	                            format: format,
+	                            key: item.key,
+	                            wrappingKey: item.key,
+	                            unwrappingKey: item.key,
+	                            algorithm: {
+	                                name: alg,
+	                                tagLength: tagLength,
+	                                iv: new Uint8Array(16)
+	                            },
+	                        }
+	                    }));
+	                });
+	            });
+	        });
+	        return cases;
+	    };
+	    return AesGCMTest;
+	}(test_1.AlgorithmTest));
+	exports.AesGCMTest = AesGCMTest;
+	var AesCTRTest = (function (_super) {
+	    __extends(AesCTRTest, _super);
+	    function AesCTRTest() {
+	        var _this = _super.call(this, ALG_AES_CTR) || this;
+	        _this.generateKey.addRange(GenerateKey(ALG_AES_CTR, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]));
+	        _this.on("generate", function (keys) {
+	            _this.exportKey.addRange(ExportKey(keys));
+	            _this.encrypt.addRange(AesCTRTest.Encrypt(ALG_AES_CTR, keys));
+	            _this.wrap.addRange(AesCTRTest.Wrap(ALG_AES_CTR, keys));
+	            _this.run();
+	        });
+	        return _this;
+	    }
+	    AesCTRTest.Encrypt = function (alg, keys) {
+	        return keys.map(function (item) { return new test_1.EncryptCase({
+	            name: alg + " len:" + item.algorithm.length,
+	            params: {
+	                encryptKey: item.key,
+	                decryptKey: item.key,
+	                algorithm: {
+	                    name: alg,
+	                    counter: new Uint8Array(16),
+	                    length: 128
+	                }
+	            }
+	        }); });
+	    };
+	    AesCTRTest.Wrap = function (alg, keys) {
+	        var cases = [];
+	        keys.forEach(function (item) {
+	            var _alg = item.algorithm;
+	            // format
+	            ["jwk", "raw"].forEach(function (format) {
+	                cases.push(new test_1.WrapCase({
+	                    name: "wrap " + alg + " len:" + _alg.length,
+	                    params: {
+	                        format: format,
+	                        key: item.key,
+	                        wrappingKey: item.key,
+	                        unwrappingKey: item.key,
+	                        algorithm: {
+	                            name: alg,
+	                            counter: new Uint8Array(16),
+	                            length: 128
+	                        },
+	                    }
+	                }));
+	            });
+	        });
+	        return cases;
+	    };
+	    return AesCTRTest;
+	}(test_1.AlgorithmTest));
+	exports.AesCTRTest = AesCTRTest;
+	var AesCFBTest = (function (_super) {
+	    __extends(AesCFBTest, _super);
+	    function AesCFBTest() {
+	        var _this = _super.call(this, ALG_AES_CFB) || this;
+	        _this.generateKey.addRange(GenerateKey(ALG_AES_CFB, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]));
+	        _this.on("generate", function (keys) {
+	            _this.exportKey.addRange(ExportKey(keys));
+	            _this.encrypt.addRange(AesCBCTest.Encrypt(ALG_AES_CFB, keys));
+	        });
+	        return _this;
+	    }
+	    return AesCFBTest;
+	}(test_1.AlgorithmTest));
+	exports.AesCFBTest = AesCFBTest;
+	var AesCMACTest = (function (_super) {
+	    __extends(AesCMACTest, _super);
+	    function AesCMACTest() {
+	        var _this = _super.call(this, ALG_AES_CMAC) || this;
+	        _this.generateKey.addRange(GenerateKey(ALG_AES_CMAC, ["sign", "verify"]));
+	        _this.on("generate", function (keys) {
+	            _this.exportKey.addRange(ExportKey(keys));
+	            _this.sign.addRange(AesCMACTest.Sign(ALG_AES_CMAC, keys));
+	            _this.run();
+	        });
+	        return _this;
+	    }
+	    AesCMACTest.Sign = function (alg, keys) {
+	        return keys.map(function (item) { return new test_1.SignCase({
+	            name: alg + " len:" + item.algorithm.length,
+	            params: {
+	                algorithm: item.algorithm,
+	                signKey: item.key,
+	                verifyKey: item.key,
+	            }
+	        }); });
+	    };
+	    return AesCMACTest;
+	}(test_1.AlgorithmTest));
+	exports.AesCMACTest = AesCMACTest;
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var test_1 = __webpack_require__(4);
 	var ALG_RSA_SSA = "RSASSA-PKCS1-v1_5";
 	var ALG_RSA_OAEP = "RSA-OAEP";
 	var ALG_RSA_PSS = "RSA-PSS";
@@ -1411,7 +1683,205 @@ var app =
 
 
 /***/ },
-/* 8 */
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var test_1 = __webpack_require__(4);
+	var ShaTest = (function (_super) {
+	    __extends(ShaTest, _super);
+	    function ShaTest() {
+	        var _this = _super.call(this, "SHA") || this;
+	        _this.digest.addRange(["SHA-1", "SHA-256", "SHA-384", "SHA-512"].map(function (hash) {
+	            return new test_1.DigestCase({
+	                name: "digest " + hash,
+	                params: {
+	                    algorithm: {
+	                        name: hash
+	                    }
+	                }
+	            });
+	        }));
+	        return _this;
+	    }
+	    return ShaTest;
+	}(test_1.AlgorithmTest));
+	exports.ShaTest = ShaTest;
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var test_1 = __webpack_require__(4);
+	var ALG_EC_DSA = "ECDSA";
+	var ALG_EC_DH = "ECDH";
+	function GenerateKey(name, keyUsages) {
+	    var cases = [];
+	    // namedCurve
+	    ["P-256", "P-384", "P-521"].forEach(function (namedCurve) {
+	        cases.push(new test_1.GenerateKeyCase({
+	            name: "generate " + name + " curve:" + namedCurve,
+	            params: {
+	                algorithm: {
+	                    name: name,
+	                    namedCurve: namedCurve
+	                },
+	                extractble: true,
+	                keyUsages: keyUsages
+	            }
+	        }));
+	    });
+	    return cases;
+	}
+	function ExportKey(keys) {
+	    var cases = [];
+	    keys.forEach(function (item) {
+	        var _loop_1 = function (keyType) {
+	            var key = item.key[keyType];
+	            // format
+	            ["jwk", keyType === "publicKey" ? "spki" : "pkcs8"].forEach(function (format) {
+	                cases.push(new test_1.ExportKeyCase({
+	                    name: key.algorithm.name + " curve:" + key.algorithm.namedCurve + " format:" + format,
+	                    params: {
+	                        format: format,
+	                        key: key,
+	                        algorithm: item.algorithm,
+	                        extractble: true,
+	                        keyUsages: key.usages
+	                    }
+	                }));
+	            });
+	        };
+	        for (var keyType in item.key) {
+	            _loop_1(keyType);
+	        }
+	    });
+	    return cases;
+	}
+	var EcDSATest = (function (_super) {
+	    __extends(EcDSATest, _super);
+	    function EcDSATest() {
+	        var _this = _super.call(this, ALG_EC_DSA) || this;
+	        _this.generateKey.addRange(GenerateKey(ALG_EC_DSA, ["sign", "verify"]));
+	        _this.on("generate", function (keys) {
+	            _this.exportKey.addRange(ExportKey(keys));
+	            _this.sign.addRange(EcDSATest.Sign(ALG_EC_DSA, keys));
+	            _this.run();
+	        });
+	        return _this;
+	    }
+	    EcDSATest.Sign = function (alg, keys) {
+	        var cases = [];
+	        keys.forEach(function (item) {
+	            // hash
+	            ["SHA-1", "SHA-256", "SHA-384", "SHA-512"]
+	                .forEach(function (hash) {
+	                var pkey = item.key;
+	                cases.push(new test_1.SignCase({
+	                    name: alg + " curve:" + item.algorithm.namedCurve + " hash:" + hash,
+	                    params: {
+	                        signKey: pkey.privateKey,
+	                        verifyKey: pkey.publicKey,
+	                        algorithm: {
+	                            name: alg,
+	                            hash: {
+	                                name: hash
+	                            }
+	                        }
+	                    }
+	                }));
+	            });
+	        });
+	        return cases;
+	    };
+	    return EcDSATest;
+	}(test_1.AlgorithmTest));
+	exports.EcDSATest = EcDSATest;
+	var EcDHTest = (function (_super) {
+	    __extends(EcDHTest, _super);
+	    function EcDHTest() {
+	        var _this = _super.call(this, ALG_EC_DH) || this;
+	        _this.generateKey.addRange(GenerateKey(ALG_EC_DH, ["deriveKey", "deriveBits"]));
+	        _this.on("generate", function (keys) {
+	            _this.exportKey.addRange(ExportKey(keys));
+	            _this.deriveKey.addRange(EcDHTest.DeriveKey(ALG_EC_DH, keys));
+	            _this.deriveBits.addRange(EcDHTest.DeriveBits(ALG_EC_DH, keys));
+	            _this.run();
+	        });
+	        return _this;
+	    }
+	    EcDHTest.DeriveKey = function (alg, keys) {
+	        var cases = [];
+	        keys.forEach(function (item) {
+	            // AES algs
+	            ["AES-CBC", "AES-GCM"].forEach(function (alg) {
+	                // AES alg length
+	                [128, 192, 256].forEach(function (algLen) {
+	                    var pkey = item.key;
+	                    var keyAlg = item.algorithm;
+	                    cases.push(new test_1.DeriveKeyCase({
+	                        name: "deriveKey " + keyAlg.name + "-" + keyAlg.namedCurve + " " + alg + "-" + algLen,
+	                        params: {
+	                            algorithm: {
+	                                name: pkey.privateKey.algorithm.name,
+	                                namedCurve: keyAlg.namedCurve,
+	                                public: pkey.publicKey
+	                            },
+	                            derivedKeyAlg: {
+	                                name: alg,
+	                                length: algLen
+	                            },
+	                            key: pkey.privateKey,
+	                            keyUsage: ["encrypt", "decrypt"]
+	                        }
+	                    }));
+	                });
+	            });
+	        });
+	        return cases;
+	    };
+	    EcDHTest.DeriveBits = function (alg, keys) {
+	        var cases = [];
+	        keys.forEach(function (item) {
+	            // bitsLength
+	            [128, 192, 256].forEach(function (bitsLength) {
+	                var pkey = item.key;
+	                var keyAlg = item.algorithm;
+	                cases.push(new test_1.DeriveBitsCase({
+	                    name: "deriveKey " + keyAlg.name + "-" + keyAlg.namedCurve + " ",
+	                    params: {
+	                        algorithm: {
+	                            name: pkey.privateKey.algorithm.name,
+	                            namedCurve: keyAlg.namedCurve,
+	                            public: pkey.publicKey
+	                        },
+	                        key: pkey.privateKey,
+	                        bitsLength: bitsLength
+	                    }
+	                }));
+	            });
+	        });
+	        return cases;
+	    };
+	    return EcDHTest;
+	}(test_1.AlgorithmTest));
+	exports.EcDHTest = EcDHTest;
+
+
+/***/ },
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1429,7 +1899,7 @@ var app =
 	var React = __webpack_require__(1);
 	var store_1 = __webpack_require__(5);
 	var test_1 = __webpack_require__(4);
-	var pie_chart_1 = __webpack_require__(9);
+	var pie_chart_1 = __webpack_require__(12);
 	var TestTable = (function (_super) {
 	    __extends(TestTable, _super);
 	    function TestTable(props) {
@@ -1539,7 +2009,7 @@ var app =
 
 
 /***/ },
-/* 9 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1581,7 +2051,7 @@ var app =
 
 
 /***/ },
-/* 10 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1599,8 +2069,8 @@ var app =
 	var React = __webpack_require__(1);
 	var store_1 = __webpack_require__(5);
 	var test_1 = __webpack_require__(4);
-	var property_1 = __webpack_require__(11);
-	var collapse_button_1 = __webpack_require__(12);
+	var property_1 = __webpack_require__(14);
+	var collapse_button_1 = __webpack_require__(15);
 	var TestDetail = (function (_super) {
 	    __extends(TestDetail, _super);
 	    function TestDetail(props) {
@@ -1721,7 +2191,7 @@ var app =
 
 
 /***/ },
-/* 11 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1778,7 +2248,7 @@ var app =
 
 
 /***/ },
-/* 12 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1805,7 +2275,7 @@ var app =
 
 
 /***/ },
-/* 13 */
+/* 16 */
 /***/ function(module, exports) {
 
 	"use strict";

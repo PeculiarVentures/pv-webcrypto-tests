@@ -11,8 +11,8 @@ import * as helper from "./helper";
 
 const self: { crypto: Crypto } = window as any;
 
-// const tests = [ShaTest, AesCBCTest, AesGCMTest, RsaOAEPTest, RsaPSSTest, RsaSSATest, EcDSATest, EcDHTest];
-const tests = [RsaSSATest];
+const tests = [ShaTest, AesCBCTest, AesGCMTest, RsaOAEPTest, RsaPSSTest, RsaSSATest, EcDSATest, EcDHTest];
+// const tests = [RsaSSATest];
 
 function newTests() {
     return tests.map(Test => new Test());
