@@ -5,7 +5,7 @@
   cursor: pointer; }
 
 body {
-  background: url(../img/bg.png); }
+  background: url(img/bg.png); }
 
 .shadow-1, .btn, .btn-collapse {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24); }
@@ -23,7 +23,6 @@ body {
   box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22); }
 
 .btn {
-  display: -ms-inline-flexbox;
   display: inline-flex;
   padding: 8px 16px;
   background-color: #2A3942;
@@ -40,10 +39,8 @@ body {
     margin-left: 24px; }
   .property-view .item {
     border-bottom: lightgrey  1px solid;
-    display: -ms-flexbox;
     display: flex;
-    -ms-flex-direction: row;
-        flex-direction: row; }
+    flex-direction: row; }
     .property-view .item > .label {
       width: 150px; }
 
@@ -68,6 +65,8 @@ td {
   line-height: 0;
   stroke-width: 100%;
   fill: none;
+  -ms-transition: stroke-dasharray .3s ease, transform .3s ease;
+  -webkit-transition: stroke-dasharray .3s ease, transform .3s ease;
   transition: stroke-dasharray .3s ease, transform .3s ease;
   transform-origin: 50% 50% 0; }
 
@@ -78,13 +77,10 @@ td {
   stroke: #FF514C; }
 
 .test-chart {
-  display: -ms-inline-flexbox;
   display: inline-flex;
   position: relative;
-  -ms-flex-pack: center;
-      justify-content: center;
-  -ms-flex-align: center;
-      align-items: center;
+  justify-content: center;
+  align-items: center;
   height: 25px;
   width: 25px;
   cursor: pointer;
@@ -108,12 +104,9 @@ td {
 .btn-collapse {
   background: gray;
   color: white;
-  display: -ms-inline-flexbox;
   display: inline-flex;
-  -ms-flex-align: center;
-      align-items: center;
-  -ms-flex-pack: center;
-      justify-content: center;
+  align-items: center;
+  justify-content: center;
   width: 16px;
   height: 16px;
   cursor: pointer;
@@ -137,3 +130,6 @@ td {
 
 .test-cell {
   text-align: center; }
+
+.hidden {
+  display: none; }
