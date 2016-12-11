@@ -159,44 +159,45 @@ var app =
 	        var _this = this;
 	        var info = helper.BrawserInfo();
 	        var _a = this.state, report = _a.report, tests = _a.tests;
-	        return (React.createElement("div", { className: "container" }, this.state.tests ?
-	            React.createElement("div", null,
-	                React.createElement("h3", null,
-	                    info.name,
-	                    " v",
-	                    info.version),
-	                React.createElement("h4", null, "Select crypto module "),
-	                React.createElement("select", { ref: "crypto", name: "", value: this.state.selectedCrypto, onChange: this.onCryptoChange },
-	                    React.createElement("option", { value: "0" }, "Native"),
-	                    React.createElement("option", { value: "1" }, "JavaScript")),
-	                React.createElement("hr", null),
-	                React.createElement(test_table_1.TestTable, { model: tests, onCellClick: this.onTestCaseClick }),
-	                React.createElement("div", { className: "row" },
-	                    React.createElement("div", { className: "btn", tabIndex: 0, onClick: function () { tests.forEach(function (item) { return item.run(); }); } }, "Run"),
-	                    React.createElement("div", { className: "btn", tabIndex: 1, onClick: function () { _this.createTests(); } }, "Reset"),
-	                    React.createElement("div", { className: "btn", tabIndex: 2, onClick: function () { _this.getReport(); } }, "Report")),
-	                report ?
-	                    React.createElement("div", null,
-	                        React.createElement("hr", null),
-	                        React.createElement("h3", null,
-	                            "Report: ",
-	                            this.state.selectedCrypto === "0" ? "Native" : "JavaScript"),
-	                        React.createElement(property_1.PropertyView, null,
-	                            React.createElement(property_1.PropertyViewItem, { label: "Browser", value: info.name + " v" + info.version }),
-	                            React.createElement(property_1.PropertyViewItem, { label: "UserAgent", value: window.navigator.userAgent }),
-	                            React.createElement(property_1.PropertyViewItem, { label: "Created", value: report.created.toString() }),
-	                            React.createElement(property_1.PropertyViewItem, { label: "Test duration", value: report.duration / 1000 + "s" }),
-	                            React.createElement(property_1.PropertyViewItem, { label: "Test success", value: report.success }),
-	                            React.createElement(property_1.PropertyViewItem, { label: "Test error", value: report.error })))
-	                    :
-	                        null,
-	                React.createElement("hr", null),
-	                this.state.selectedTest ?
-	                    React.createElement(detail_1.TestDetail, { model: this.state.selectedTest })
-	                    :
-	                        null)
-	            :
-	                null));
+	        return (React.createElement("div", { className: "container" },
+	            React.createElement("h3", null,
+	                info.name,
+	                " v",
+	                info.version),
+	            React.createElement("h4", null, "Select crypto module "),
+	            React.createElement("select", { ref: "crypto", name: "", value: this.state.selectedCrypto, onChange: this.onCryptoChange },
+	                React.createElement("option", { value: "0" }, "Native"),
+	                React.createElement("option", { value: "1" }, "JavaScript")),
+	            React.createElement("hr", null),
+	            this.state.tests ?
+	                React.createElement("div", null,
+	                    React.createElement(test_table_1.TestTable, { model: tests, onCellClick: this.onTestCaseClick }),
+	                    React.createElement("div", { className: "row" },
+	                        React.createElement("div", { className: "btn", onClick: function () { tests.forEach(function (item) { return item.run(); }); } }, "Run"),
+	                        React.createElement("div", { className: "btn", onClick: function () { _this.createTests(); } }, "Reset"),
+	                        React.createElement("div", { className: "btn", onClick: function () { _this.getReport(); } }, "Report")),
+	                    report ?
+	                        React.createElement("div", null,
+	                            React.createElement("hr", null),
+	                            React.createElement("h3", null,
+	                                "Report: ",
+	                                this.state.selectedCrypto === "0" ? "Native" : "JavaScript"),
+	                            React.createElement(property_1.PropertyView, null,
+	                                React.createElement(property_1.PropertyViewItem, { label: "Browser", value: info.name + " v" + info.version }),
+	                                React.createElement(property_1.PropertyViewItem, { label: "UserAgent", value: window.navigator.userAgent }),
+	                                React.createElement(property_1.PropertyViewItem, { label: "Created", value: report.created.toString() }),
+	                                React.createElement(property_1.PropertyViewItem, { label: "Test duration", value: report.duration / 1000 + "s" }),
+	                                React.createElement(property_1.PropertyViewItem, { label: "Test success", value: report.success }),
+	                                React.createElement(property_1.PropertyViewItem, { label: "Test error", value: report.error })))
+	                        :
+	                            null,
+	                    React.createElement("hr", null),
+	                    this.state.selectedTest ?
+	                        React.createElement(detail_1.TestDetail, { model: this.state.selectedTest })
+	                        :
+	                            null)
+	                :
+	                    null));
 	    };
 	    return App;
 	}(React.Component));
