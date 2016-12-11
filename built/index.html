@@ -13,39 +13,20 @@
         if (cryptoEngines.native.webkitSubtle)  cryptoEngines.native.subtle = cryptoEngines.native.webkitSubtle;
     </script>
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-    <script src="https://www.promisejs.org/polyfills/promise-7.0.4.min.js"></script>
-    <script src="src/asmcrypto.js"></script>
-    <script src="src/elliptic.js"></script>
-    <script src="src/webcrypto-core.min.js"></script>
+    <script src="src/es5-shim.min.js"></script>
+    <script src="src/react.min.js"></script>
+    <script src="src/react-dom.min.js"></script>
+    <script src="src/promise.js"></script>
     <script src="src/webcrypto-liner.min.js"></script>
     <script>
         // Copy crypto js implementation
         cryptoEngines.js = window.crypto;
     </script>
-    <script src="src/require.js"></script>
 </head>
 
 <body>
     <div id="app"></div>
-    <script>
-        // For any third party dependencies, like jQuery, place them in the lib folder.
-
-        // Configure loading modules from the lib directory,
-        // except for 'app' ones, which are in a sibling
-        // directory.
-        requirejs.config({
-            baseUrl: 'src',
-            paths: {
-                "react": "react.min",
-                "react-dom": "react-dom.min",
-                "main": 'app'
-            }
-        });
-
-        // Start loading the main app file. Put all of
-        // your application logic in there.
-        requirejs(['main']);
-    </script>
+    <script src="app.js"></script>
 </body>
 
 </html>

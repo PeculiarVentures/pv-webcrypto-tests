@@ -1,4 +1,4 @@
-import {AlgorithmTest, TestCaseCollection, GenerateKeyCase, ExportKeyCase, SignCase, EncryptCase, WrapCase} from "./store/test";
+import { AlgorithmTest, TestCaseCollection, GenerateKeyCase, ExportKeyCase, SignCase, EncryptCase, WrapCase } from "../store/test";
 
 const ALG_AES_CBC = "AES-CBC";
 const ALG_AES_CTR = "AES-CTR";
@@ -29,22 +29,22 @@ function GenerateKey(name: string, keyUsages: string[]) {
     return cases;
 }
 
-function ExportKey(keys: CryptoKey[]) {
+function ExportKey(keys: TestCaseGeneratedKey[]) {
     let cases: ExportKeyCase[] = [];
 
-    keys.forEach(key => {
+    keys.forEach(item => {
         // format
-        const alg_length = (key.algorithm as any).length;
+        const alg_length = (item.algorithm as any).length;
         ["raw", "jwk"].forEach(format => {
             cases.push(
                 new ExportKeyCase({
-                    name: `${key.algorithm.name} length:${alg_length} format:${format}`,
+                    name: `${item.algorithm.name} length:${alg_length} format:${format}`,
                     params: {
                         format: format,
-                        key: key,
-                        algorithm: key.algorithm,
+                        key: item.key as CryptoKey,
+                        algorithm: item.algorithm,
                         extractble: true,
-                        keyUsages: key.usages
+                        keyUsages: (item.key as CryptoKey).usages
                     }
                 })
             );
@@ -58,23 +58,23 @@ export class AesCBCTest extends AlgorithmTest {
     constructor() {
         super(ALG_AES_CBC);
 
-        this.generateKey.push(GenerateKey(ALG_AES_CBC, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]));
-        this.on("generate", (keys: CryptoKey[]) => {
-            this.exportKey.push(ExportKey(keys));
-            this.encrypt.push(AesCBCTest.Encrypt(ALG_AES_CBC, keys));
-            this.wrap.push(AesCBCTest.Wrap(ALG_AES_CBC, keys));
+        this.generateKey.addRange(GenerateKey(ALG_AES_CBC, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]));
+        this.on("generate", (keys: TestCaseGeneratedKey[]) => {
+            this.exportKey.addRange(ExportKey(keys));
+            this.encrypt.addRange(AesCBCTest.Encrypt(ALG_AES_CBC, keys));
+            this.wrap.addRange(AesCBCTest.Wrap(ALG_AES_CBC, keys));
 
             this.run();
         });
     }
 
-    static Encrypt(alg: string, keys: CryptoKey[]) {
-        return keys.map(key => {
+    static Encrypt(alg: string, keys: TestCaseGeneratedKey[]) {
+        return keys.map(item => {
             return new EncryptCase({
-                name: `${alg} len:${(key.algorithm as any).length}`,
+                name: `${alg} len:${(item.algorithm as any).length}`,
                 params: {
-                    encryptKey: key,
-                    decryptKey: key,
+                    encryptKey: item.key as CryptoKey,
+                    decryptKey: item.key as CryptoKey,
                     algorithm: {
                         name: ALG_AES_CBC,
                         iv: new Uint8Array(16),
@@ -84,19 +84,19 @@ export class AesCBCTest extends AlgorithmTest {
         });
     }
 
-    static Wrap(alg: string, keys: CryptoKey[]) {
+    static Wrap(alg: string, keys: TestCaseGeneratedKey[]) {
         const cases: WrapCase[] = [];
-        keys.forEach(key => {
-            let _alg: any = key.algorithm;
+        keys.forEach(item => {
+            let _alg: any = item.algorithm;
             // format
             ["jwk", "raw"].forEach(format => {
                 cases.push(new WrapCase({
                     name: `wrap ${alg} len:${_alg.length}`,
                     params: {
                         format,
-                        key,
-                        wrappingKey: key,
-                        unwrappingKey: key,
+                        key: item.key as CryptoKey,
+                        wrappingKey: item.key as CryptoKey,
+                        unwrappingKey: item.key as CryptoKey,
                         algorithm: {
                             name: alg,
                             iv: new Uint8Array(16)
@@ -111,28 +111,28 @@ export class AesCBCTest extends AlgorithmTest {
 export class AesGCMTest extends AlgorithmTest {
     constructor() {
         super(ALG_AES_GCM);
-        this.generateKey.push(GenerateKey(ALG_AES_GCM, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]));
-        this.on("generate", (keys: CryptoKey[]) => {
-            this.exportKey.push(ExportKey(keys));
-            this.encrypt.push(AesGCMTest.Encrypt(keys));
-            this.wrap.push(AesGCMTest.Wrap(ALG_AES_GCM, keys));
+        this.generateKey.addRange(GenerateKey(ALG_AES_GCM, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]));
+        this.on("generate", (keys: TestCaseGeneratedKey[]) => {
+            this.exportKey.addRange(ExportKey(keys));
+            this.encrypt.addRange(AesGCMTest.Encrypt(keys));
+            this.wrap.addRange(AesGCMTest.Wrap(ALG_AES_GCM, keys));
 
             this.run();
         });
     }
 
-    static Encrypt(keys: CryptoKey[]) {
+    static Encrypt(keys: TestCaseGeneratedKey[]) {
         let cases: EncryptCase[] = [];
 
-        keys.forEach(key => {
+        keys.forEach(item => {
             // tagLength
             [32, 64, 96, 104, 112, 120, 128]
                 .forEach(tagLength => {
                     cases.push(new EncryptCase({
-                        name: `${ALG_AES_GCM} len:${(key.algorithm as any).length} tagLen:${tagLength}`,
+                        name: `${ALG_AES_GCM} len:${(item.algorithm as any).length} tagLen:${tagLength}`,
                         params: {
-                            encryptKey: key,
-                            decryptKey: key,
+                            encryptKey: item.key as CryptoKey,
+                            decryptKey: item.key as CryptoKey,
                             algorithm: {
                                 name: ALG_AES_GCM,
                                 iv: new Uint8Array(12),
@@ -147,10 +147,10 @@ export class AesGCMTest extends AlgorithmTest {
         return cases;
     }
 
-    static Wrap(alg: string, keys: CryptoKey[]) {
+    static Wrap(alg: string, keys: TestCaseGeneratedKey[]) {
         const cases: WrapCase[] = [];
-        keys.forEach(key => {
-            let _alg: any = key.algorithm;
+        keys.forEach(item => {
+            let _alg: any = item.algorithm;
             // format
             ["jwk", "raw"].forEach(format => {
                 // tagLength
@@ -159,9 +159,9 @@ export class AesGCMTest extends AlgorithmTest {
                         name: `wrap ${alg} len:${_alg.length} tagLen:${tagLength}`,
                         params: {
                             format,
-                            key,
-                            wrappingKey: key,
-                            unwrappingKey: key,
+                            key: item.key as CryptoKey,
+                            wrappingKey: item.key as CryptoKey,
+                            unwrappingKey: item.key as CryptoKey,
                             algorithm: {
                                 name: alg,
                                 tagLength: tagLength,
@@ -178,22 +178,22 @@ export class AesGCMTest extends AlgorithmTest {
 export class AesCTRTest extends AlgorithmTest {
     constructor() {
         super(ALG_AES_CTR);
-        this.generateKey.push(GenerateKey(ALG_AES_CTR, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]));
-        this.on("generate", (keys: CryptoKey[]) => {
-            this.exportKey.push(ExportKey(keys));
-            this.encrypt.push(AesCTRTest.Encrypt(ALG_AES_CTR, keys));
-            this.wrap.push(AesCTRTest.Wrap(ALG_AES_CTR, keys));
+        this.generateKey.addRange(GenerateKey(ALG_AES_CTR, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]));
+        this.on("generate", (keys: TestCaseGeneratedKey[]) => {
+            this.exportKey.addRange(ExportKey(keys));
+            this.encrypt.addRange(AesCTRTest.Encrypt(ALG_AES_CTR, keys));
+            this.wrap.addRange(AesCTRTest.Wrap(ALG_AES_CTR, keys));
 
             this.run();
         });
 
     }
-    static Encrypt(alg: string, keys: CryptoKey[]) {
-        return keys.map(key => new EncryptCase({
-            name: `${alg} len:${(key.algorithm as any).length}`,
+    static Encrypt(alg: string, keys: TestCaseGeneratedKey[]) {
+        return keys.map(item => new EncryptCase({
+            name: `${alg} len:${(item.algorithm as any).length}`,
             params: {
-                encryptKey: key,
-                decryptKey: key,
+                encryptKey: item.key as CryptoKey,
+                decryptKey: item.key as CryptoKey,
                 algorithm: {
                     name: alg,
                     counter: new Uint8Array(16),
@@ -203,19 +203,19 @@ export class AesCTRTest extends AlgorithmTest {
         }));
     }
 
-    static Wrap(alg: string, keys: CryptoKey[]) {
+    static Wrap(alg: string, keys: TestCaseGeneratedKey[]) {
         const cases: WrapCase[] = [];
-        keys.forEach(key => {
-            let _alg: any = key.algorithm;
+        keys.forEach(item => {
+            let _alg: any = item.algorithm;
             // format
             ["jwk", "raw"].forEach(format => {
                 cases.push(new WrapCase({
                     name: `wrap ${alg} len:${_alg.length}`,
                     params: {
                         format,
-                        key,
-                        wrappingKey: key,
-                        unwrappingKey: key,
+                        key: item.key as CryptoKey,
+                        wrappingKey: item.key as CryptoKey,
+                        unwrappingKey: item.key as CryptoKey,
                         algorithm: {
                             name: alg,
                             counter: new Uint8Array(16),
@@ -231,32 +231,32 @@ export class AesCTRTest extends AlgorithmTest {
 export class AesCFBTest extends AlgorithmTest {
     constructor() {
         super(ALG_AES_CFB);
-        this.generateKey.push(GenerateKey(ALG_AES_CFB, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]));
-        this.on("generate", (keys: CryptoKey[]) => {
-            this.exportKey.push(ExportKey(keys));
-            this.encrypt.push(AesCBCTest.Encrypt(ALG_AES_CFB, keys));
+        this.generateKey.addRange(GenerateKey(ALG_AES_CFB, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]));
+        this.on("generate", (keys: TestCaseGeneratedKey[]) => {
+            this.exportKey.addRange(ExportKey(keys));
+            this.encrypt.addRange(AesCBCTest.Encrypt(ALG_AES_CFB, keys));
         });
     }
 }
 export class AesCMACTest extends AlgorithmTest {
     constructor() {
         super(ALG_AES_CMAC);
-        this.generateKey.push(GenerateKey(ALG_AES_CMAC, ["sign", "verify"]));
-        this.on("generate", (keys: CryptoKey[]) => {
-            this.exportKey.push(ExportKey(keys));
-            this.sign.push(AesCMACTest.Sign(ALG_AES_CMAC, keys));
+        this.generateKey.addRange(GenerateKey(ALG_AES_CMAC, ["sign", "verify"]));
+        this.on("generate", keys => {
+            this.exportKey.addRange(ExportKey(keys));
+            this.sign.addRange(AesCMACTest.Sign(ALG_AES_CMAC, keys));
 
             this.run();
         });
     }
 
-    static Sign(alg: string, keys: CryptoKey[]) {
-        return keys.map(key => new SignCase({
-            name: `${alg} len:${(key.algorithm as any).length}`,
+    static Sign(alg: string, keys: TestCaseGeneratedKey[]) {
+        return keys.map(item => new SignCase({
+            name: `${alg} len:${(item.algorithm as any).length}`,
             params: {
-                algorithm: key.algorithm,
-                signKey: key,
-                verifyKey: key
+                algorithm: item.algorithm,
+                signKey: item.key as CryptoKey,
+                verifyKey: item.key as CryptoKey,
             }
         }));
     }

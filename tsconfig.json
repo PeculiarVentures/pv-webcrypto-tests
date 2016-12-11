@@ -1,15 +1,16 @@
 {
     "compilerOptions": {
-        "module": "amd",
+        "module": "commonjs",
         "target": "es5",
+        "lib": [
+            "es2015",
+            "dom"
+        ],
         "noImplicitAny": true,
+        "strictNullChecks": true,
         "sourceMap": false,
         "pretty": true,
-        "outFile": "built/src/app.js",
         "jsx": "react",
         "experimentalDecorators": true
-    },
-    "exclude": [
-        "node_modules"
-    ]
+    }
 }

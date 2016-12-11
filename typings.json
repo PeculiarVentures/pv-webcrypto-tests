@@ -1,8 +1,0 @@
-{
-  "globalDependencies": {
-    "mocha": "registry:dt/mocha#2.2.5+20160720003353",
-    "node": "registry:env/node#6.0.0+20160825160117",
-    "react": "registry:dt/react#0.14.0+20160829191040",
-    "react-dom": "registry:dt/react-dom#0.14.0+20160412154040"
-  }
-}

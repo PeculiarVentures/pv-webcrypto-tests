@@ -97,10 +97,9 @@ export class TestTableItemCell extends React.Component<ITestTableItemCellProps, 
         const model = this.props.model;
         if (!model)
             return <td></td>;
-        const items = model.state.items;
         const complited = model.state.complited;
         let success: number = 0, error: number = 0;
-        items.forEach(item => {
+        model.forEach(item => {
             if (item.state.status === CaseStatus.success) {
                 success++;
             }
@@ -108,7 +107,7 @@ export class TestTableItemCell extends React.Component<ITestTableItemCellProps, 
                 error++;
             }
         });
-        const length = items.length;
+        const length = model.length;
         return (
             <td className="test-cell">
                 <div onClick={ e => this.props.onCellClick(model) }>

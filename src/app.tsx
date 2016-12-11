@@ -1,27 +1,22 @@
 import * as React from "react";
-import {AlgorithmTest, TestCaseCollection} from "./store/test";
-import {AesCBCTest, AesCTRTest, AesGCMTest, AesCFBTest, AesCMACTest} from "./tests/aes";
-import {RsaOAEPTest, RsaPSSTest, RsaSSATest} from "./tests/rsa";
-import {ShaTest} from "./tests/sha";
-import {EcDSATest, EcDHTest} from "./tests/ec";
-import {TestTable} from "./components/test-table";
-import {TestDetail} from "./components/detail";
-import {PropertyView, PropertyViewItem} from "./components/property";
+import { AlgorithmTest, TestCaseCollection } from "./store/test";
+import { AesCBCTest, AesCTRTest, AesGCMTest, AesCFBTest, AesCMACTest } from "./tests/aes";
+import { RsaOAEPTest, RsaPSSTest, RsaSSATest } from "./tests/rsa";
+import { ShaTest } from "./tests/sha";
+import { EcDSATest, EcDHTest } from "./tests/ec";
+import { TestTable } from "./components/test-table";
+import { TestDetail } from "./components/detail";
+import { PropertyView, PropertyViewItem } from "./components/property";
 import * as helper from "./helper";
 
-const tests = [
-    new ShaTest(),
-    new AesCBCTest(),
-    // new AesCTRTest(),
-    new AesGCMTest(),
-    // new AesCFBTest(),
-    // new AesCMACTest(),
-    // new RsaOAEPTest(),
-    // new RsaPSSTest(),
-    // new RsaSSATest(),
-    // new EcDSATest(),
-    // new EcDHTest(),
-];
+const self: { crypto: Crypto } = window as any;
+
+// const tests = [ShaTest, AesCBCTest, AesGCMTest, RsaOAEPTest, RsaPSSTest, RsaSSATest, EcDSATest, EcDHTest];
+const tests = [RsaSSATest];
+
+function newTests() {
+    return tests.map(Test => new Test());
+}
 
 interface IAppProps {
 }
@@ -33,46 +28,31 @@ interface IAppState {
     report?: any;
 }
 
+
 export class App extends React.Component<IAppProps, IAppState> {
 
     constructor(props: IAppProps) {
         super(props);
         this.state = {
-            tests: [],
-            selectedCrypto: "Native"
+            tests: newTests(),
+            selectedCrypto: "0"
         };
+        self.crypto = cryptoEngines.native; // set default crypto -> Native
 
         this.onCryptoChange = this.onCryptoChange.bind(this);
         this.onTestCaseClick = this.onTestCaseClick.bind(this);
     }
 
     protected createTests() {
-        this.setState({
-            tests: [],
-            selectedTest: null,
-            report: null
-        }, () => {
+        this.setState({ tests: undefined }, () =>
             this.setState({
-                tests: [
-                    new ShaTest(),
-                    new AesCBCTest(),
-                    // new AesCTRTest(),
-                    new AesGCMTest(),
-                    // new AesCFBTest(),
-                    // new AesCMACTest(),
-                    new RsaOAEPTest(),
-                    new RsaPSSTest(),
-                    new RsaSSATest(),
-                    new EcDSATest(),
-                    new EcDHTest(),
-                ]
-            });
-        });
+                tests: newTests(),
+                selectedTest: undefined,
+                report: undefined
+            }));
     }
 
     componentDidMount() {
-        this.createTests();
-        window.crypto = cryptoEngines.native; // set default crypto -> Native
     }
 
     getTotalTestTime() {
@@ -87,7 +67,7 @@ export class App extends React.Component<IAppProps, IAppState> {
             error: 0,
             success: 0
         };
-        this.state.tests.forEach(test => {
+        this.state.tests!.forEach(test => {
             let testReport = test.report();
             report.duration += testReport.duration;
             report.error += testReport.error;
@@ -96,21 +76,19 @@ export class App extends React.Component<IAppProps, IAppState> {
         this.setState({ report });
     }
 
-    onCryptoChange(e: React.FormEvent) {
-        const selectedCrypto = (e.target as HTMLInputElement).value;
+    onCryptoChange(e: React.FormEvent<HTMLSelectElement>) {
+        const selectedCrypto = e.currentTarget.value;
         switch (selectedCrypto) {
             case "0": // Native
-                window.crypto = cryptoEngines.native;
-                this.setState({ selectedCrypto: "Native" });
+                self.crypto = cryptoEngines.native;
                 break;
             case "1": // JS
-                window.crypto = cryptoEngines.js;
-                this.setState({ selectedCrypto: "Java Script" });
+                self.crypto = cryptoEngines.js;
                 break;
             default:
                 throw new Error("Uknown type of crypto module");
         }
-        this.createTests();
+        this.setState({ selectedCrypto }, () => this.createTests());
     }
 
     onTestCaseClick(test: TestCaseCollection<any>) {
@@ -125,42 +103,48 @@ export class App extends React.Component<IAppProps, IAppState> {
         const {report, tests} = this.state;
         return (
             <div className="container">
-                <h3>{info.name} v{info.version}</h3>
-                <h4>Select crypto module </h4>
-                <select ref="crypto" name="" defaultValue="0" onChange={this.onCryptoChange}>
-                    <option value="0">Native</option>
-                    <option value="1">JavaScript</option>
-                </select>
-                <hr/>
-                <TestTable model={tests} onCellClick={this.onTestCaseClick}/>
-                <div className="row">
-                    <div className="btn" onClick={() => { tests.forEach(item => item.run()); } }>Run</div>
-                    <div className="btn" onClick={() => { this.createTests(); } }>Reset</div>
-                    <div className="btn" onClick={() => { this.getReport(); } }>Report</div>
-                </div>
-                {
-                    report ?
-                        <div>
-                            <hr/>
-                            <h3>Report: {this.state.selectedCrypto}</h3>
-                            <PropertyView>
-                                <PropertyViewItem label="Browser" value={`${info.name} v${info.version}`}/>
-                                <PropertyViewItem label="UserAgent" value={window.navigator.userAgent}/>
-                                <PropertyViewItem label="Created" value={report.created.toString() }/>
-                                <PropertyViewItem label="Test duration" value={`${report.duration / 1000}s`}/>
-                                <PropertyViewItem label="Test success" value={report.success}/>
-                                <PropertyViewItem label="Test error" value={report.error}/>
-                            </PropertyView>
+                {this.state.tests ?
+                    <div>
+                        <h3>{info.name} v{info.version}</h3>
+                        <h4>Select crypto module </h4>
+                        <select ref="crypto" name="" value={this.state.selectedCrypto} onChange={this.onCryptoChange}>
+                            <option value="0">Native</option>
+                            <option value="1">JavaScript</option>
+                        </select>
+                        <hr />
+                        <TestTable model={tests!} onCellClick={this.onTestCaseClick} />
+                        <div className="row">
+                            <div className="btn" onClick={() => { tests!.forEach(item => item.run()); } }>Run</div>
+                            <div className="btn" onClick={() => { this.createTests(); } }>Reset</div>
+                            <div className="btn" onClick={() => { this.getReport(); } }>Report</div>
                         </div>
-                        :
-                        null
-                }
-                <hr/>
-                {
-                    this.state.selectedTest ?
-                        <TestDetail model={this.state.selectedTest}/>
-                        :
-                        null
+                        {
+                            report ?
+                                <div>
+                                    <hr />
+                                    <h3>Report: {this.state.selectedCrypto === "0" ? "Native" : "JavaScript"}</h3>
+                                    <PropertyView>
+                                        <PropertyViewItem label="Browser" value={`${info.name} v${info.version}`} />
+                                        <PropertyViewItem label="UserAgent" value={window.navigator.userAgent} />
+                                        <PropertyViewItem label="Created" value={report.created.toString()} />
+                                        <PropertyViewItem label="Test duration" value={`${report.duration / 1000}s`} />
+                                        <PropertyViewItem label="Test success" value={report.success} />
+                                        <PropertyViewItem label="Test error" value={report.error} />
+                                    </PropertyView>
+                                </div>
+                                :
+                                null
+                        }
+                        <hr />
+                        {
+                            this.state.selectedTest ?
+                                <TestDetail model={this.state.selectedTest} />
+                                :
+                                null
+                        }
+                    </div>
+                    :
+                    null
                 }
             </div>
         );

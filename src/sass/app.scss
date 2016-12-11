@@ -1,24 +1,24 @@
-// As hex codes */
+// As hex codes
 
-$light-light-blue: #316A8C;	// Main Primary color */
+$light-light-blue: #316A8C;	// Main Primary color
 $light-blue: #57A6D5;
 $blue: #3B84B0;
 $dark-blue: #2D5268;
 $dark-dark-blue: #2A3942;
 
-$light-light-red: #DC4844;	// Main Secondary color (1) */
+$light-light-red: #DC4844;	// Main Secondary color (1)
 $light-red: #FF6460;
 $red: #FF514C;
 $dark-red: #A34442;
 $dark-dark-red: #68403F;
 
-$ligth-ltight-green: #36AD3D;	// Main Secondary color (2) */
+$ligth-ltight-green: #36AD3D;	// Main Secondary color (2)
 $light-green: #57E660;
 $green: #3ED048;
 $dark-green: #348039;
 $dark-dark-green: #325234;
 
-$light-light-yellow: #DC9844;	// Main Complement color */
+$light-light-yellow: #DC9844;	// Main Complement color
 $light-yellow: #FFB860;
 $yellow: #FFAF4C;
 $dark-yellow: #A37742;
@@ -41,7 +41,7 @@ $shadow-5: 0 19px 38px rgba($shadow, 0.30), 0 15px 12px rgba($shadow, 0.22);
 }
 
 body {
-    background: url(../img/bg.png)
+    background: url(img/bg.png)
 }
 
 .shadow-1{
@@ -219,4 +219,8 @@ td {
 
 .test-cell {
     text-align: center;
+}
+
+.hidden {
+    display: none;
 }

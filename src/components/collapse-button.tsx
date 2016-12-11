@@ -2,7 +2,7 @@ import * as React from "react";
 
 interface ICollapseButtonProps {
     collapsed: boolean;
-    onClick?: React.MouseEventHandler;
+    onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 interface ICollapseButtonState {
