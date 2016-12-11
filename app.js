@@ -172,9 +172,9 @@ var app =
 	                React.createElement("hr", null),
 	                React.createElement(test_table_1.TestTable, { model: tests, onCellClick: this.onTestCaseClick }),
 	                React.createElement("div", { className: "row" },
-	                    React.createElement("div", { className: "btn", onClick: function () { tests.forEach(function (item) { return item.run(); }); } }, "Run"),
-	                    React.createElement("div", { className: "btn", onClick: function () { _this.createTests(); } }, "Reset"),
-	                    React.createElement("div", { className: "btn", onClick: function () { _this.getReport(); } }, "Report")),
+	                    React.createElement("div", { className: "btn", tabIndex: 0, onClick: function () { tests.forEach(function (item) { return item.run(); }); } }, "Run"),
+	                    React.createElement("div", { className: "btn", tabIndex: 1, onClick: function () { _this.createTests(); } }, "Reset"),
+	                    React.createElement("div", { className: "btn", tabIndex: 2, onClick: function () { _this.getReport(); } }, "Report")),
 	                report ?
 	                    React.createElement("div", null,
 	                        React.createElement("hr", null),
