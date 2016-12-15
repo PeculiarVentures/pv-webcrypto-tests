@@ -12,7 +12,6 @@ import * as helper from "./helper";
 const self: { crypto: Crypto } = window as any;
 
 const tests = [ShaTest, AesCBCTest, AesGCMTest, RsaOAEPTest, RsaPSSTest, RsaSSATest, EcDSATest, EcDHTest];
-// const tests = [RsaSSATest];
 
 function newTests() {
     return tests.map(Test => new Test());
@@ -103,18 +102,18 @@ export class App extends React.Component<IAppProps, IAppState> {
         const {report, tests} = this.state;
         return (
             <div className="container">
+                <h3>{info.name} v{info.version}</h3>
+                <h4>Select crypto module </h4>
+                <select ref="crypto" name="" value={this.state.selectedCrypto} onChange={this.onCryptoChange}>
+                    <option value="0">Native</option>
+                    <option value="1">JavaScript</option>
+                </select>
+                <hr />
                 {this.state.tests ?
                     <div>
-                        <h3>{info.name} v{info.version}</h3>
-                        <h4>Select crypto module </h4>
-                        <select ref="crypto" name="" value={this.state.selectedCrypto} onChange={this.onCryptoChange}>
-                            <option value="0">Native</option>
-                            <option value="1">JavaScript</option>
-                        </select>
-                        <hr />
                         <TestTable model={tests!} onCellClick={this.onTestCaseClick} />
                         <div className="row">
-                            <div className="btn" onClick={() => { tests!.forEach(item => item.run()); } }>Run</div>
+                            <div className="btn" onClick={() => { tests!.filter(item => item.state.selected).forEach(item => item.run()); } }>Run</div>
                             <div className="btn" onClick={() => { this.createTests(); } }>Reset</div>
                             <div className="btn" onClick={() => { this.getReport(); } }>Report</div>
                         </div>

@@ -84,6 +84,7 @@ export class TestCaseCollection<I extends TestCase<any>> extends BaseStoreCollec
 }
 
 interface AlgorithmTestState extends TestCaseState {
+    selected?: boolean;
 }
 
 export class AlgorithmTest extends TestCase<AlgorithmTestState> {
@@ -114,6 +115,7 @@ export class AlgorithmTest extends TestCase<AlgorithmTestState> {
     constructor(name: string) {
         super({
             name: name,
+            selected: true,
         });
 
         this.generateKey = new TestCaseCollection([]);
