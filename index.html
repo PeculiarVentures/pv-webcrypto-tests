@@ -13,13 +13,15 @@
         if (cryptoEngines.native.webkitSubtle)  cryptoEngines.native.subtle = cryptoEngines.native.webkitSubtle;
     </script>
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <script src="src/promise.js"></script>
+    <script src="src/webcrypto-liner.min.js"></script>
+    <script src="src/asmcrypto.js"></script>
     <script src="src/es5-shim.min.js"></script>
     <script src="src/react.min.js"></script>
     <script src="src/react-dom.min.js"></script>
-    <script src="src/promise.js"></script>
-    <script src="src/webcrypto-liner.min.js"></script>
     <script>
         // Copy crypto js implementation
+        // console.log(asmCrypto.RSA.generateKey(1024, 65537));
         cryptoEngines.js = window.crypto;
     </script>
 </head>

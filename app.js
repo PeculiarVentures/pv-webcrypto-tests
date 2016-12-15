@@ -77,16 +77,15 @@ var app =
 	var React = __webpack_require__(1);
 	var test_1 = __webpack_require__(4);
 	var aes_1 = __webpack_require__(7);
-	var rsa_1 = __webpack_require__(8);
-	var sha_1 = __webpack_require__(9);
-	var ec_1 = __webpack_require__(10);
-	var test_table_1 = __webpack_require__(11);
-	var detail_1 = __webpack_require__(13);
-	var property_1 = __webpack_require__(14);
-	var helper = __webpack_require__(16);
+	var rsa_1 = __webpack_require__(15);
+	var sha_1 = __webpack_require__(14);
+	var ec_1 = __webpack_require__(16);
+	var test_table_1 = __webpack_require__(8);
+	var detail_1 = __webpack_require__(10);
+	var property_1 = __webpack_require__(11);
+	var helper = __webpack_require__(13);
 	var self = window;
 	var tests = [sha_1.ShaTest, aes_1.AesCBCTest, aes_1.AesGCMTest, rsa_1.RsaOAEPTest, rsa_1.RsaPSSTest, rsa_1.RsaSSATest, ec_1.EcDSATest, ec_1.EcDHTest];
-	// const tests = [RsaSSATest];
 	function newTests() {
 	    return tests.map(function (Test) { return new Test(); });
 	}
@@ -173,7 +172,7 @@ var app =
 	                React.createElement("div", null,
 	                    React.createElement(test_table_1.TestTable, { model: tests, onCellClick: this.onTestCaseClick }),
 	                    React.createElement("div", { className: "row" },
-	                        React.createElement("div", { className: "btn", onClick: function () { tests.forEach(function (item) { return item.run(); }); } }, "Run"),
+	                        React.createElement("div", { className: "btn", onClick: function () { tests.filter(function (item) { return item.state.selected; }).forEach(function (item) { return item.run(); }); } }, "Run"),
 	                        React.createElement("div", { className: "btn", onClick: function () { _this.createTests(); } }, "Reset"),
 	                        React.createElement("div", { className: "btn", onClick: function () { _this.getReport(); } }, "Report")),
 	                    report ?
@@ -287,6 +286,7 @@ var app =
 	    function AlgorithmTest(name) {
 	        var _this = _super.call(this, {
 	            name: name,
+	            selected: true,
 	        }) || this;
 	        _this.generateKey = new TestCaseCollection([]);
 	        _this.exportKey = new TestCaseCollection([]);
@@ -1464,6 +1464,498 @@ var app =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var React = __webpack_require__(1);
+	var store_1 = __webpack_require__(5);
+	var test_1 = __webpack_require__(4);
+	var pie_chart_1 = __webpack_require__(9);
+	var TestTable = (function (_super) {
+	    __extends(TestTable, _super);
+	    function TestTable(props) {
+	        var _this = _super.call(this, props) || this;
+	        _this.state = {};
+	        return _this;
+	    }
+	    TestTable.prototype.render = function () {
+	        var _this = this;
+	        return (React.createElement("table", { className: "test-table" },
+	            React.createElement("thead", null,
+	                React.createElement("tr", null,
+	                    React.createElement("td", null,
+	                        React.createElement("input", { type: "checkbox", onChange: function (e) { return _this.props.model.forEach(function (item) {
+	                                return item.setState({ selected: e.currentTarget.checked });
+	                            }); } })),
+	                    React.createElement("td", null, "Allgorithm"),
+	                    React.createElement("td", null, "generateKey"),
+	                    React.createElement("td", null, "digest"),
+	                    React.createElement("td", null, "export/import "),
+	                    React.createElement("td", null, "sign/verify"),
+	                    React.createElement("td", null, "encrypt/decrypt"),
+	                    React.createElement("td", null, "derive key"),
+	                    React.createElement("td", null, "derive bits"),
+	                    React.createElement("td", null, "wrap/unwrap"))),
+	            React.createElement("tbody", null, this.props.model.map(function (item) { return React.createElement(TestTableItem, { model: item, onCellClick: _this.props.onCellClick }); }))));
+	    };
+	    return TestTable;
+	}(React.Component));
+	exports.TestTable = TestTable;
+	var TestTableItem = (function (_super) {
+	    __extends(TestTableItem, _super);
+	    function TestTableItem(props) {
+	        var _this = _super.call(this, props) || this;
+	        _this.state = {};
+	        return _this;
+	    }
+	    TestTableItem.prototype.render = function () {
+	        var _this = this;
+	        var model = this.props.model;
+	        return (React.createElement("tr", null,
+	            React.createElement("td", null,
+	                React.createElement("input", { type: "checkbox", checked: this.props.model.state.selected, onChange: function (e) { return _this.props.model.setState({ selected: e.currentTarget.checked }); } })),
+	            React.createElement("td", null, model.state.name),
+	            React.createElement(TestTableItemCell, { model: model.generateKey, onCellClick: this.props.onCellClick }),
+	            React.createElement(TestTableItemCell, { model: model.digest, onCellClick: this.props.onCellClick }),
+	            React.createElement(TestTableItemCell, { model: model.exportKey, onCellClick: this.props.onCellClick }),
+	            React.createElement(TestTableItemCell, { model: model.sign, onCellClick: this.props.onCellClick }),
+	            React.createElement(TestTableItemCell, { model: model.encrypt, onCellClick: this.props.onCellClick }),
+	            React.createElement(TestTableItemCell, { model: model.deriveKey, onCellClick: this.props.onCellClick }),
+	            React.createElement(TestTableItemCell, { model: model.deriveBits, onCellClick: this.props.onCellClick }),
+	            React.createElement(TestTableItemCell, { model: model.wrap, onCellClick: this.props.onCellClick })));
+	    };
+	    return TestTableItem;
+	}(React.Component));
+	TestTableItem = __decorate([
+	    store_1.Store()
+	], TestTableItem);
+	exports.TestTableItem = TestTableItem;
+	var TestTableItemCell = (function (_super) {
+	    __extends(TestTableItemCell, _super);
+	    function TestTableItemCell(props) {
+	        var _this = _super.call(this, props) || this;
+	        _this.state = {};
+	        return _this;
+	    }
+	    TestTableItemCell.prototype.render = function () {
+	        var _this = this;
+	        var model = this.props.model;
+	        if (!model)
+	            return React.createElement("td", null);
+	        var complited = model.state.complited;
+	        var success = 0, error = 0;
+	        model.forEach(function (item) {
+	            if (item.state.status === test_1.CaseStatus.success) {
+	                success++;
+	            }
+	            else if (item.state.status === test_1.CaseStatus.error) {
+	                error++;
+	            }
+	        });
+	        var length = model.length;
+	        return (React.createElement("td", { className: "test-cell" },
+	            React.createElement("div", { onClick: function (e) { return _this.props.onCellClick(model); } },
+	                React.createElement(TestChar, { success: success, error: error, length: length }))));
+	    };
+	    return TestTableItemCell;
+	}(React.Component));
+	TestTableItemCell = __decorate([
+	    store_1.Store()
+	], TestTableItemCell);
+	exports.TestTableItemCell = TestTableItemCell;
+	var TestChar = (function (_super) {
+	    __extends(TestChar, _super);
+	    function TestChar(props) {
+	        var _this = _super.call(this, props) || this;
+	        _this.state = {};
+	        return _this;
+	    }
+	    TestChar.prototype.count = function (len, val) {
+	        return len ? (val / len) : 0;
+	    };
+	    TestChar.prototype.render = function () {
+	        var _a = this.props, success = _a.success, error = _a.error, length = _a.length;
+	        return (React.createElement("div", { className: "test-chart shadow-1" },
+	            React.createElement("div", { className: "value" }, Math.floor(this.count(length, success + error) * 100)),
+	            React.createElement(pie_chart_1.PieChart, null,
+	                React.createElement(pie_chart_1.Pie, { className: "error", value: 79 * this.count(length, error + success), size: 12.5 }),
+	                React.createElement(pie_chart_1.Pie, { className: "success", value: 79 * this.count(length, success), size: 12.5 }))));
+	    };
+	    return TestChar;
+	}(React.Component));
+	exports.TestChar = TestChar;
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var React = __webpack_require__(1);
+	var PieChart = (function (_super) {
+	    __extends(PieChart, _super);
+	    function PieChart(props) {
+	        var _this = _super.call(this, props) || this;
+	        _this.state = {};
+	        return _this;
+	    }
+	    PieChart.prototype.render = function () {
+	        return (React.createElement("figure", { className: "pie-chart" },
+	            React.createElement("svg", null, this.props.children.map(function (item) { return item.props.value ? item : null; }))));
+	    };
+	    return PieChart;
+	}(React.Component));
+	exports.PieChart = PieChart;
+	var Pie = (function (_super) {
+	    __extends(Pie, _super);
+	    function Pie(props) {
+	        var _this = _super.call(this, props) || this;
+	        _this.state = {};
+	        return _this;
+	    }
+	    Pie.prototype.render = function () {
+	        var _a = this.props, className = _a.className, value = _a.value, size = _a.size;
+	        var rotate = this.props.rotate || 0;
+	        return (React.createElement("circle", { className: "pie " + className, r: size || 0, cy: size || 0, cx: size || 0, style: { strokeDasharray: value + ", 158", transform: "rotate(" + rotate + "deg)" } }));
+	    };
+	    return Pie;
+	}(React.Component));
+	exports.Pie = Pie;
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var React = __webpack_require__(1);
+	var store_1 = __webpack_require__(5);
+	var test_1 = __webpack_require__(4);
+	var property_1 = __webpack_require__(11);
+	var collapse_button_1 = __webpack_require__(12);
+	var TestDetail = (function (_super) {
+	    __extends(TestDetail, _super);
+	    function TestDetail(props) {
+	        var _this = _super.call(this, props) || this;
+	        _this.state = {};
+	        return _this;
+	    }
+	    TestDetail.prototype.render = function () {
+	        return (React.createElement("table", { className: "detail" },
+	            React.createElement("thead", null,
+	                React.createElement("tr", null,
+	                    React.createElement("td", null),
+	                    React.createElement("td", null, "name"),
+	                    React.createElement("td", null, "time"),
+	                    React.createElement("td", null, "status"),
+	                    React.createElement("td", null, "message"))),
+	            this.props.model.map(function (item) { return (React.createElement(TestDetailItem, { test: item.state })); }),
+	            React.createElement("tbody", null)));
+	    };
+	    return TestDetail;
+	}(React.Component));
+	TestDetail = __decorate([
+	    store_1.Store()
+	], TestDetail);
+	exports.TestDetail = TestDetail;
+	var TestDetailItem = (function (_super) {
+	    __extends(TestDetailItem, _super);
+	    function TestDetailItem(props) {
+	        var _this = _super.call(this, props) || this;
+	        _this.state = {
+	            collapsed: true
+	        };
+	        return _this;
+	    }
+	    TestDetailItem.prototype.render = function () {
+	        var _this = this;
+	        var test = this.props.test;
+	        var status = test.status || test_1.CaseStatus.ready;
+	        return (React.createElement("tbody", null,
+	            React.createElement("tr", null,
+	                React.createElement("td", null,
+	                    React.createElement(collapse_button_1.CollapseButton, { collapsed: this.state.collapsed, onClick: function (e) { return _this.setState({ collapsed: !_this.state.collapsed }); } })),
+	                React.createElement("td", null, test.name),
+	                React.createElement("td", null, test.duration / 1e3 + "s"),
+	                React.createElement("td", { className: "status " + test_1.CaseStatus[status] }, test_1.CaseStatus[status]),
+	                React.createElement("td", null, test.stack)),
+	            !this.state.collapsed ?
+	                React.createElement("tr", null,
+	                    React.createElement("td", null),
+	                    React.createElement("td", { colSpan: 3 },
+	                        React.createElement(DetailParamsView, { params: test.params })))
+	                :
+	                    null));
+	    };
+	    return TestDetailItem;
+	}(React.Component));
+	exports.TestDetailItem = TestDetailItem;
+	var DetailParamsView = (function (_super) {
+	    __extends(DetailParamsView, _super);
+	    function DetailParamsView(props) {
+	        var _this = _super.call(this, props) || this;
+	        _this.state = {};
+	        return _this;
+	    }
+	    DetailParamsView.prototype.renderKey = function (key, groupName) {
+	        console.log("renderKey");
+	        return (React.createElement(property_1.PropertyViewGroup, { label: groupName },
+	            React.createElement(property_1.PropertyViewItem, { label: "type", value: key.type }),
+	            this.renderAlgrithm(key.algorithm, "Algorithm"),
+	            React.createElement(property_1.PropertyViewItem, { label: "extractable", value: key.extractable.toString() }),
+	            React.createElement(property_1.PropertyViewItem, { label: "usages", value: key.usages.join(", ") })));
+	    };
+	    DetailParamsView.prototype.renderItems = function (params) {
+	        var items = [];
+	        for (var key in params) {
+	            var value = params[key];
+	            if (key === "algorithm" || key === "derivedKeyAlg") {
+	                items.push(this.renderAlgrithm(params[key], key));
+	                continue;
+	            }
+	            else if (key === "keyUsages") {
+	                value = params[key] ? params[key].join(", ") : "null";
+	            }
+	            else if (params[key].constructor.name === "CryptoKey") {
+	                items.push(this.renderKey(params[key], key));
+	                continue;
+	            }
+	            else {
+	                value = value.toString();
+	            }
+	            items.push(React.createElement(property_1.PropertyViewItem, { label: key, value: value }));
+	        }
+	        return items;
+	    };
+	    DetailParamsView.prototype.renderAlgrithm = function (alg, groupName) {
+	        var items = [];
+	        for (var key in alg) {
+	            var value = alg[key];
+	            var text = void 0;
+	            if (key === "publicExponent")
+	                text = value[0] === 1 ? "65537" : "3";
+	            else if (ArrayBuffer.isView(value))
+	                text = "ArrayBuffer";
+	            else if (key === "hash")
+	                text = value.name;
+	            else
+	                text = value ? value.toString() : "null";
+	            items.push(React.createElement(property_1.PropertyViewItem, { label: key, value: text }));
+	        }
+	        return (React.createElement(property_1.PropertyViewGroup, { label: groupName }, items));
+	    };
+	    DetailParamsView.prototype.render = function () {
+	        return (React.createElement(property_1.PropertyView, null, this.renderItems(this.props.params)));
+	    };
+	    return DetailParamsView;
+	}(React.Component));
+	exports.DetailParamsView = DetailParamsView;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var React = __webpack_require__(1);
+	var PropertyView = (function (_super) {
+	    __extends(PropertyView, _super);
+	    function PropertyView(props) {
+	        var _this = _super.call(this, props) || this;
+	        _this.state = {};
+	        return _this;
+	    }
+	    PropertyView.prototype.render = function () {
+	        return (React.createElement("div", { className: "property-view" }, this.props.children));
+	    };
+	    return PropertyView;
+	}(React.Component));
+	exports.PropertyView = PropertyView;
+	var PropertyViewItem = (function (_super) {
+	    __extends(PropertyViewItem, _super);
+	    function PropertyViewItem(props) {
+	        var _this = _super.call(this, props) || this;
+	        _this.state = {};
+	        return _this;
+	    }
+	    PropertyViewItem.prototype.render = function () {
+	        return (React.createElement("div", { className: "item" },
+	            React.createElement("div", { className: "label" }, this.props.label),
+	            React.createElement("div", { className: "value" }, this.props.value)));
+	    };
+	    return PropertyViewItem;
+	}(React.Component));
+	exports.PropertyViewItem = PropertyViewItem;
+	var PropertyViewGroup = (function (_super) {
+	    __extends(PropertyViewGroup, _super);
+	    function PropertyViewGroup(props) {
+	        var _this = _super.call(this, props) || this;
+	        _this.state = {};
+	        return _this;
+	    }
+	    PropertyViewGroup.prototype.render = function () {
+	        return (React.createElement("div", { className: "group" },
+	            React.createElement("div", { className: "header" },
+	                React.createElement("div", { className: "label" }, this.props.label)),
+	            this.props.children));
+	    };
+	    return PropertyViewGroup;
+	}(React.Component));
+	exports.PropertyViewGroup = PropertyViewGroup;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var React = __webpack_require__(1);
+	var CollapseButton = (function (_super) {
+	    __extends(CollapseButton, _super);
+	    function CollapseButton(props) {
+	        var _this = _super.call(this, props) || this;
+	        _this.state = {};
+	        return _this;
+	    }
+	    CollapseButton.prototype.render = function () {
+	        var _a = this.props, collapsed = _a.collapsed, onClick = _a.onClick;
+	        return (React.createElement("div", { className: "btn-collapse ", onClick: onClick }, collapsed ? "+" : "-"));
+	    };
+	    return CollapseButton;
+	}(React.Component));
+	exports.CollapseButton = CollapseButton;
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports) {
+
+	"use strict";
+	/**
+	 * Returns info about browser
+	 */
+	function BrawserInfo() {
+	    var res = {
+	        name: "",
+	        version: ""
+	    };
+	    var userAgent = window.navigator.userAgent;
+	    var reg;
+	    if (reg = /edge\/([\d\.]+)/i.exec(userAgent)) {
+	        res.name = "Edge";
+	        res.version = reg[1];
+	    }
+	    else if (/msie/i.test(userAgent)) {
+	        res.name = "Internet Explorer";
+	        res.version = /msie ([\d\.]+)/i.exec(userAgent)[1];
+	    }
+	    else if (/Trident/i.test(userAgent)) {
+	        res.name = "Internet Explorer";
+	        res.version = /rv:([\d\.]+)/i.exec(userAgent)[1];
+	    }
+	    else if (/chrome/i.test(userAgent)) {
+	        res.name = "Chrome";
+	        res.version = /chrome\/([\d\.]+)/i.exec(userAgent)[1];
+	    }
+	    else if (/safari/i.test(userAgent)) {
+	        res.name = "Safari";
+	        res.version = /([\d\.]+) safari/i.exec(userAgent)[1];
+	    }
+	    else if (/firefox/i.test(userAgent)) {
+	        res.name = "Firefox";
+	        res.version = /firefox\/([\d\.]+)/i.exec(userAgent)[1];
+	    }
+	    return res;
+	}
+	exports.BrawserInfo = BrawserInfo;
+	if (!Object.assign)
+	    Object.assign = function (target) {
+	        var sources = [];
+	        for (var _i = 1; _i < arguments.length; _i++) {
+	            sources[_i - 1] = arguments[_i];
+	        }
+	        var res = arguments[0];
+	        for (var i = 1; i < arguments.length; i++) {
+	            var obj = arguments[i];
+	            for (var prop in obj) {
+	                res[prop] = obj[prop];
+	            }
+	        }
+	        return res;
+	    };
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var test_1 = __webpack_require__(4);
+	var ShaTest = (function (_super) {
+	    __extends(ShaTest, _super);
+	    function ShaTest() {
+	        var _this = _super.call(this, "SHA") || this;
+	        _this.digest.addRange(["SHA-1", "SHA-256", "SHA-384", "SHA-512"].map(function (hash) {
+	            return new test_1.DigestCase({
+	                name: "digest " + hash,
+	                params: {
+	                    algorithm: {
+	                        name: hash
+	                    }
+	                }
+	            });
+	        }));
+	        return _this;
+	    }
+	    return ShaTest;
+	}(test_1.AlgorithmTest));
+	exports.ShaTest = ShaTest;
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
 	var test_1 = __webpack_require__(4);
 	var ALG_RSA_SSA = "RSASSA-PKCS1-v1_5";
 	var ALG_RSA_OAEP = "RSA-OAEP";
@@ -1684,39 +2176,7 @@ var app =
 
 
 /***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var test_1 = __webpack_require__(4);
-	var ShaTest = (function (_super) {
-	    __extends(ShaTest, _super);
-	    function ShaTest() {
-	        var _this = _super.call(this, "SHA") || this;
-	        _this.digest.addRange(["SHA-1", "SHA-256", "SHA-384", "SHA-512"].map(function (hash) {
-	            return new test_1.DigestCase({
-	                name: "digest " + hash,
-	                params: {
-	                    algorithm: {
-	                        name: hash
-	                    }
-	                }
-	            });
-	        }));
-	        return _this;
-	    }
-	    return ShaTest;
-	}(test_1.AlgorithmTest));
-	exports.ShaTest = ShaTest;
-
-
-/***/ },
-/* 10 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1879,459 +2339,6 @@ var app =
 	    return EcDHTest;
 	}(test_1.AlgorithmTest));
 	exports.EcDHTest = EcDHTest;
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-	    return c > 3 && r && Object.defineProperty(target, key, r), r;
-	};
-	var React = __webpack_require__(1);
-	var store_1 = __webpack_require__(5);
-	var test_1 = __webpack_require__(4);
-	var pie_chart_1 = __webpack_require__(12);
-	var TestTable = (function (_super) {
-	    __extends(TestTable, _super);
-	    function TestTable(props) {
-	        var _this = _super.call(this, props) || this;
-	        _this.state = {};
-	        return _this;
-	    }
-	    TestTable.prototype.render = function () {
-	        var _this = this;
-	        return (React.createElement("table", { className: "test-table" },
-	            React.createElement("thead", null,
-	                React.createElement("tr", null,
-	                    React.createElement("td", null, "Allgorithm"),
-	                    React.createElement("td", null, "generateKey"),
-	                    React.createElement("td", null, "digest"),
-	                    React.createElement("td", null, "export/import "),
-	                    React.createElement("td", null, "sign/verify"),
-	                    React.createElement("td", null, "encrypt/decrypt"),
-	                    React.createElement("td", null, "derive key"),
-	                    React.createElement("td", null, "derive bits"),
-	                    React.createElement("td", null, "wrap/unwrap"))),
-	            React.createElement("tbody", null, this.props.model.map(function (item) { return React.createElement(TestTableItem, { model: item, onCellClick: _this.props.onCellClick }); }))));
-	    };
-	    return TestTable;
-	}(React.Component));
-	exports.TestTable = TestTable;
-	var TestTableItem = (function (_super) {
-	    __extends(TestTableItem, _super);
-	    function TestTableItem(props) {
-	        var _this = _super.call(this, props) || this;
-	        _this.state = {};
-	        return _this;
-	    }
-	    TestTableItem.prototype.render = function () {
-	        var model = this.props.model;
-	        return (React.createElement("tr", null,
-	            React.createElement("td", null, model.state.name),
-	            React.createElement(TestTableItemCell, { model: model.generateKey, onCellClick: this.props.onCellClick }),
-	            React.createElement(TestTableItemCell, { model: model.digest, onCellClick: this.props.onCellClick }),
-	            React.createElement(TestTableItemCell, { model: model.exportKey, onCellClick: this.props.onCellClick }),
-	            React.createElement(TestTableItemCell, { model: model.sign, onCellClick: this.props.onCellClick }),
-	            React.createElement(TestTableItemCell, { model: model.encrypt, onCellClick: this.props.onCellClick }),
-	            React.createElement(TestTableItemCell, { model: model.deriveKey, onCellClick: this.props.onCellClick }),
-	            React.createElement(TestTableItemCell, { model: model.deriveBits, onCellClick: this.props.onCellClick }),
-	            React.createElement(TestTableItemCell, { model: model.wrap, onCellClick: this.props.onCellClick })));
-	    };
-	    return TestTableItem;
-	}(React.Component));
-	TestTableItem = __decorate([
-	    store_1.Store()
-	], TestTableItem);
-	exports.TestTableItem = TestTableItem;
-	var TestTableItemCell = (function (_super) {
-	    __extends(TestTableItemCell, _super);
-	    function TestTableItemCell(props) {
-	        var _this = _super.call(this, props) || this;
-	        _this.state = {};
-	        return _this;
-	    }
-	    TestTableItemCell.prototype.render = function () {
-	        var _this = this;
-	        var model = this.props.model;
-	        if (!model)
-	            return React.createElement("td", null);
-	        var complited = model.state.complited;
-	        var success = 0, error = 0;
-	        model.forEach(function (item) {
-	            if (item.state.status === test_1.CaseStatus.success) {
-	                success++;
-	            }
-	            else if (item.state.status === test_1.CaseStatus.error) {
-	                error++;
-	            }
-	        });
-	        var length = model.length;
-	        return (React.createElement("td", { className: "test-cell" },
-	            React.createElement("div", { onClick: function (e) { return _this.props.onCellClick(model); } },
-	                React.createElement(TestChar, { success: success, error: error, length: length }))));
-	    };
-	    return TestTableItemCell;
-	}(React.Component));
-	TestTableItemCell = __decorate([
-	    store_1.Store()
-	], TestTableItemCell);
-	exports.TestTableItemCell = TestTableItemCell;
-	var TestChar = (function (_super) {
-	    __extends(TestChar, _super);
-	    function TestChar(props) {
-	        var _this = _super.call(this, props) || this;
-	        _this.state = {};
-	        return _this;
-	    }
-	    TestChar.prototype.count = function (len, val) {
-	        return len ? (val / len) : 0;
-	    };
-	    TestChar.prototype.render = function () {
-	        var _a = this.props, success = _a.success, error = _a.error, length = _a.length;
-	        return (React.createElement("div", { className: "test-chart shadow-1" },
-	            React.createElement("div", { className: "value" }, Math.floor(this.count(length, success + error) * 100)),
-	            React.createElement(pie_chart_1.PieChart, null,
-	                React.createElement(pie_chart_1.Pie, { className: "error", value: 79 * this.count(length, error + success), size: 12.5 }),
-	                React.createElement(pie_chart_1.Pie, { className: "success", value: 79 * this.count(length, success), size: 12.5 }))));
-	    };
-	    return TestChar;
-	}(React.Component));
-	exports.TestChar = TestChar;
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var React = __webpack_require__(1);
-	var PieChart = (function (_super) {
-	    __extends(PieChart, _super);
-	    function PieChart(props) {
-	        var _this = _super.call(this, props) || this;
-	        _this.state = {};
-	        return _this;
-	    }
-	    PieChart.prototype.render = function () {
-	        return (React.createElement("figure", { className: "pie-chart" },
-	            React.createElement("svg", null, this.props.children.map(function (item) { return item.props.value ? item : null; }))));
-	    };
-	    return PieChart;
-	}(React.Component));
-	exports.PieChart = PieChart;
-	var Pie = (function (_super) {
-	    __extends(Pie, _super);
-	    function Pie(props) {
-	        var _this = _super.call(this, props) || this;
-	        _this.state = {};
-	        return _this;
-	    }
-	    Pie.prototype.render = function () {
-	        var _a = this.props, className = _a.className, value = _a.value, size = _a.size;
-	        var rotate = this.props.rotate || 0;
-	        return (React.createElement("circle", { className: "pie " + className, r: size || 0, cy: size || 0, cx: size || 0, style: { strokeDasharray: value + ", 158", transform: "rotate(" + rotate + "deg)" } }));
-	    };
-	    return Pie;
-	}(React.Component));
-	exports.Pie = Pie;
-
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-	    return c > 3 && r && Object.defineProperty(target, key, r), r;
-	};
-	var React = __webpack_require__(1);
-	var store_1 = __webpack_require__(5);
-	var test_1 = __webpack_require__(4);
-	var property_1 = __webpack_require__(14);
-	var collapse_button_1 = __webpack_require__(15);
-	var TestDetail = (function (_super) {
-	    __extends(TestDetail, _super);
-	    function TestDetail(props) {
-	        var _this = _super.call(this, props) || this;
-	        _this.state = {};
-	        return _this;
-	    }
-	    TestDetail.prototype.render = function () {
-	        return (React.createElement("table", { className: "detail" },
-	            React.createElement("thead", null,
-	                React.createElement("tr", null,
-	                    React.createElement("td", null),
-	                    React.createElement("td", null, "name"),
-	                    React.createElement("td", null, "time"),
-	                    React.createElement("td", null, "status"),
-	                    React.createElement("td", null, "message"))),
-	            this.props.model.map(function (item) { return (React.createElement(TestDetailItem, { test: item.state })); }),
-	            React.createElement("tbody", null)));
-	    };
-	    return TestDetail;
-	}(React.Component));
-	TestDetail = __decorate([
-	    store_1.Store()
-	], TestDetail);
-	exports.TestDetail = TestDetail;
-	var TestDetailItem = (function (_super) {
-	    __extends(TestDetailItem, _super);
-	    function TestDetailItem(props) {
-	        var _this = _super.call(this, props) || this;
-	        _this.state = {
-	            collapsed: true
-	        };
-	        return _this;
-	    }
-	    TestDetailItem.prototype.render = function () {
-	        var _this = this;
-	        var test = this.props.test;
-	        var status = test.status || test_1.CaseStatus.ready;
-	        return (React.createElement("tbody", null,
-	            React.createElement("tr", null,
-	                React.createElement("td", null,
-	                    React.createElement(collapse_button_1.CollapseButton, { collapsed: this.state.collapsed, onClick: function (e) { return _this.setState({ collapsed: !_this.state.collapsed }); } })),
-	                React.createElement("td", null, test.name),
-	                React.createElement("td", null, test.duration / 1e3 + "s"),
-	                React.createElement("td", { className: "status " + test_1.CaseStatus[status] }, test_1.CaseStatus[status]),
-	                React.createElement("td", null, test.stack)),
-	            !this.state.collapsed ?
-	                React.createElement("tr", null,
-	                    React.createElement("td", null),
-	                    React.createElement("td", { colSpan: 3 },
-	                        React.createElement(DetailParamsView, { params: test.params })))
-	                :
-	                    null));
-	    };
-	    return TestDetailItem;
-	}(React.Component));
-	exports.TestDetailItem = TestDetailItem;
-	var DetailParamsView = (function (_super) {
-	    __extends(DetailParamsView, _super);
-	    function DetailParamsView(props) {
-	        var _this = _super.call(this, props) || this;
-	        _this.state = {};
-	        return _this;
-	    }
-	    DetailParamsView.prototype.renderKey = function (key, groupName) {
-	        console.log("renderKey");
-	        return (React.createElement(property_1.PropertyViewGroup, { label: groupName },
-	            React.createElement(property_1.PropertyViewItem, { label: "type", value: key.type }),
-	            this.renderAlgrithm(key.algorithm, "Algorithm"),
-	            React.createElement(property_1.PropertyViewItem, { label: "extractable", value: key.extractable.toString() }),
-	            React.createElement(property_1.PropertyViewItem, { label: "usages", value: key.usages.join(", ") })));
-	    };
-	    DetailParamsView.prototype.renderItems = function (params) {
-	        var items = [];
-	        for (var key in params) {
-	            var value = params[key];
-	            if (key === "algorithm" || key === "derivedKeyAlg") {
-	                items.push(this.renderAlgrithm(params[key], key));
-	                continue;
-	            }
-	            else if (key === "keyUsages") {
-	                value = params[key] ? params[key].join(", ") : "null";
-	            }
-	            else if (params[key].constructor.name === "CryptoKey") {
-	                items.push(this.renderKey(params[key], key));
-	                continue;
-	            }
-	            else {
-	                value = value.toString();
-	            }
-	            items.push(React.createElement(property_1.PropertyViewItem, { label: key, value: value }));
-	        }
-	        return items;
-	    };
-	    DetailParamsView.prototype.renderAlgrithm = function (alg, groupName) {
-	        var items = [];
-	        for (var key in alg) {
-	            var value = alg[key];
-	            var text = void 0;
-	            if (key === "publicExponent")
-	                text = value[0] === 1 ? "65537" : "3";
-	            else if (ArrayBuffer.isView(value))
-	                text = "ArrayBuffer";
-	            else if (key === "hash")
-	                text = value.name;
-	            else
-	                text = value ? value.toString() : "null";
-	            items.push(React.createElement(property_1.PropertyViewItem, { label: key, value: text }));
-	        }
-	        return (React.createElement(property_1.PropertyViewGroup, { label: groupName }, items));
-	    };
-	    DetailParamsView.prototype.render = function () {
-	        return (React.createElement(property_1.PropertyView, null, this.renderItems(this.props.params)));
-	    };
-	    return DetailParamsView;
-	}(React.Component));
-	exports.DetailParamsView = DetailParamsView;
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var React = __webpack_require__(1);
-	var PropertyView = (function (_super) {
-	    __extends(PropertyView, _super);
-	    function PropertyView(props) {
-	        var _this = _super.call(this, props) || this;
-	        _this.state = {};
-	        return _this;
-	    }
-	    PropertyView.prototype.render = function () {
-	        return (React.createElement("div", { className: "property-view" }, this.props.children));
-	    };
-	    return PropertyView;
-	}(React.Component));
-	exports.PropertyView = PropertyView;
-	var PropertyViewItem = (function (_super) {
-	    __extends(PropertyViewItem, _super);
-	    function PropertyViewItem(props) {
-	        var _this = _super.call(this, props) || this;
-	        _this.state = {};
-	        return _this;
-	    }
-	    PropertyViewItem.prototype.render = function () {
-	        return (React.createElement("div", { className: "item" },
-	            React.createElement("div", { className: "label" }, this.props.label),
-	            React.createElement("div", { className: "value" }, this.props.value)));
-	    };
-	    return PropertyViewItem;
-	}(React.Component));
-	exports.PropertyViewItem = PropertyViewItem;
-	var PropertyViewGroup = (function (_super) {
-	    __extends(PropertyViewGroup, _super);
-	    function PropertyViewGroup(props) {
-	        var _this = _super.call(this, props) || this;
-	        _this.state = {};
-	        return _this;
-	    }
-	    PropertyViewGroup.prototype.render = function () {
-	        return (React.createElement("div", { className: "group" },
-	            React.createElement("div", { className: "header" },
-	                React.createElement("div", { className: "label" }, this.props.label)),
-	            this.props.children));
-	    };
-	    return PropertyViewGroup;
-	}(React.Component));
-	exports.PropertyViewGroup = PropertyViewGroup;
-
-
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var React = __webpack_require__(1);
-	var CollapseButton = (function (_super) {
-	    __extends(CollapseButton, _super);
-	    function CollapseButton(props) {
-	        var _this = _super.call(this, props) || this;
-	        _this.state = {};
-	        return _this;
-	    }
-	    CollapseButton.prototype.render = function () {
-	        var _a = this.props, collapsed = _a.collapsed, onClick = _a.onClick;
-	        return (React.createElement("div", { className: "btn-collapse ", onClick: onClick }, collapsed ? "+" : "-"));
-	    };
-	    return CollapseButton;
-	}(React.Component));
-	exports.CollapseButton = CollapseButton;
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports) {
-
-	"use strict";
-	/**
-	 * Returns info about browser
-	 */
-	function BrawserInfo() {
-	    var res = {
-	        name: "",
-	        version: ""
-	    };
-	    var userAgent = window.navigator.userAgent;
-	    var reg;
-	    if (reg = /edge\/([\d\.]+)/i.exec(userAgent)) {
-	        res.name = "Edge";
-	        res.version = reg[1];
-	    }
-	    else if (/msie/i.test(userAgent)) {
-	        res.name = "Internet Explorer";
-	        res.version = /msie ([\d\.]+)/i.exec(userAgent)[1];
-	    }
-	    else if (/Trident/i.test(userAgent)) {
-	        res.name = "Internet Explorer";
-	        res.version = /rv:([\d\.]+)/i.exec(userAgent)[1];
-	    }
-	    else if (/chrome/i.test(userAgent)) {
-	        res.name = "Chrome";
-	        res.version = /chrome\/([\d\.]+)/i.exec(userAgent)[1];
-	    }
-	    else if (/safari/i.test(userAgent)) {
-	        res.name = "Safari";
-	        res.version = /([\d\.]+) safari/i.exec(userAgent)[1];
-	    }
-	    else if (/firefox/i.test(userAgent)) {
-	        res.name = "Firefox";
-	        res.version = /firefox\/([\d\.]+)/i.exec(userAgent)[1];
-	    }
-	    return res;
-	}
-	exports.BrawserInfo = BrawserInfo;
-	if (!Object.assign)
-	    Object.assign = function (target) {
-	        var sources = [];
-	        for (var _i = 1; _i < arguments.length; _i++) {
-	            sources[_i - 1] = arguments[_i];
-	        }
-	        var res = arguments[0];
-	        for (var i = 1; i < arguments.length; i++) {
-	            var obj = arguments[i];
-	            for (var prop in obj) {
-	                res[prop] = obj[prop];
-	            }
-	        }
-	        return res;
-	    };
 
 
 /***/ }
