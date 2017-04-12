@@ -8,7 +8,7 @@ function GenerateKey(name: string, keyUsages: string[]) {
     let cases: GenerateKeyCase[] = [];
 
     // modulusLength
-    [1024, 2048, /*4096*/].forEach(modulusLength => {
+    [/*1024,*/ 2048, 4096].forEach(modulusLength => {
 
         // publicExponent
         [new Uint8Array([3]), new Uint8Array([1, 0, 1])].forEach((publicExponent, index) => {
@@ -27,7 +27,7 @@ function GenerateKey(name: string, keyUsages: string[]) {
                                 publicExponent: publicExponent,
                                 modulusLength: modulusLength
                             },
-                            extractble: true,
+                            extractable: true,
                             keyUsages: keyUsages
                         }
                     })
@@ -45,7 +45,7 @@ function ExportKey(keys: TestCaseGeneratedKey[]) {
 
     keys.forEach(item => {
         const pkey = item.key as CryptoKeyPair;
-        for (let keyType in pkey) {
+        ["publicKey", "privateKey"].forEach((keyType) => {
             let key = (pkey as any)[keyType];
             // format
             ["jwk", keyType === "publicKey" ? "spki" : "pkcs8"].forEach(format => {
@@ -56,13 +56,13 @@ function ExportKey(keys: TestCaseGeneratedKey[]) {
                             format: format,
                             key: key,
                             algorithm: item.algorithm,
-                            extractble: true,
+                            extractable: true,
                             keyUsages: key.usages
                         }
                     })
                 );
             });
-        }
+        });
     });
 
     return cases;
@@ -126,7 +126,7 @@ export class RsaPSSTest extends AlgorithmTest {
                     algorithm: {
                         name: alg,
                         hash: (item.algorithm as any).hash,
-                        saltLength: 128
+                        saltLength: 32
                     }
                 }
             };
@@ -157,6 +157,13 @@ export class RsaOAEPTest extends AlgorithmTest {
         [null, new Uint8Array(5)].forEach(label => {
             keys.forEach(item => {
                 const pkey = item.key as CryptoKeyPair;
+                if (
+                    (item.algorithm as any).hash.name === "SHA-512" &&
+                    (item.algorithm as any).modulusLength === 1024
+                ) {
+                    // OpenSSL has got error in this case
+                    return;
+                }
                 cases.push(new EncryptCase({
                     name: `${alg} hash:${(item.algorithm as any).hash.name} pubExp:${(item.algorithm as any).publicExponent.length === 1 ? 3 : 65537} modLen:${(item.algorithm as any).modulusLength} label:${label}`,
                     params: {

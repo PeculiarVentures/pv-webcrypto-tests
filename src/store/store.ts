@@ -4,12 +4,12 @@ export const STORE_EVENT_CHANGE = "change";
 
 export type StoreOptions = {
     /**
-     * Fillter of attribute names from State 
+     * Filter of attribute names from State 
      * 
      * @type {string[]}
      */
     filter?: string[];
-}
+};
 
 /**
  * Decorator to bind BaseStore to React component 

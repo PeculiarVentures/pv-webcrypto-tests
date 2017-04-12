@@ -84,8 +84,11 @@ export class App extends React.Component<IAppProps, IAppState> {
             case "1": // JS
                 self.crypto = cryptoEngines.js;
                 break;
+            case "2": // Local
+                self.crypto = cryptoEngines.local;
+                break;
             default:
-                throw new Error("Uknown type of crypto module");
+                throw new Error("Unknown type of crypto module");
         }
         this.setState({ selectedCrypto }, () => this.createTests());
     }
@@ -98,7 +101,7 @@ export class App extends React.Component<IAppProps, IAppState> {
     }
 
     render() {
-        const info = helper.BrawserInfo();
+        const info = helper.BrowserInfo();
         const {report, tests} = this.state;
         return (
             <div className="container">
@@ -107,6 +110,7 @@ export class App extends React.Component<IAppProps, IAppState> {
                 <select ref="crypto" name="" value={this.state.selectedCrypto} onChange={this.onCryptoChange}>
                     <option value="0">Native</option>
                     <option value="1">JavaScript</option>
+                    <option value="2">WebCrypto Local</option>
                 </select>
                 <hr />
                 {this.state.tests ?
@@ -121,7 +125,7 @@ export class App extends React.Component<IAppProps, IAppState> {
                             report ?
                                 <div>
                                     <hr />
-                                    <h3>Report: {this.state.selectedCrypto === "0" ? "Native" : "JavaScript"}</h3>
+                                    <h3>Report: {this.state.selectedCrypto === "0" ? "Native" : this.state.selectedCrypto === "1" ? "JavaScript" : "WebCrypto Local"}</h3>
                                     <PropertyView>
                                         <PropertyViewItem label="Browser" value={`${info.name} v${info.version}`} />
                                         <PropertyViewItem label="UserAgent" value={window.navigator.userAgent} />

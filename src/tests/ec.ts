@@ -1,4 +1,4 @@
-import {AlgorithmTest, TestCaseCollection, GenerateKeyCase, ExportKeyCase, SignCase, DeriveKeyCase, DeriveBitsCase} from "../store/test";
+import { AlgorithmTest, TestCaseCollection, GenerateKeyCase, ExportKeyCase, SignCase, DeriveKeyCase, DeriveBitsCase } from "../store/test";
 
 const ALG_EC_DSA = "ECDSA";
 const ALG_EC_DH = "ECDH";
@@ -16,7 +16,7 @@ function GenerateKey(name: string, keyUsages: string[]) {
                         name: name,
                         namedCurve: namedCurve
                     },
-                    extractble: true,
+                    extractable: true,
                     keyUsages: keyUsages
                 }
             })
@@ -30,8 +30,8 @@ function GenerateKey(name: string, keyUsages: string[]) {
 function ExportKey(keys: TestCaseGeneratedKey[]) {
     let cases: ExportKeyCase[] = [];
 
-    keys.forEach(item => {
-        for (let keyType in item.key) {
+    keys.forEach((item) => {
+        ["publicKey", "privateKey"].forEach((keyType) => {
             let key = (item.key as any)[keyType];
             // format
             ["jwk", keyType === "publicKey" ? "spki" : "pkcs8"].forEach(format => {
@@ -42,13 +42,13 @@ function ExportKey(keys: TestCaseGeneratedKey[]) {
                             format: format,
                             key: key,
                             algorithm: item.algorithm,
-                            extractble: true,
+                            extractable: true,
                             keyUsages: key.usages
                         }
                     })
                 );
             });
-        }
+        });
     });
 
     return cases;
@@ -60,7 +60,7 @@ export class EcDSATest extends AlgorithmTest {
         super(ALG_EC_DSA);
 
         this.generateKey.addRange(GenerateKey(ALG_EC_DSA, ["sign", "verify"]));
-        this.on("generate", keys  => {
+        this.on("generate", keys => {
             this.exportKey.addRange(ExportKey(keys));
             this.sign.addRange(EcDSATest.Sign(ALG_EC_DSA, keys));
 

@@ -1,7 +1,7 @@
 /**
  * Returns info about browser 
  */
-export function BrawserInfo() {
+export function BrowserInfo() {
     let res = {
         name: "",
         version: ""
