@@ -2276,7 +2276,7 @@ var ALG_RSA_PSS = "RSA-PSS";
 function GenerateKey(name, keyUsages) {
     var cases = [];
     // modulusLength
-    [1024, 2048,].forEach(function (modulusLength) {
+    [/*1024,*/ 2048, 4096].forEach(function (modulusLength) {
         // publicExponent
         [new Uint8Array([3]), new Uint8Array([1, 0, 1])].forEach(function (publicExponent, index) {
             // sha
@@ -2379,7 +2379,7 @@ var RsaPSSTest = (function (_super) {
                     algorithm: {
                         name: alg,
                         hash: item.algorithm.hash,
-                        saltLength: 128
+                        saltLength: 32
                     }
                 }
             };
@@ -2410,6 +2410,11 @@ var RsaOAEPTest = (function (_super) {
         [null, new Uint8Array(5)].forEach(function (label) {
             keys.forEach(function (item) {
                 var pkey = item.key;
+                if (item.algorithm.hash.name === "SHA-512" &&
+                    item.algorithm.modulusLength === 1024) {
+                    // OpenSSL has got error in this case
+                    return;
+                }
                 cases.push(new test_1.EncryptCase({
                     name: alg + " hash:" + item.algorithm.hash.name + " pubExp:" + (item.algorithm.publicExponent.length === 1 ? 3 : 65537) + " modLen:" + item.algorithm.modulusLength + " label:" + label,
                     params: {
