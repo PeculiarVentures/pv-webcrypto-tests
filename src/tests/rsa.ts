@@ -45,7 +45,7 @@ function ExportKey(keys: TestCaseGeneratedKey[]) {
 
     keys.forEach(item => {
         const pkey = item.key as CryptoKeyPair;
-        for (let keyType in pkey) {
+        ["publicKey", "privateKey"].forEach((keyType) => {
             let key = (pkey as any)[keyType];
             // format
             ["jwk", keyType === "publicKey" ? "spki" : "pkcs8"].forEach(format => {
@@ -62,7 +62,7 @@ function ExportKey(keys: TestCaseGeneratedKey[]) {
                     })
                 );
             });
-        }
+        });
     });
 
     return cases;

@@ -9,7 +9,7 @@ export type StoreOptions = {
      * @type {string[]}
      */
     filter?: string[];
-}
+};
 
 /**
  * Decorator to bind BaseStore to React component 

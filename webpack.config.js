@@ -9,7 +9,7 @@ module.exports = [
         },
         output: {
             filename: "[name].js",
-            path: "./built",
+            path: `${__dirname}/built`,
             library: "[name]"
         },
 
@@ -18,20 +18,24 @@ module.exports = [
 
         resolve: {
             // Add ".ts" and ".tsx" as resolvable extensions.
-            extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js"]
+            extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"]
         },
 
         module: {
-            loaders: [
+            rules: [
                 // All files with a ".ts" or ".tsx" extension will be handled by "ts-loader".
                 {
                     test: /\.tsx?$/,
-                    loader: "ts-loader"
+                    loader: "ts-loader",
+                    exclude: /node_modules/,
                 },
 
                 {
                     test: /\.scss$/,
-                    loader: ExtractTextPlugin.extract("style-loader", "css-loader!postcss-loader!sass-loader")
+                    loader: ExtractTextPlugin.extract({
+                        fallback: "style-loader",
+                        use: "css-loader!postcss-loader!sass-loader",
+                    }),
                 },
 
                 {
@@ -58,8 +62,9 @@ module.exports = [
 
 
         plugins: [
-            new ExtractTextPlugin("style.css", {
-                allChunks: true
+            new ExtractTextPlugin({
+                filename: "style.css",
+                allChunks: true,
             })
         ],
         // When importing a module whose path matches one of the following, just

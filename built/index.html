@@ -10,8 +10,10 @@
 
         // Copy standard native crypto module
         cryptoEngines.native = window.msCrypto || window.crypto;
-        if (cryptoEngines.native.webkitSubtle)  cryptoEngines.native.subtle = cryptoEngines.native.webkitSubtle;
+        if (cryptoEngines.native.webkitSubtle) cryptoEngines.native.subtle = cryptoEngines.native.webkitSubtle;
     </script>
+    <script src="http://cdn.rawgit.com/dcodeIO/protobuf.js/6.6.0/dist/protobuf.js"></script>
+    <script src="https://cdn.rawgit.com/jakearchibald/idb/97e4e878/lib/idb.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <script src="src/promise.js"></script>
     <script src="src/webcrypto-liner.min.js"></script>
@@ -19,9 +21,40 @@
     <script src="src/es5-shim.min.js"></script>
     <script src="src/react.min.js"></script>
     <script src="src/react-dom.min.js"></script>
+    <script src="src/webcrypto-socket.js"></script>
     <script>
         // Copy crypto js implementation
         cryptoEngines.js = window.crypto;
+
+        ws = new WebcryptoSocket.SocketProvider();
+
+        ws.connect("localhost:8080")
+            .on("error", (e) => {
+                console.error(e.error);
+            })
+            .on("listening", (e) => {
+                ws.info()
+                    .then((info) => {
+                        console.log("Providers:", info);
+                        return ws.getCrypto(info.providers[0].id); // OpenSSL
+                    })
+                    .then((crypto) => {
+                        cryptoEngines.local = crypto;
+                    })
+            })
+            .on("token", (info) => {
+                if (info.error) {
+                    console.error(info.error);
+                } else {
+                    ws.info()
+                        .then((wcInfo) => {
+                            console.log(wcInfo);
+                        });
+                }
+            })
+            .on("close", (e) => {
+                console.info("close");
+            });
     </script>
 </head>
 
