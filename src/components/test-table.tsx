@@ -29,7 +29,7 @@ export class TestTable extends React.Component<ITestTableProps, ITestTableState>
                                 item.setState({ selected: e.currentTarget.checked })
                             )} />
                         </td>
-                        <td>Allgorithm</td>
+                        <td>Algorithm</td>
                         <td>generateKey</td>
                         <td>digest</td>
                         <td>export/import </td>
@@ -103,7 +103,7 @@ export class TestTableItemCell extends React.Component<ITestTableItemCellProps, 
         const model = this.props.model;
         if (!model)
             return <td></td>;
-        const complited = model.state.complited;
+        const completed = model.state.completed;
         let success: number = 0, error: number = 0;
         model.forEach(item => {
             if (item.state.status === CaseStatus.success) {

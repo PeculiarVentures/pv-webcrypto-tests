@@ -19,7 +19,7 @@ function GenerateKey(name: string, keyUsages: string[]) {
                         name: name,
                         length: length
                     },
-                    extractble: true,
+                    extractable: true,
                     keyUsages: keyUsages
                 }
             })
@@ -43,7 +43,7 @@ function ExportKey(keys: TestCaseGeneratedKey[]) {
                         format: format,
                         key: item.key as CryptoKey,
                         algorithm: item.algorithm,
-                        extractble: true,
+                        extractable: true,
                         keyUsages: (item.key as CryptoKey).usages
                     }
                 })

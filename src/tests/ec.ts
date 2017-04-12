@@ -16,7 +16,7 @@ function GenerateKey(name: string, keyUsages: string[]) {
                         name: name,
                         namedCurve: namedCurve
                     },
-                    extractble: true,
+                    extractable: true,
                     keyUsages: keyUsages
                 }
             })
@@ -42,7 +42,7 @@ function ExportKey(keys: TestCaseGeneratedKey[]) {
                             format: format,
                             key: key,
                             algorithm: item.algorithm,
-                            extractble: true,
+                            extractable: true,
                             keyUsages: key.usages
                         }
                     })

@@ -28,17 +28,17 @@ export enum CaseStatus {
 }
 
 export interface TestCaseCollectionState<I extends TestCase<any>> extends BaseStoreCollectionState<I> {
-    complited?: number;
+    completed?: number;
 }
 
 export class TestCaseCollection<I extends TestCase<any>> extends BaseStoreCollection<I, TestCaseCollectionState<I>> {
 
     static defaultState = {
-        complitetd: 0
+        completed: 0
     };
 
     constructor(cases: I[]) {
-        const _state = Object.assign({}, TestCaseCollection.defaultState, { items: cases || [], complited: 0 });
+        const _state = Object.assign({}, TestCaseCollection.defaultState, { items: cases || [], completed: 0 });
         super(_state);
         this.connectToCases(this.state.items!);
     }
@@ -63,7 +63,7 @@ export class TestCaseCollection<I extends TestCase<any>> extends BaseStoreCollec
             console.log(item.state.name);
             console.log(`  Status:${CaseStatus[item.state.status]}`);
             this.setState({
-                complited: this.state.complited + 1
+                completed: this.state.completed + 1
             });
             this.run();
         }
@@ -73,8 +73,8 @@ export class TestCaseCollection<I extends TestCase<any>> extends BaseStoreCollec
 
     run() {
         const state = this.state;
-        if (this.length && state.complited !== this.length) {
-            const testCase = this.items(state.complited!);
+        if (this.length && state.completed !== this.length) {
+            const testCase = this.items(state.completed!);
             testCase.run();
         }
         else {
@@ -135,7 +135,7 @@ export class AlgorithmTest extends TestCase<AlgorithmTestState> {
         }
     }
 
-    getGanratedKeys() {
+    getGeneratedKeys() {
         return this.generateKey
             .filter(_case => !!_case.state.key)
             .map(_case => {
@@ -151,13 +151,13 @@ export class AlgorithmTest extends TestCase<AlgorithmTestState> {
             let done = true;
             for (let i in this.generateKey) {
                 let state = this.generateKey.state;
-                if (state.complited !== state.items!.length) {
+                if (state.completed !== state.items!.length) {
                     done = false;
                     break;
                 }
             }
             if (done) {
-                const keys = this.getGanratedKeys();
+                const keys = this.getGeneratedKeys();
                 if (keys)
                     this.emit("generate", keys);
             }
@@ -178,7 +178,7 @@ export class AlgorithmTest extends TestCase<AlgorithmTestState> {
         return tests;
     }
 
-    protected countDuaration(tests: TestCaseCollection<any>) {
+    protected countDuration(tests: TestCaseCollection<any>) {
         let res = 0;
         const durations = tests.map(item => item.state.duration);
         if (durations.length)
@@ -193,7 +193,7 @@ export class AlgorithmTest extends TestCase<AlgorithmTestState> {
 
     report() {
         // total duration
-        let duration = this.getAllTests().map(test => this.countDuaration(test)).reduce((p, c) => p + c);
+        let duration = this.getAllTests().map(test => this.countDuration(test)).reduce((p, c) => p + c);
         let success = this.getAllTests().map(test => this.countStatus(test, CaseStatus.success)).reduce((p, c) => p + c);
         let error = this.getAllTests().map(test => this.countStatus(test, CaseStatus.error)).reduce((p, c) => p + c);
 
@@ -208,7 +208,7 @@ export class AlgorithmTest extends TestCase<AlgorithmTestState> {
 export interface GenerateKeyCaseState extends TestCaseState {
     params?: {
         algorithm: any;
-        extractble: boolean;
+        extractable: boolean;
         keyUsages: string[];
     };
     key?: CryptoKey | CryptoKeyPair;
@@ -226,7 +226,7 @@ export class GenerateKeyCase extends TestCase<GenerateKeyCaseState> {
         Promise.resolve()
             .then(() => {
                 this.setState({ status: CaseStatus.working });
-                return crypto.subtle.generateKey(params.algorithm, params.extractble, params.keyUsages);
+                return crypto.subtle.generateKey(params.algorithm, params.extractable, params.keyUsages);
             })
             .then((key: CryptoKey | CryptoKeyPair) => {
                 const endAt = new Date().getTime();
@@ -253,7 +253,7 @@ export interface ExportKeyCaseState extends TestCaseState {
         key: CryptoKey,
         format: string;
         algorithm: any;
-        extractble: boolean;
+        extractable: boolean;
         keyUsages: string[];
     };
     key?: CryptoKey | CryptoKeyPair;
@@ -274,7 +274,7 @@ export class ExportKeyCase extends TestCase<ExportKeyCaseState> {
                 return crypto.subtle.exportKey(params.format, params.key);
             })
             .then((data: any) => {
-                return crypto.subtle.importKey(params!.format, data, params!.algorithm, params!.extractble, params!.keyUsages);
+                return crypto.subtle.importKey(params!.format, data, params!.algorithm, params!.extractable, params!.keyUsages);
             })
             .then((key: CryptoKey) => {
                 const endAt = new Date().getTime();

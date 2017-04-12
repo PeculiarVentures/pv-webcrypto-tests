@@ -109,7 +109,7 @@ export class DetailParamsView extends React.Component<IDetailParamsViewProps, ID
         return (
             <PropertyViewGroup label={groupName}>
                 <PropertyViewItem label="type" value={key.type} />
-                {this.renderAlgrithm(key.algorithm, "Algorithm")}
+                {this.renderAlgorithm(key.algorithm, "Algorithm")}
                 <PropertyViewItem label="extractable" value={key.extractable.toString()} />
                 <PropertyViewItem label="usages" value={key.usages.join(", ")} />
             </PropertyViewGroup>
@@ -121,7 +121,7 @@ export class DetailParamsView extends React.Component<IDetailParamsViewProps, ID
         for (let key in params) {
             let value: string = params[key];
             if (key === "algorithm" || key === "derivedKeyAlg") {
-                items.push(this.renderAlgrithm(params[key], key));
+                items.push(this.renderAlgorithm(params[key], key));
                 continue;
             }
             else if (key === "keyUsages") {
@@ -140,7 +140,7 @@ export class DetailParamsView extends React.Component<IDetailParamsViewProps, ID
         return items;
     }
 
-    renderAlgrithm(alg: { [key: string]: any }, groupName: string) {
+    renderAlgorithm(alg: { [key: string]: any }, groupName: string) {
         let items: JSX.Element[] = [];
         for (let key in alg) {
             let value = alg[key];

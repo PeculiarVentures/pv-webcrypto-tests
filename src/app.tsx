@@ -85,7 +85,7 @@ export class App extends React.Component<IAppProps, IAppState> {
                 self.crypto = cryptoEngines.js;
                 break;
             default:
-                throw new Error("Uknown type of crypto module");
+                throw new Error("Unknown type of crypto module");
         }
         this.setState({ selectedCrypto }, () => this.createTests());
     }
@@ -98,7 +98,7 @@ export class App extends React.Component<IAppProps, IAppState> {
     }
 
     render() {
-        const info = helper.BrawserInfo();
+        const info = helper.BrowserInfo();
         const {report, tests} = this.state;
         return (
             <div className="container">
