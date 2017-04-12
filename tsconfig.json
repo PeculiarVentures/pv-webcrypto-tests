@@ -7,8 +7,9 @@
             "dom"
         ],
         "noImplicitAny": true,
-        "strictNullChecks": true,
+        "strictNullChecks": false,
         "sourceMap": false,
+        "importHelpers": true,
         "pretty": true,
         "jsx": "react",
         "experimentalDecorators": true
