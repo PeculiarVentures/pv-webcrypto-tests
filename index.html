@@ -18,6 +18,7 @@
     <script src="src/promise.js"></script>
     <script src="src/webcrypto-liner.min.js"></script>
     <script src="src/asmcrypto.js"></script>
+    <script src="src/elliptic.js"></script>
     <script src="src/es5-shim.min.js"></script>
     <script src="src/react.min.js"></script>
     <script src="src/react-dom.min.js"></script>
@@ -28,7 +29,7 @@
 
         ws = new WebcryptoSocket.SocketProvider();
 
-        ws.connect("127.0.0.1:8080")
+        ws.connect("localhost:8080")
             .on("error", (e) => {
                 console.error(e.error);
             })
