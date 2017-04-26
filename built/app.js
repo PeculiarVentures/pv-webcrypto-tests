@@ -998,7 +998,16 @@ var detail_1 = __webpack_require__(10);
 var property_1 = __webpack_require__(4);
 var helper = __webpack_require__(13);
 var self = window;
-var tests = [sha_1.ShaTest, aes_1.AesCBCTest, aes_1.AesGCMTest, rsa_1.RsaOAEPTest, rsa_1.RsaPSSTest, rsa_1.RsaSSATest, ec_1.EcDSATest, ec_1.EcDHTest];
+var tests = [
+    sha_1.ShaTest,
+    aes_1.AesCBCTest,
+    aes_1.AesGCMTest,
+    rsa_1.RsaOAEPTest,
+    rsa_1.RsaPSSTest,
+    rsa_1.RsaSSATest,
+    ec_1.EcDSATest,
+    ec_1.EcDHTest,
+];
 function newTests() {
     return tests.map(function (Test) { return new Test(); });
 }
