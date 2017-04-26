@@ -30,30 +30,30 @@
         ws = new WebcryptoSocket.SocketProvider();
 
         ws.connect("localhost:8080")
-            .on("error", (e) => {
+            .on("error", function(e) {
                 console.error(e.error);
             })
-            .on("listening", (e) => {
+            .on("listening", function(e) {
                 ws.info()
-                    .then((info) => {
+                    .then(function(info) {
                         console.log("Providers:", info);
                         return ws.getCrypto(info.providers[0].id); // OpenSSL
                     })
-                    .then((crypto) => {
+                    .then(function(crypto) {
                         cryptoEngines.local = crypto;
                     })
             })
-            .on("token", (info) => {
+            .on("token", function(info) {
                 if (info.error) {
                     console.error(info.error);
                 } else {
                     ws.info()
-                        .then((wcInfo) => {
+                        .then(function(wcInfo) {
                             console.log(wcInfo);
                         });
                 }
             })
-            .on("close", (e) => {
+            .on("close", function(e) {
                 console.info("close");
             });
     </script>
