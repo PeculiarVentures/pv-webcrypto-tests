@@ -27,35 +27,40 @@
         // Copy crypto js implementation
         cryptoEngines.js = window.crypto;
 
-        ws = new WebcryptoSocket.SocketProvider();
+        try {
+            ws = new WebcryptoSocket.SocketProvider();
 
-        ws.connect("localhost:8080")
-            .on("error", function(e) {
-                console.error(e.error);
-            })
-            .on("listening", function(e) {
-                ws.info()
-                    .then(function(info) {
-                        console.log("Providers:", info);
-                        return ws.getCrypto(info.providers[0].id); // OpenSSL
-                    })
-                    .then(function(crypto) {
-                        cryptoEngines.local = crypto;
-                    })
-            })
-            .on("token", function(info) {
-                if (info.error) {
-                    console.error(info.error);
-                } else {
+            ws.connect("localhost:8080")
+                .on("error", function (e) {
+                    console.error(e.error);
+                })
+                .on("listening", function (e) {
                     ws.info()
-                        .then(function(wcInfo) {
-                            console.log(wcInfo);
-                        });
-                }
-            })
-            .on("close", function(e) {
-                console.info("close");
-            });
+                        .then(function (info) {
+                            console.log("Providers:", info);
+                            return ws.getCrypto(info.providers[0].id); // OpenSSL
+                        })
+                        .then(function (crypto) {
+                            cryptoEngines.local = crypto;
+                        })
+                })
+                .on("token", function (info) {
+                    if (info.error) {
+                        console.error(info.error);
+                    } else {
+                        ws.info()
+                            .then(function (wcInfo) {
+                                console.log(wcInfo);
+                            });
+                    }
+                })
+                .on("close", function (e) {
+                    console.info("close");
+                });
+        }
+        catch (e) {
+            console.error(e);
+        }
     </script>
 </head>
 
