@@ -1000,6 +1000,7 @@ var helper = __webpack_require__(13);
 var self = window;
 var tests = [
     sha_1.ShaTest,
+    aes_1.AesECBTest,
     aes_1.AesCBCTest,
     aes_1.AesGCMTest,
     rsa_1.RsaOAEPTest,
@@ -1851,6 +1852,7 @@ ReactDOM.render(React.createElement(app_1.App, null), document.getElementById("a
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 var test_1 = __webpack_require__(2);
+var ALG_AES_ECB = "AES-ECB";
 var ALG_AES_CBC = "AES-CBC";
 var ALG_AES_CTR = "AES-CTR";
 var ALG_AES_GCM = "AES-GCM";
@@ -1894,6 +1896,59 @@ function ExportKey(keys) {
     });
     return cases;
 }
+var AesECBTest = (function (_super) {
+    tslib_1.__extends(AesECBTest, _super);
+    function AesECBTest() {
+        var _this = _super.call(this, ALG_AES_ECB) || this;
+        _this.generateKey.addRange(GenerateKey(ALG_AES_ECB, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]));
+        _this.on("generate", function (keys) {
+            _this.exportKey.addRange(ExportKey(keys));
+            _this.encrypt.addRange(AesECBTest.Encrypt(ALG_AES_ECB, keys));
+            _this.wrap.addRange(AesECBTest.Wrap(ALG_AES_ECB, keys));
+            _this.run();
+        });
+        return _this;
+    }
+    AesECBTest.Encrypt = function (alg, keys) {
+        return keys.map(function (item) {
+            return new test_1.EncryptCase({
+                name: alg + " len:" + item.algorithm.length,
+                params: {
+                    encryptKey: item.key,
+                    decryptKey: item.key,
+                    algorithm: {
+                        name: ALG_AES_ECB,
+                    }
+                }
+            });
+        });
+    };
+    AesECBTest.Wrap = function (alg, keys) {
+        var cases = [];
+        keys.forEach(function (item) {
+            var _alg = item.algorithm;
+            // format
+            ["jwk", "raw"].forEach(function (format) {
+                cases.push(new test_1.WrapCase({
+                    name: "wrap " + alg + " len:" + _alg.length,
+                    params: {
+                        format: format,
+                        key: item.key,
+                        wrappingKey: item.key,
+                        unwrappingKey: item.key,
+                        algorithm: {
+                            name: alg,
+                            iv: new Uint8Array(16)
+                        },
+                    }
+                }));
+            });
+        });
+        return cases;
+    };
+    return AesECBTest;
+}(test_1.AlgorithmTest));
+exports.AesECBTest = AesECBTest;
 var AesCBCTest = (function (_super) {
     tslib_1.__extends(AesCBCTest, _super);
     function AesCBCTest() {

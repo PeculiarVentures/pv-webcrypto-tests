@@ -1,6 +1,6 @@
 import * as React from "react";
 import { AlgorithmTest, TestCaseCollection } from "./store/test";
-import { AesCBCTest, AesCTRTest, AesGCMTest, AesCFBTest, AesCMACTest } from "./tests/aes";
+import { AesECBTest, AesCBCTest, AesCTRTest, AesGCMTest, AesCFBTest, AesCMACTest } from "./tests/aes";
 import { RsaOAEPTest, RsaPSSTest, RsaSSATest } from "./tests/rsa";
 import { ShaTest } from "./tests/sha";
 import { EcDSATest, EcDHTest } from "./tests/ec";
@@ -13,6 +13,7 @@ const self: { crypto: Crypto } = window as any;
 
 const tests = [
     ShaTest,
+    AesECBTest,
     AesCBCTest,
     AesGCMTest,
     RsaOAEPTest,

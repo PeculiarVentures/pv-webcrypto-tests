@@ -1,5 +1,6 @@
 import { AlgorithmTest, TestCaseCollection, GenerateKeyCase, ExportKeyCase, SignCase, EncryptCase, WrapCase } from "../store/test";
 
+const ALG_AES_ECB = "AES-ECB";
 const ALG_AES_CBC = "AES-CBC";
 const ALG_AES_CTR = "AES-CTR";
 const ALG_AES_GCM = "AES-GCM";
@@ -52,6 +53,60 @@ function ExportKey(keys: TestCaseGeneratedKey[]) {
     });
 
     return cases;
+}
+
+export class AesECBTest extends AlgorithmTest {
+    constructor() {
+        super(ALG_AES_ECB);
+
+        this.generateKey.addRange(GenerateKey(ALG_AES_ECB, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]));
+        this.on("generate", (keys: TestCaseGeneratedKey[]) => {
+            this.exportKey.addRange(ExportKey(keys));
+            this.encrypt.addRange(AesECBTest.Encrypt(ALG_AES_ECB, keys));
+            this.wrap.addRange(AesECBTest.Wrap(ALG_AES_ECB, keys));
+
+            this.run();
+        });
+    }
+
+    static Encrypt(alg: string, keys: TestCaseGeneratedKey[]) {
+        return keys.map(item => {
+            return new EncryptCase({
+                name: `${alg} len:${(item.algorithm as any).length}`,
+                params: {
+                    encryptKey: item.key as CryptoKey,
+                    decryptKey: item.key as CryptoKey,
+                    algorithm: {
+                        name: ALG_AES_ECB,
+                    }
+                }
+            });
+        });
+    }
+
+    static Wrap(alg: string, keys: TestCaseGeneratedKey[]) {
+        const cases: WrapCase[] = [];
+        keys.forEach(item => {
+            let _alg: any = item.algorithm;
+            // format
+            ["jwk", "raw"].forEach(format => {
+                cases.push(new WrapCase({
+                    name: `wrap ${alg} len:${_alg.length}`,
+                    params: {
+                        format,
+                        key: item.key as CryptoKey,
+                        wrappingKey: item.key as CryptoKey,
+                        unwrappingKey: item.key as CryptoKey,
+                        algorithm: {
+                            name: alg,
+                            iv: new Uint8Array(16)
+                        },
+                    }
+                }));
+            });
+        });
+        return cases;
+    }
 }
 
 export class AesCBCTest extends AlgorithmTest {
