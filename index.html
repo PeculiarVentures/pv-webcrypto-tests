@@ -30,7 +30,7 @@
         try {
             ws = new WebcryptoSocket.SocketProvider();
 
-            ws.connect("localhost:8080")
+            ws.connect("127.0.0.1:8080")
                 .on("error", function (e) {
                     console.error(e.error);
                 })
