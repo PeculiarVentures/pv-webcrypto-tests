@@ -1,7 +1,7 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('protobufjs')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'protobufjs'], factory) :
-	(factory((global.WebcryptoSocket = global.WebcryptoSocket || {}),global.protobuf));
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('protobufjs')) :
+  typeof define === 'function' && define.amd ? define(['exports', 'protobufjs'], factory) :
+  (factory((global.WebcryptoSocket = global.WebcryptoSocket || {}),global.protobuf));
 }(this, (function (exports,protobufjs) { 'use strict';
 
 /*! *****************************************************************************
@@ -93,6 +93,10 @@ EventHandlers.prototype = Object.create(null);
 function EventEmitter() {
   EventEmitter.init.call(this);
 }
+// nodejs oddity
+// require('events') === require('events').EventEmitter
+EventEmitter.EventEmitter = EventEmitter;
+
 EventEmitter.usingDomains = false;
 
 EventEmitter.prototype.domain = undefined;
@@ -1623,7 +1627,6 @@ var ECDSAPublicKeyConverter = (function () {
             });
         });
     };
-    
     return ECDSAPublicKeyConverter;
 }());
 var ECDHPublicKeyConverter = (function () {
@@ -1643,7 +1646,6 @@ var ECDHPublicKeyConverter = (function () {
             });
         });
     };
-    
     return ECDHPublicKeyConverter;
 }());
 var DateConverter = (function () {
@@ -1663,7 +1665,6 @@ var DateConverter = (function () {
             });
         });
     };
-    
     return DateConverter;
 }());
 
@@ -3475,6 +3476,12 @@ __decorate([
 __decorate([
     ProtobufProperty({ id: ProviderCryptoProto_1.INDEX++, repeated: true, type: "string" })
 ], ProviderCryptoProto.prototype, "algorithms", void 0);
+__decorate([
+    ProtobufProperty({ id: ProviderCryptoProto_1.INDEX++, type: "bool", defaultValue: false })
+], ProviderCryptoProto.prototype, "isRemovable", void 0);
+__decorate([
+    ProtobufProperty({ id: ProviderCryptoProto_1.INDEX++, type: "string" })
+], ProviderCryptoProto.prototype, "atr", void 0);
 ProviderCryptoProto = ProviderCryptoProto_1 = __decorate([
     ProtobufElement({})
 ], ProviderCryptoProto);
@@ -3603,6 +3610,18 @@ IsLoggedInActionProto.ACTION = "crypto/isLoggedIn";
 IsLoggedInActionProto = __decorate([
     ProtobufElement({})
 ], IsLoggedInActionProto);
+var ResetActionProto = (function (_super) {
+    __extends(ResetActionProto, _super);
+    function ResetActionProto() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return ResetActionProto;
+}(CryptoActionProto));
+ResetActionProto.INDEX = CryptoActionProto.INDEX;
+ResetActionProto.ACTION = "crypto/reset";
+ResetActionProto = __decorate([
+    ProtobufElement({})
+], ResetActionProto);
 var CryptoActionProto_1;
 
 function printf(text) {
@@ -3695,6 +3714,9 @@ function PrepareAlgorithm(alg) {
 function PrepareData(data, paramName) {
     if (!data) {
         throw new WebCryptoError("Parameter '" + paramName + "' is required and cant be empty");
+    }
+    if (typeof Buffer !== "undefined" && Buffer.isBuffer(data)) {
+        return new Uint8Array(data);
     }
     if (ArrayBuffer.isView(data)) {
         return new Uint8Array(data.buffer);
@@ -3838,6 +3860,7 @@ var AlgorithmNames = {
     RsaSSA: "RSASSA-PKCS1-v1_5",
     RsaPSS: "RSA-PSS",
     RsaOAEP: "RSA-OAEP",
+    AesECB: "AES-ECB",
     AesCTR: "AES-CTR",
     AesCMAC: "AES-CMAC",
     AesGCM: "AES-GCM",
@@ -3987,6 +4010,14 @@ var AesEncrypt = (function (_super) {
     return AesEncrypt;
 }(AesWrapKey));
 AesEncrypt.KEY_USAGES = ["encrypt", "decrypt", "wrapKey", "unwrapKey"];
+var AesECB = (function (_super) {
+    __extends(AesECB, _super);
+    function AesECB() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return AesECB;
+}(AesEncrypt));
+AesECB.ALG_NAME = AlgorithmNames.AesECB;
 var AesCBC = (function (_super) {
     __extends(AesCBC, _super);
     function AesCBC() {
@@ -4680,6 +4711,9 @@ var SubtleCrypto = (function () {
                 case AlgorithmNames.RsaPSS.toUpperCase():
                     Class = RsaPSS;
                     break;
+                case AlgorithmNames.AesECB.toUpperCase():
+                    Class = AesECB;
+                    break;
                 case AlgorithmNames.AesCBC.toUpperCase():
                     Class = AesCBC;
                     break;
@@ -4783,6 +4817,9 @@ var SubtleCrypto = (function () {
                 case AlgorithmNames.RsaOAEP.toUpperCase():
                     Class = RsaOAEP;
                     break;
+                case AlgorithmNames.AesECB.toUpperCase():
+                    Class = AesECB;
+                    break;
                 case AlgorithmNames.AesCBC.toUpperCase():
                     Class = AesCBC;
                     break;
@@ -4806,6 +4843,9 @@ var SubtleCrypto = (function () {
             switch (alg.name.toUpperCase()) {
                 case AlgorithmNames.RsaOAEP.toUpperCase():
                     Class = RsaOAEP;
+                    break;
+                case AlgorithmNames.AesECB.toUpperCase():
+                    Class = AesECB;
                     break;
                 case AlgorithmNames.AesCBC.toUpperCase():
                     Class = AesCBC;
@@ -4871,6 +4911,9 @@ var SubtleCrypto = (function () {
                 case AlgorithmNames.RsaPSS.toUpperCase():
                     Class = RsaPSS;
                     break;
+                case AlgorithmNames.AesECB.toUpperCase():
+                    Class = AesECB;
+                    break;
                 case AlgorithmNames.RsaOAEP.toUpperCase():
                     Class = RsaOAEP;
                     break;
@@ -4915,6 +4958,9 @@ var SubtleCrypto = (function () {
                 case AlgorithmNames.RsaOAEP.toUpperCase():
                     Class = RsaOAEP;
                     break;
+                case AlgorithmNames.AesECB.toUpperCase():
+                    Class = AesECB;
+                    break;
                 case AlgorithmNames.AesCBC.toUpperCase():
                     Class = AesCBC;
                     break;
@@ -4953,6 +4999,9 @@ var SubtleCrypto = (function () {
                 case AlgorithmNames.RsaOAEP.toUpperCase():
                     Class = RsaOAEP;
                     break;
+                case AlgorithmNames.AesECB.toUpperCase():
+                    Class = AesECB;
+                    break;
                 case AlgorithmNames.AesCBC.toUpperCase():
                     Class = AesCBC;
                     break;
@@ -4980,6 +5029,9 @@ var SubtleCrypto = (function () {
             switch (unwrapAlg.name.toUpperCase()) {
                 case AlgorithmNames.RsaOAEP.toUpperCase():
                     Class = RsaOAEP;
+                    break;
+                case AlgorithmNames.AesECB.toUpperCase():
+                    Class = AesECB;
                     break;
                 case AlgorithmNames.AesCBC.toUpperCase():
                     Class = AesCBC;
@@ -6252,13 +6304,26 @@ var SocketCrypto = (function () {
         this.certStorage = new SocketCertificateStorage(this);
     }
     SocketCrypto.prototype.getRandomValues = function (data) {
-        throw new Error("Method not implemented");
+        if (!self.crypto) {
+            throw new Error("Cannot get native crypto object. Function getRandomValues is not implemented.");
+        }
+        return self.crypto.getRandomValues(data);
     };
     SocketCrypto.prototype.login = function () {
         return __awaiter(this, void 0, void 0, function () {
             var action;
             return __generator(this, function (_a) {
                 action = new LoginActionProto();
+                action.providerID = this.id;
+                return [2, this.client.send(action)];
+            });
+        });
+    };
+    SocketCrypto.prototype.reset = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var action;
+            return __generator(this, function (_a) {
+                action = new ResetActionProto();
                 action.providerID = this.id;
                 return [2, this.client.send(action)];
             });
