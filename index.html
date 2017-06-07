@@ -35,13 +35,22 @@
                     console.error(e.error);
                 })
                 .on("listening", function (e) {
-                    ws.info()
-                        .then(function (info) {
-                            console.log("Providers:", info);
-                            return ws.getCrypto(info.providers[0].id); // OpenSSL
+                    ws.isLoggedIn()
+                        .then((ok) => {
+                            console.log("Is logged in:", ok);
+                            if (!ok) {
+                                return ws.login();
+                            }
                         })
-                        .then(function (crypto) {
-                            cryptoEngines.local = crypto;
+                        .then(() => {
+                            return ws.info()
+                                .then(function (info) {
+                                    console.log("Providers:", info);
+                                    return ws.getCrypto(info.providers[0].id); // OpenSSL
+                                })
+                                .then(function (crypto) {
+                                    cryptoEngines.local = crypto;
+                                })
                         })
                 })
                 .on("token", function (info) {
