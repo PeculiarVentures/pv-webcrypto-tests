@@ -1,21 +1,25 @@
 import * as React from "react";
-import { AlgorithmTest, TestCaseCollection } from "./store/test";
-import { AesECBTest, AesCBCTest, AesCTRTest, AesGCMTest, AesCFBTest, AesCMACTest } from "./tests/aes";
-import { RsaOAEPTest, RsaPSSTest, RsaSSATest } from "./tests/rsa";
-import { ShaTest } from "./tests/sha";
-import { EcDSATest, EcDHTest } from "./tests/ec";
-import { TestTable } from "./components/test-table";
 import { TestDetail } from "./components/detail";
 import { PropertyView, PropertyViewItem } from "./components/property";
+import { TestTable } from "./components/test-table";
 import * as helper from "./helper";
+import { AlgorithmTest, TestCaseCollection } from "./store/test";
+import { AesCBCTest, AesCFBTest, AesCMACTest, AesCTRTest, AesECBTest, AesGCMTest } from "./tests/aes";
+import { DesCbcTest, DesEde3CbcTest } from "./tests/des";
+import { EcDHTest, EcDSATest } from "./tests/ec";
+import { RsaESTest, RsaOAEPTest, RsaPSSTest, RsaSSATest } from "./tests/rsa";
+import { ShaTest } from "./tests/sha";
 
 const self: { crypto: Crypto } = window as any;
 
-const tests = [
+const testList = [
     ShaTest,
     AesECBTest,
     AesCBCTest,
     AesGCMTest,
+    DesCbcTest,
+    DesEde3CbcTest,
+    RsaESTest,
     RsaOAEPTest,
     RsaPSSTest,
     RsaSSATest,
@@ -24,7 +28,7 @@ const tests = [
 ];
 
 function newTests() {
-    return tests.map(Test => new Test());
+    return testList.map((o) => new o());
 }
 
 interface IAppProps {
@@ -37,14 +41,13 @@ interface IAppState {
     report?: any;
 }
 
-
 export class App extends React.Component<IAppProps, IAppState> {
 
     constructor(props: IAppProps) {
         super(props);
         this.state = {
             tests: newTests(),
-            selectedCrypto: "0"
+            selectedCrypto: "0",
         };
         self.crypto = cryptoEngines.native; // set default crypto -> Native
 
@@ -52,32 +55,24 @@ export class App extends React.Component<IAppProps, IAppState> {
         this.onTestCaseClick = this.onTestCaseClick.bind(this);
     }
 
-    protected createTests() {
-        this.setState({ tests: undefined }, () =>
-            this.setState({
-                tests: newTests(),
-                selectedTest: undefined,
-                report: undefined
-            }));
+    public componentDidMount() {
+        // nothing
     }
 
-    componentDidMount() {
+    public getTotalTestTime() {
+        // nothing
     }
 
-    getTotalTestTime() {
-
-    }
-
-    getReport() {
-        let report = {
+    public getReport() {
+        const report = {
             created: new Date(),
             userAgent: window.navigator.userAgent,
             duration: 0,
             error: 0,
-            success: 0
+            success: 0,
         };
-        this.state.tests!.forEach(test => {
-            let testReport = test.report();
+        this.state.tests!.forEach((test) => {
+            const testReport = test.report();
             report.duration += testReport.duration;
             report.error += testReport.error;
             report.success += testReport.success;
@@ -85,7 +80,7 @@ export class App extends React.Component<IAppProps, IAppState> {
         this.setState({ report });
     }
 
-    onCryptoChange(e: React.FormEvent<HTMLSelectElement>) {
+    public onCryptoChange(e: React.FormEvent<HTMLSelectElement>) {
         const selectedCrypto = e.currentTarget.value;
         switch (selectedCrypto) {
             case "0": // Native
@@ -103,16 +98,20 @@ export class App extends React.Component<IAppProps, IAppState> {
         this.setState({ selectedCrypto }, () => this.createTests());
     }
 
-    onTestCaseClick(test: TestCaseCollection<any>) {
-        if (this.state.selectedTest !== test)
+    public onTestCaseClick(test: TestCaseCollection<any>) {
+        if (this.state.selectedTest !== test) {
             this.setState({ selectedTest: new TestCaseCollection<any>([]) }, () => {
                 this.setState({ selectedTest: test });
             });
+        }
     }
 
-    render() {
+    public render() {
         const info = helper.BrowserInfo();
         const { report, tests } = this.state;
+        if (!tests) {
+            throw new Error("'tests' in state is empty");
+        }
         return (
             <div className="container">
                 <h3>{info.name} v{info.version}</h3>
@@ -125,9 +124,9 @@ export class App extends React.Component<IAppProps, IAppState> {
                 <hr />
                 {this.state.tests ?
                     <div>
-                        <TestTable model={tests!} onCellClick={this.onTestCaseClick} />
+                        <TestTable model={tests} onCellClick={this.onTestCaseClick} />
                         <div className="row">
-                            <div className="btn" onClick={() => { tests!.filter(item => item.state.selected).forEach(item => item.run()); }}>Run</div>
+                            <div className="btn" onClick={() => { tests.filter((item) => item.state.selected).forEach((item) => item.run()); }}>Run</div>
                             <div className="btn" onClick={() => { this.createTests(); }}>Reset</div>
                             <div className="btn" onClick={() => { this.getReport(); }}>Report</div>
                         </div>
@@ -161,6 +160,15 @@ export class App extends React.Component<IAppProps, IAppState> {
                 }
             </div>
         );
+    }
+
+    protected createTests() {
+        this.setState({ tests: undefined }, () =>
+            this.setState({
+                tests: newTests(),
+                selectedTest: undefined,
+                report: undefined,
+            }));
     }
 
 }

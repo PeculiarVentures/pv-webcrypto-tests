@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Store } from "../store/store";
-import { AlgorithmTest, TestCaseCollection, TestCaseState, CaseStatus } from "../store/test";
+import { AlgorithmTest, CaseStatus, TestCaseCollection } from "../store/test";
 import { Pie, PieChart } from "./pie-chart";
 
 export type TestTableCellClickHandle = (item: TestCaseCollection<any>) => void;
@@ -19,14 +19,14 @@ export class TestTable extends React.Component<ITestTableProps, ITestTableState>
         this.state = {};
     }
 
-    render() {
+    public render() {
         return (
             <table className="test-table">
                 <thead>
                     <tr>
                         <td>
-                            <input type="checkbox" onChange={e => this.props.model.forEach(item =>
-                                item.setState({ selected: e.currentTarget.checked })
+                            <input type="checkbox" onChange={(e) => this.props.model.forEach((item) =>
+                                item.setState({ selected: e.currentTarget.checked }),
                             )} />
                         </td>
                         <td>Algorithm</td>
@@ -41,7 +41,7 @@ export class TestTable extends React.Component<ITestTableProps, ITestTableState>
                     </tr>
                 </thead>
                 <tbody>
-                    {this.props.model.map(item => <TestTableItem model={item} onCellClick={this.props.onCellClick} />)}
+                    {this.props.model.map((item) => <TestTableItem model={item} onCellClick={this.props.onCellClick} />)}
                 </tbody>
             </table>
         );
@@ -64,7 +64,7 @@ export class TestTableItem extends React.Component<ITestTableItemProps, ITestTab
         this.state = {};
     }
 
-    render() {
+    public render() {
         const model = this.props.model;
         return (
             <tr>
@@ -99,24 +99,25 @@ export class TestTableItemCell extends React.Component<ITestTableItemCellProps, 
         this.state = {};
     }
 
-    render() {
+    public render() {
         const model = this.props.model;
-        if (!model)
+        if (!model) {
             return <td></td>;
+        }
         const completed = model.state.completed;
-        let success: number = 0, error: number = 0;
-        model.forEach(item => {
+        let success = 0;
+        let error = 0;
+        model.forEach((item) => {
             if (item.state.status === CaseStatus.success) {
                 success++;
-            }
-            else if (item.state.status === CaseStatus.error) {
+            } else if (item.state.status === CaseStatus.error) {
                 error++;
             }
         });
         const length = model.length;
         return (
             <td className="test-cell">
-                <div onClick={e => this.props.onCellClick(model)}>
+                <div onClick={(e) => this.props.onCellClick(model)}>
                     <TestChar success={success} error={error} length={length} />
                 </div>
             </td>
@@ -140,12 +141,12 @@ export class TestChar extends React.Component<ITestCharProps, ITestCharState> {
         this.state = {};
     }
 
-    count(len: number, val: number) {
+    public count(len: number, val: number) {
         return len ? (val / len) : 0;
     }
 
-    render() {
-        const {success, error, length} = this.props;
+    public render() {
+        const { success, error, length } = this.props;
         return (
             <div className={"test-chart shadow-1"}>
                 <div className="value">{Math.floor(this.count(length, success + error) * 100)}</div>

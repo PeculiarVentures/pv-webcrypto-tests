@@ -11,7 +11,7 @@ export class PropertyView extends React.Component<IPropertyViewProps, IPropertyV
         this.state = {};
     }
 
-    render() {
+    public render() {
         return (
             <div className="property-view">
                 {this.props.children}
@@ -35,7 +35,7 @@ export class PropertyViewItem extends React.Component<IPropertyViewItemProps, IP
         this.state = {};
     }
 
-    render() {
+    public render() {
         return (
             <div className="item">
                 <div className="label">{this.props.label}</div>
@@ -59,7 +59,7 @@ export class PropertyViewGroup extends React.Component<IPropertyViewGroupProps, 
         this.state = {};
     }
 
-    render() {
+    public render() {
         return (
             <div className="group">
                 <div className="header">

@@ -1,9 +1,9 @@
 import * as React from "react";
 import { Store } from "../store/store";
-import { TestCaseParams, TestCaseState } from "../store/test";
-import { TestCaseCollection, CaseStatus } from "../store/test";
-import { PropertyView, PropertyViewItem, PropertyViewGroup } from "./property";
+import { ITestCaseParams, ITestCaseState } from "../store/test";
+import { CaseStatus, TestCaseCollection } from "../store/test";
 import { CollapseButton } from "./collapse-button";
+import { PropertyView, PropertyViewGroup, PropertyViewItem } from "./property";
 
 interface ITestDetailProps {
     model: TestCaseCollection<any>;
@@ -19,7 +19,7 @@ export class TestDetail extends React.Component<ITestDetailProps, ITestDetailSta
         this.state = {};
     }
 
-    render() {
+    public render() {
 
         return (
             <table className="detail">
@@ -32,7 +32,7 @@ export class TestDetail extends React.Component<ITestDetailProps, ITestDetailSta
                         <td>message</td>
                     </tr>
                 </thead>
-                {this.props.model.map(item => (
+                {this.props.model.map((item) => (
                     <TestDetailItem test={item.state} />
                 ))}
                 <tbody>
@@ -44,7 +44,7 @@ export class TestDetail extends React.Component<ITestDetailProps, ITestDetailSta
 }
 
 interface ITestDetailItemProps {
-    test: TestCaseState;
+    test: ITestCaseState;
 }
 
 interface ITestDetailItemState {
@@ -56,21 +56,21 @@ export class TestDetailItem extends React.Component<ITestDetailItemProps, ITestD
     constructor(props: ITestDetailItemProps) {
         super(props);
         this.state = {
-            collapsed: true
+            collapsed: true,
         };
     }
 
-    render() {
+    public render() {
         const test = this.props.test;
         const status = test.status || CaseStatus.ready;
         return (
             <tbody>
                 <tr>
                     <td>
-                        <CollapseButton collapsed={this.state.collapsed!} onClick={e => this.setState({ collapsed: !this.state.collapsed })} />
+                        <CollapseButton collapsed={this.state.collapsed!} onClick={(e) => this.setState({ collapsed: !this.state.collapsed })} />
                     </td>
                     <td>{test.name}</td>
-                    <td>{`${test.duration / 1e3}s`}</td>
+                    <td>{`${test!.duration! / 1e3}s`}</td>
                     <td className={`status ${CaseStatus[status]}`}>{CaseStatus[status]}</td>
                     <td>{test.stack}</td>
                 </tr>
@@ -92,7 +92,7 @@ export class TestDetailItem extends React.Component<ITestDetailItemProps, ITestD
 }
 
 interface IDetailParamsViewProps {
-    params: TestCaseParams;
+    params: ITestCaseParams;
 }
 
 interface IDetailParamsViewState { }
@@ -104,7 +104,7 @@ export class DetailParamsView extends React.Component<IDetailParamsViewProps, ID
         this.state = {};
     }
 
-    renderKey(key: CryptoKey, groupName: string) {
+    public renderKey(key: CryptoKey, groupName: string) {
         console.log("renderKey");
         return (
             <PropertyViewGroup label={groupName}>
@@ -116,22 +116,19 @@ export class DetailParamsView extends React.Component<IDetailParamsViewProps, ID
         );
     }
 
-    renderItems(params: TestCaseParams) {
-        let items: JSX.Element[] = [];
-        for (let key in params) {
+    public renderItems(params: ITestCaseParams) {
+        const items: JSX.Element[] = [];
+        for (const key in params) {
             let value: string = params[key];
             if (key === "algorithm" || key === "derivedKeyAlg") {
                 items.push(this.renderAlgorithm(params[key], key));
                 continue;
-            }
-            else if (key === "keyUsages") {
+            } else if (key === "keyUsages") {
                 value = params[key] ? params[key].join(", ") : "null";
-            }
-            else if (params[key].constructor.name === "CryptoKey") {
+            } else if (params[key].constructor.name === "CryptoKey") {
                 items.push(this.renderKey(params[key], key));
                 continue;
-            }
-            else {
+            } else {
                 value = value.toString();
             }
             items.push(<PropertyViewItem label={key} value={value} />);
@@ -140,19 +137,20 @@ export class DetailParamsView extends React.Component<IDetailParamsViewProps, ID
         return items;
     }
 
-    renderAlgorithm(alg: { [key: string]: any }, groupName: string) {
-        let items: JSX.Element[] = [];
-        for (let key in alg) {
-            let value = alg[key];
+    public renderAlgorithm(alg: { [key: string]: any }, groupName: string) {
+        const items: JSX.Element[] = [];
+        for (const key in alg) {
+            const value = alg[key];
             let text: string;
-            if (key === "publicExponent")
+            if (key === "publicExponent") {
                 text = value[0] === 1 ? "65537" : "3";
-            else if (ArrayBuffer.isView(value))
+            } else if (ArrayBuffer.isView(value)) {
                 text = "ArrayBuffer";
-            else if (key === "hash")
+            } else if (key === "hash") {
                 text = value.name;
-            else
+            } else {
                 text = value ? value.toString() : "null";
+            }
             items.push(<PropertyViewItem label={key} value={text} />);
         }
         return (
@@ -162,7 +160,7 @@ export class DetailParamsView extends React.Component<IDetailParamsViewProps, ID
         );
     }
 
-    render() {
+    public render() {
         return (
             <PropertyView>
                 {this.renderItems(this.props.params)}

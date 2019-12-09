@@ -1,4 +1,4 @@
-declare var cryptoEngines: {
+declare let cryptoEngines: {
     native: Crypto;
     js: Crypto;
     local: Crypto;

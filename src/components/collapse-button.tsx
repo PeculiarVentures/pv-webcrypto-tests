@@ -15,7 +15,7 @@ export class CollapseButton extends React.Component<ICollapseButtonProps, IColla
         this.state = {};
     }
 
-    render() {
+    public render() {
         const {collapsed, onClick} = this.props;
         return (
             <div className="btn-collapse " onClick={onClick}>

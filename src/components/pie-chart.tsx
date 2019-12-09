@@ -11,11 +11,11 @@ export class PieChart extends React.Component<IPieChartProps, IPieChartState> {
         this.state = {};
     }
 
-    render() {
+    public render() {
         return (
             <figure className="pie-chart">
                 <svg >
-                    {(this.props.children as React.ReactElement<IPieProps>[]).map(item => item.props.value ? item : null)}
+                    {(this.props.children as Array<React.ReactElement<IPieProps>>).map((item) => item.props.value ? item : null)}
                 </svg>
             </figure>
         );
@@ -39,7 +39,7 @@ export class Pie extends React.Component<IPieProps, IPieState> {
         this.state = {};
     }
 
-    render() {
+    public render() {
         const {className, value, size} = this.props;
         const rotate = this.props.rotate || 0;
 

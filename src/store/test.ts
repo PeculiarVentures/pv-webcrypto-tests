@@ -1,21 +1,19 @@
-import { BaseStore, BaseStoreCollection, BaseStoreCollectionState } from "./store";
+import { BaseStore, BaseStoreCollection, IBaseStoreCollectionState } from "./store";
 
-export interface TestCaseState {
+export interface ITestCaseState {
     name?: string;
-    params?: TestCaseParams;
+    params?: ITestCaseParams;
     status?: CaseStatus;
     duration?: number;
     message?: string;
     stack?: string;
 }
 
-export abstract class TestCase<T extends TestCaseState> extends BaseStore<T>  {
-
-    abstract run(): void;
-
+export abstract class TestCase<T extends ITestCaseState> extends BaseStore<T>  {
+    public abstract run(): void;
 }
 
-export interface TestCaseParams {
+export interface ITestCaseParams {
     [key: string]: any;
 }
 
@@ -27,94 +25,90 @@ export enum CaseStatus {
     working,
 }
 
-export interface TestCaseCollectionState<I extends TestCase<any>> extends BaseStoreCollectionState<I> {
-    completed?: number;
+export interface ITestCaseCollectionState<I extends TestCase<any>> extends IBaseStoreCollectionState<I> {
+    completed: number;
 }
 
-export class TestCaseCollection<I extends TestCase<any>> extends BaseStoreCollection<I, TestCaseCollectionState<I>> {
+export class TestCaseCollection<I extends TestCase<any>> extends BaseStoreCollection<I, ITestCaseCollectionState<I>> {
 
-    static defaultState = {
-        completed: 0
+    public static defaultState = {
+        ...BaseStoreCollection.defaultState,
+        completed: 0,
     };
 
     constructor(cases: I[]) {
-        const _state = Object.assign({}, TestCaseCollection.defaultState, { items: cases || [], completed: 0 });
-        super(_state);
+        const state = Object.assign({}, TestCaseCollection.defaultState, { items: cases || [], completed: 0 });
+        super(state);
         this.connectToCases(this.state.items!);
     }
 
-    protected connectToCases(cases: I[]) {
-        for (let item of cases) {
-            item.on("change", this.onCaseChanged.bind(this, item));
-        }
-    }
-
-    add(item: I) {
+    public add(item: I) {
         super.add(item);
         this.connectToCases([item]);
     }
-    addRange(items: I[]) {
+    public addRange(items: I[]) {
         super.addRange(items);
         this.connectToCases(items);
     }
 
-    onCaseChanged(item: I) {
+    public onCaseChanged(item: I) {
         if (item.state.status === CaseStatus.success || item.state.status === CaseStatus.error) {
-            console.log(item.state.name);
-            console.log(`  Status:${CaseStatus[item.state.status]}`);
+            // console.log(item.state.name);
+            // console.log(`  Status:${CaseStatus[item.state.status]}`);
             this.setState({
-                completed: this.state.completed + 1
+                completed: this.state.completed + 1,
             });
             this.run();
-        }
-        else
+        } else {
             this.setState();
+        }
     }
 
-    run() {
+    public run() {
         const state = this.state;
         if (this.length && state.completed !== this.length) {
-            const testCase = this.items(state.completed!);
+            const testCase = this.items(state.completed);
             testCase.run();
-        }
-        else {
+        } else {
             this.emit("end", this);
         }
     }
+
+    protected connectToCases(cases: I[]) {
+        for (const item of cases) {
+            item.on("change", this.onCaseChanged.bind(this, item));
+        }
+    }
 }
 
-interface AlgorithmTestState extends TestCaseState {
-    selected?: boolean;
+interface IAlgorithmTestState extends ITestCaseState {
+    selected: boolean;
 }
 
-export class AlgorithmTest extends TestCase<AlgorithmTestState> {
-
-    generateKey: TestCaseCollection<GenerateKeyCase>;
-    exportKey: TestCaseCollection<ExportKeyCase>;
-    sign: TestCaseCollection<SignCase>;
-    encrypt: TestCaseCollection<EncryptCase>;
-    digest: TestCaseCollection<DigestCase>;
-    deriveKey: TestCaseCollection<DeriveKeyCase>;
-    deriveBits: TestCaseCollection<DeriveBitsCase>;
-    wrap: TestCaseCollection<WrapCase>;
-
-    on(event: "change", cb: (state: AlgorithmTestState) => void): this;
-    on(event: "generate", cb: (keys: TestCaseGeneratedKey[]) => void): this;
-    on(event: string, cb: Function): this;
-    on(event: string, cb: Function) {
-        return super.on(event, cb);
+function assertArg<T>(obj: T | undefined | null, message: string): asserts obj is T {
+    if (!obj) {
+        throw new Error(message);
     }
+}
 
-    once(event: "change", cb: (state: AlgorithmTestState) => void): this;
-    once(event: "generate", cb: (keys: TestCaseGeneratedKey[]) => void): this;
-    once(event: string, cb: Function): this;
-    once(event: string, cb: Function) {
-        return super.once(event, cb);
-    }
+function assertParams<T>(obj: T | undefined | null, name: string): asserts obj is T {
+    assertArg(obj, `Params of ${name} are empty`);
+}
+
+export class AlgorithmTest extends TestCase<IAlgorithmTestState> {
+
+    public generateKey: TestCaseCollection<GenerateKeyCase>;
+    public exportKey: TestCaseCollection<ExportKeyCase>;
+    public sign: TestCaseCollection<SignCase>;
+    public encrypt: TestCaseCollection<EncryptCase>;
+    public digest: TestCaseCollection<DigestCase>;
+    public deriveKey: TestCaseCollection<DeriveKeyCase>;
+    public deriveBits: TestCaseCollection<DeriveBitsCase>;
+    public wrap: TestCaseCollection<WrapCase>;
 
     constructor(name: string) {
         super({
-            name: name,
+            name,
             selected: true,
         });
 
@@ -135,37 +129,69 @@ export class AlgorithmTest extends TestCase<AlgorithmTestState> {
         }
     }
 
-    getGeneratedKeys() {
+    public on(event: "change", cb: (state: IAlgorithmTestState) => void): this;
+    public on(event: "generate", cb: (keys: TestCaseGeneratedKey[]) => void): this;
+    public on(event: string, cb: (...args: any[]) => void): this;
+    public on(event: string, cb: (...args: any[]) => void) {
+        return super.on(event, cb);
+    }
+
+    public once(event: "change", cb: (state: IAlgorithmTestState) => void): this;
+    public once(event: "generate", cb: (keys: TestCaseGeneratedKey[]) => void): this;
+    public once(event: string, cb: (...args: any[]) => void): this;
+    public once(event: string, cb: (...args: any[]) => void) {
+        return super.once(event, cb);
+    }
+
+    public getGeneratedKeys() {
         return this.generateKey
-            .filter(_case => !!_case.state.key)
-            .map(_case => {
+            .filter((o) => !!o.state.key)
+            .map((o) => {
+                assertArg(o.state.params, "'params' in state is empty");
                 return {
-                    key: _case.state.key!,
-                    algorithm: _case.state.params!.algorithm
+                    key: o.state.key,
+                    algorithm: o.state.params.algorithm,
                 };
             });
     }
 
-    onCaseChange(item: TestCaseCollectionState<any>) {
+    public onCaseChange(item: ITestCaseCollectionState<any>) {
         if (this.generateKey) {
             let done = true;
-            for (let i in this.generateKey) {
-                let state = this.generateKey.state;
-                if (state.completed !== state.items!.length) {
-                    done = false;
-                    break;
-                }
+            const state = this.generateKey.state;
+            if (state.completed !== state.items.length) {
+                done = false;
             }
             if (done) {
                 const keys = this.getGeneratedKeys();
-                if (keys)
+                if (keys) {
                     this.emit("generate", keys);
+                }
             }
         }
     }
 
+    public report() {
+        // total duration
+        const duration = this.getAllTests()
+            .map((test) => this.countDuration(test))
+            .reduce((p, c) => p + c);
+        const success = this.getAllTests()
+            .map((test) => this.countStatus(test, CaseStatus.success))
+            .reduce((p, c) => p + c);
+        const error = this.getAllTests()
+            .map((test) => this.countStatus(test, CaseStatus.error))
+            .reduce((p, c) => p + c);
+
+        return { duration, success, error };
+    }
+
+    public run() {
+        this.getAllTests().forEach((test) => test.run());
+    }
+
     protected getAllTests() {
-        let tests: TestCaseCollection<any>[] = [];
+        const tests: Array<TestCaseCollection<any>> = [];
         tests.push(this.generateKey);
         tests.push(this.exportKey);
         tests.push(this.sign);
@@ -180,32 +206,21 @@ export class AlgorithmTest extends TestCase<AlgorithmTestState> {
 
     protected countDuration(tests: TestCaseCollection<any>) {
         let res = 0;
-        const durations = tests.map(item => item.state.duration);
-        if (durations.length)
+        const durations = tests.map((item) => item.state.duration);
+        if (durations.length) {
             res = durations.reduce((prev, cur) => prev += cur);
+        }
         return res;
     }
 
     protected countStatus(tests: TestCaseCollection<any>, status: CaseStatus) {
-        let res = tests.filter(item => item.state.status === status).length;
+        const res = tests.filter((item) => item.state.status === status).length;
         return res;
-    }
-
-    report() {
-        // total duration
-        let duration = this.getAllTests().map(test => this.countDuration(test)).reduce((p, c) => p + c);
-        let success = this.getAllTests().map(test => this.countStatus(test, CaseStatus.success)).reduce((p, c) => p + c);
-        let error = this.getAllTests().map(test => this.countStatus(test, CaseStatus.error)).reduce((p, c) => p + c);
-
-        return { duration, success, error };
-    }
-    run() {
-        this.getAllTests().forEach(test => test.run());
     }
 
 }
 
-export interface GenerateKeyCaseState extends TestCaseState {
+export interface IGenerateKeyCaseState extends ITestCaseState {
     params?: {
         algorithm: any;
         extractable: boolean;
@@ -213,42 +228,43 @@ export interface GenerateKeyCaseState extends TestCaseState {
     };
     key?: CryptoKey | CryptoKeyPair;
 }
-export class GenerateKeyCase extends TestCase<GenerateKeyCaseState> {
-    constructor(state: GenerateKeyCaseState) {
+export class GenerateKeyCase extends TestCase<IGenerateKeyCaseState> {
+    constructor(state: IGenerateKeyCaseState) {
         state.duration = 0;
         super(state);
     }
 
-    run() {
+    public run() {
         const params = this.state.params;
-        if (!params) throw new Error("Params of GenerateKeyCase are empty");
         const startAt = new Date().getTime();
-        Promise.resolve()
-            .then(() => {
-                this.setState({ status: CaseStatus.working });
-                return crypto.subtle.generateKey(params.algorithm, params.extractable, params.keyUsages);
-            })
+
+        (async () => {
+            assertParams(params, "GenerateKeyCase");
+            this.setState({ status: CaseStatus.working });
+            const keys = crypto.subtle.generateKey(params.algorithm, params.extractable, params.keyUsages);
+            return keys;
+        })()
             .then((key: CryptoKey | CryptoKeyPair) => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.success,
-                    key: key,
-                    duration: endAt - startAt
+                    key,
+                    duration: endAt - startAt,
                 });
             })
-            .catch(e => {
+            .catch((e) => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.error,
                     message: e.message,
                     stack: e.stack,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
             });
     }
 }
 
-export interface ExportKeyCaseState extends TestCaseState {
+export interface IExportKeyCaseState extends ITestCaseState {
     params?: {
         key: CryptoKey,
         format: string;
@@ -258,177 +274,190 @@ export interface ExportKeyCaseState extends TestCaseState {
     };
     key?: CryptoKey | CryptoKeyPair;
 }
-export class ExportKeyCase extends TestCase<ExportKeyCaseState> {
-    constructor(state: ExportKeyCaseState) {
+export class ExportKeyCase extends TestCase<IExportKeyCaseState> {
+    constructor(state: IExportKeyCaseState) {
         state.duration = 0;
         super(state);
     }
 
-    run() {
+    public run() {
         const params = this.state.params;
         const startAt = new Date().getTime();
-        Promise.resolve()
+        (async () => {
+            assertParams(params, "ExportKeyCase");
+            this.setState({ status: CaseStatus.working });
+            const data = await crypto.subtle.exportKey(params.format, params.key);
+            await crypto.subtle.importKey(params.format, data, params.algorithm, params.extractable, params.keyUsages);
+        })()
             .then(() => {
-                if (!params) throw new Error("Params of ExportKeyCase are empty");
-                this.setState({ status: CaseStatus.working });
-                return crypto.subtle.exportKey(params.format, params.key);
-            })
-            .then((data: any) => {
-                return crypto.subtle.importKey(params!.format, data, params!.algorithm, params!.extractable, params!.keyUsages);
-            })
-            .then((key: CryptoKey) => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.success,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
             })
-            .catch(e => {
+            .catch((e) => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.error,
                     message: e.message,
                     stack: e.stack,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
             });
     }
 }
 
-export interface SignCaseState extends TestCaseState {
+export interface ISignCaseState extends ITestCaseState {
     params?: {
         signKey: CryptoKey,
         verifyKey: CryptoKey,
         algorithm: any;
     };
 }
-export class SignCase extends BaseStore<SignCaseState> {
-    constructor(state: SignCaseState) {
+export class SignCase extends BaseStore<ISignCaseState> {
+    constructor(state: ISignCaseState) {
         state.duration = 0;
         super(state);
     }
 
-    run() {
+    public run() {
         const params = this.state.params;
         const startAt = new Date().getTime();
-        Promise.resolve()
-            .then(() => {
-                if (!params) throw new Error("Params of SignCase are empty");
-                this.setState({ status: CaseStatus.working });
-                return crypto.subtle.sign(params.algorithm, params.signKey, new Uint8Array([1, 2, 3, 4, 5]));
-            })
-            .then(data => {
-                return crypto.subtle.verify(params!.algorithm, params!.verifyKey, data, new Uint8Array([1, 2, 3, 4, 5]));
-            })
-            .then(key => {
+
+        (async () => {
+            assertParams(params, "SignCase");
+            this.setState({ status: CaseStatus.working });
+            const signature = await crypto.subtle.sign(
+                params.algorithm,
+                params.signKey,
+                new Uint8Array([1, 2, 3, 4, 5]));
+
+            const ok = await crypto.subtle.verify(
+                params.algorithm,
+                params.verifyKey,
+                signature,
+                new Uint8Array([1, 2, 3, 4, 5]));
+
+            if (!ok) {
+                throw new Error("Signature is invalid");
+            }
+        })()
+            .then((key) => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.success,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
                 return;
             })
-            .catch(e => {
+            .catch((e) => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.error,
                     message: e.message,
                     stack: e.stack,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
             });
 
     }
 }
 
-export interface EncryptCaseState extends TestCaseState {
+export interface IEncryptCaseState extends ITestCaseState {
     params?: {
         encryptKey: CryptoKey,
         decryptKey: CryptoKey,
         algorithm: any;
     };
 }
-export class EncryptCase extends BaseStore<EncryptCaseState> {
-    constructor(state: EncryptCaseState) {
+export class EncryptCase extends BaseStore<IEncryptCaseState> {
+    constructor(state: IEncryptCaseState) {
         state.duration = 0;
         super(state);
     }
 
-    run() {
+    public run() {
         const params = this.state.params;
         const startAt = new Date().getTime();
-        Promise.resolve()
+
+        (async () => {
+            assertParams(params, "EncryptCase");
+            this.setState({ status: CaseStatus.working });
+            const enc = await crypto.subtle.encrypt(
+                params.algorithm,
+                params.encryptKey,
+                new Uint8Array([1, 2, 3, 4, 5]));
+
+            const dec = await crypto.subtle.decrypt(
+                params.algorithm,
+                params.decryptKey,
+                enc);
+        })()
             .then(() => {
-                if (!params) throw new Error("Params of EncryptCase are empty");
-                this.setState({ status: CaseStatus.working });
-                return crypto.subtle.encrypt(params.algorithm, params.encryptKey, new Uint8Array([1, 2, 3, 4, 5]));
-            })
-            .then(data => {
-                return crypto.subtle.decrypt(params!.algorithm, params!.decryptKey, data);
-            })
-            .then(key => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.success,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
             })
-            .catch(e => {
+            .catch((e) => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.error,
                     message: e.message,
                     stack: e.stack,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
             });
 
     }
 }
 
-export interface DigestCaseState extends TestCaseState {
+export interface IDigestCaseState extends ITestCaseState {
     params?: {
         algorithm: any;
     };
 }
-export class DigestCase extends BaseStore<DigestCaseState> {
-    constructor(state: DigestCaseState) {
+export class DigestCase extends BaseStore<IDigestCaseState> {
+    constructor(state: IDigestCaseState) {
         state.duration = 0;
         super(state);
     }
 
-    run() {
+    public run() {
         const params = this.state.params;
         const startAt = new Date().getTime();
-        Promise.resolve()
+
+        (async () => {
+            assertParams(params, "DigestCase");
+            this.setState({ status: CaseStatus.working });
+            const data = await crypto.subtle.digest(params.algorithm, new Uint8Array([1, 2, 3, 4, 5]));
+            if (!data.byteLength) {
+                throw new Error("Wrong type of digest function result");
+            }
+        })()
             .then(() => {
-                if (!params) throw new Error("Params of DigestCase are empty");
-                this.setState({ status: CaseStatus.working });
-                return crypto.subtle.digest(params.algorithm, new Uint8Array([1, 2, 3, 4, 5]));
-            })
-            .then(data => {
                 const endAt = new Date().getTime();
-                if (!data.byteLength)
-                    throw new Error("Wrong type of digest function result");
                 this.setState({
                     status: CaseStatus.success,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
             })
-            .catch(e => {
+            .catch((e) => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.error,
                     message: e.message,
                     stack: e.stack,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
             });
 
     }
 }
 
-export interface DeriveKeyCaseState extends TestCaseState {
+export interface IDeriveKeyCaseState extends ITestCaseState {
     params?: {
         algorithm: any;
         key: CryptoKey;
@@ -436,84 +465,86 @@ export interface DeriveKeyCaseState extends TestCaseState {
         keyUsage: string[];
     };
 }
-export class DeriveKeyCase extends BaseStore<DeriveKeyCaseState> {
-    constructor(state: DeriveKeyCaseState) {
+export class DeriveKeyCase extends BaseStore<IDeriveKeyCaseState> {
+    constructor(state: IDeriveKeyCaseState) {
         state.duration = 0;
         super(state);
     }
 
-    run() {
+    public run() {
         const params = this.state.params;
         const startAt = new Date().getTime();
-        Promise.resolve()
+        (async () => {
+            assertParams(params, "DeriveKeyCase");
+            this.setState({ status: CaseStatus.working });
+            const data = await crypto.subtle.deriveKey(
+                params.algorithm,
+                params.key,
+                params.derivedKeyAlg,
+                true,
+                params.keyUsage);
+        })()
             .then(() => {
-                if (!params) throw new Error("Params of DeriveKeyCase are empty");
-                this.setState({ status: CaseStatus.working });
-                return crypto.subtle.deriveKey(params.algorithm, params.key, params.derivedKeyAlg, true, params.keyUsage);
-            })
-            .then(data => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.success,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
             })
-            .catch(e => {
+            .catch((e) => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.error,
                     message: e.message,
                     stack: e.stack,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
             });
 
     }
 }
 
-export interface DeriveBitsCaseState extends TestCaseState {
+export interface IDeriveBitsCaseState extends ITestCaseState {
     params?: {
         algorithm: any;
         key: CryptoKey;
         bitsLength: number
     };
 }
-export class DeriveBitsCase extends BaseStore<DeriveBitsCaseState> {
-    constructor(state: DeriveBitsCaseState) {
+export class DeriveBitsCase extends BaseStore<IDeriveBitsCaseState> {
+    constructor(state: IDeriveBitsCaseState) {
         state.duration = 0;
         super(state);
     }
 
-    run() {
+    public run() {
         const params = this.state.params;
         const startAt = new Date().getTime();
-        Promise.resolve()
+        (async () => {
+            assertParams(params, "DeriveBitsCase");
+            this.setState({ status: CaseStatus.working });
+            const data = await crypto.subtle.deriveBits(params.algorithm, params.key, params.bitsLength);
+        })()
             .then(() => {
-                if (!params) throw new Error("Params of DeriveBitsCase are empty");
-                this.setState({ status: CaseStatus.working });
-                return crypto.subtle.deriveBits(params.algorithm, params.key, params.bitsLength);
-            })
-            .then(data => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.success,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
             })
-            .catch(e => {
+            .catch((e) => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.error,
                     message: e.message,
                     stack: e.stack,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
             });
-
     }
 }
 
-export interface WrapCaseState extends TestCaseState {
+export interface IWrapCaseState extends ITestCaseState {
     params?: {
         format: string;
         algorithm: any;
@@ -522,38 +553,43 @@ export interface WrapCaseState extends TestCaseState {
         unwrappingKey: CryptoKey;
     };
 }
-export class WrapCase extends BaseStore<WrapCaseState> {
-    constructor(state: WrapCaseState) {
+export class WrapCase extends BaseStore<IWrapCaseState> {
+    constructor(state: IWrapCaseState) {
         state.duration = 0;
         super(state);
     }
 
-    run() {
+    public run() {
         const params = this.state.params;
         const startAt = new Date().getTime();
-        Promise.resolve()
+        (async () => {
+            assertParams(params, "WrapCase");
+            this.setState({ status: CaseStatus.working });
+            const data = await crypto.subtle.wrapKey(params.format, params.key, params.wrappingKey, params.algorithm);
+
+            await crypto.subtle.unwrapKey(
+                params.format,
+                new Uint8Array(data),
+                params.unwrappingKey,
+                params.algorithm,
+                params.key.algorithm as any,
+                true,
+                params.key.usages);
+        })()
             .then(() => {
-                if (!params) throw new Error("Params of DeriveBitsCase are empty");
-                this.setState({ status: CaseStatus.working });
-                return crypto.subtle.wrapKey(params.format, params.key, params.wrappingKey, params.algorithm);
-            })
-            .then(data => {
-                return crypto.subtle.unwrapKey(params!.format, new Uint8Array(data), params!.unwrappingKey, params!.algorithm, params!.key.algorithm as any, true, params!.key.usages);
-            })
-            .then(key => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.success,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
             })
-            .catch(e => {
+            .catch((e) => {
                 const endAt = new Date().getTime();
                 this.setState({
                     status: CaseStatus.error,
                     message: e.message,
                     stack: e.stack,
-                    duration: endAt - startAt
+                    duration: endAt - startAt,
                 });
             });
 
