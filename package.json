@@ -2,20 +2,20 @@
   "name": "pv-webcrypto-tests",
   "version": "1.0.0",
   "description": "",
-  "main": "gulpfile.js",
   "devDependencies": {
-    "@types/node": "^12.12.14",
-    "@types/react": "^16.9.15",
+    "@babel/core": "^7.7.5",
+    "@babel/plugin-proposal-decorators": "^7.7.4",
+    "@babel/plugin-transform-runtime": "^7.7.6",
+    "@types/react": "^16.9.16",
     "@types/react-dom": "^16.9.4",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0",
-    "resolve-url-loader": "^3.1.1",
-    "tslib": "^1.10.0",
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-html-externals": "^0.1.2",
+    "parcel-plugin-static-files-copy": "^2.2.1",
+    "sass": "^1.23.7",
     "typescript": "^3.7.3"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack"
+    "start": "parcel src/index.html --port 3000"
   },
   "repository": {
     "type": "git",
@@ -26,5 +26,20 @@
   "bugs": {
     "url": "https://github.com/PeculiarVentures/pv-webcrypto-tests/issues"
   },
-  "homepage": "https://github.com/PeculiarVentures/pv-webcrypto-tests#readme"
+  "homepage": "https://github.com/PeculiarVentures/pv-webcrypto-tests#readme",
+  "dependencies": {
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
+  },
+  "staticFiles": {
+    "staticPath": [
+      {
+        "staticOutDir": "vendor",
+        "staticPath": "src/vendor"
+      }
+    ]
+  },
+  "externals": {
+    "./vendor/**/*": false
+  }
 }
