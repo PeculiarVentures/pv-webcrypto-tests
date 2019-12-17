@@ -2,5 +2,11 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import {App} from "./app";
+import initWebcryptoSocket from "./utils/init_webcrypto_socket";
 
-ReactDOM.render(<App/>, document.getElementById("app"));
+initWebcryptoSocket();
+
+ReactDOM.render(
+  <App/>,
+  document.getElementById("app"),
+);
