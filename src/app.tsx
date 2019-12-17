@@ -4,7 +4,7 @@ import { PropertyView, PropertyViewItem } from "./components/property";
 import { TestTable } from "./components/test-table";
 import * as helper from "./helper";
 import { AlgorithmTest, TestCaseCollection } from "./store/test";
-import { AesCBCTest, AesCFBTest, AesCMACTest, AesCTRTest, AesECBTest, AesGCMTest } from "./tests/aes";
+import { AesCBCTest, AesECBTest, AesGCMTest } from "./tests/aes";
 import { DesCbcTest, DesEde3CbcTest } from "./tests/des";
 import { EcDHTest, EcDSATest } from "./tests/ec";
 import { RsaESTest, RsaOAEPTest, RsaPSSTest, RsaSSATest } from "./tests/rsa";
@@ -109,9 +109,6 @@ export class App extends React.Component<IAppProps, IAppState> {
     public render() {
         const info = helper.BrowserInfo();
         const { report, tests } = this.state;
-        if (!tests) {
-            throw new Error("'tests' in state is empty");
-        }
         return (
             <div className="container">
                 <h3>{info.name} v{info.version}</h3>
